@@ -3,11 +3,23 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
 const register = async (req, res) => {
-  const { name, surname, number, password } = req.body;
-  const hashedPassword = await bcrypt.hash(password, 10);
-  const user = new User({ name, surname, number, password: hashedPassword });
-  await user.save();
-  res.status(201).json({ message: "Kayıt başarılı!" });
+  try {
+    const { name, surname, number, password } = req.body;
+
+    // 🚀 **Mevcut Kullanıcı Kontrolü**
+    const existingUser = await User.findOne({ number });
+    if (existingUser) {
+      return res.status(400).json({ message: "Bu numara zaten kayıtlı!" });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const user = new User({ name, surname, number, password: hashedPassword });
+    await user.save();
+    
+    res.status(201).json({ message: "Kayıt başarılı!" });
+  } catch (error) {
+    res.status(500).json({ message: "Kayıt sırasında hata oluştu.", error });
+  }
 };
 
 const login = async (req, res) => {
