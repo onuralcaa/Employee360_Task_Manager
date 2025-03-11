@@ -1,0 +1,50 @@
+/* Sayfayı ortalar ve arka plan rengi ekler */
+.dashboard-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #f4f4f4;
+}
+
+/* Kutu yapısını oluşturur ve gölge efekti ekler */
+.dashboard-box {
+  background: white;
+  padding: 2rem;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  width: 400px;
+}
+
+/* Başlık için stil */
+.dashboard-box h1 {
+  font-size: 28px;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+/* Açıklama yazısı için stil */
+.dashboard-box p {
+  font-size: 16px;
+  color: #555;
+  margin-bottom: 20px;
+}
+
+/* Çıkış butonunun görünümünü modern hale getirir */
+.dashboard-box button {
+  width: 100%;
+  padding: 10px;
+  background-color: #ff4b5c;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 18px;
+  cursor: pointer;
+  transition: 0.3s ease;
+}
+
+/* Buton üzerine gelindiğinde koyulaşmasını sağlar */
+.dashboard-box button:hover {
+  background-color: #ff1e40;
+}
