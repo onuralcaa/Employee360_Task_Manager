@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { register } from "../api/api";
 import { useNavigate } from "react-router-dom";
-import "./Register.css"; // Yeni eklenen CSS dosyası
+import { FaEye, FaEyeSlash } from "react-icons/fa";
+import "./Register.css"; // Görselleştirme için CSS dosyası eklendi
 
 function Register() {
   const [user, setUser] = useState({ name: "", surname: "", number: "", password: "" });
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (e) => setUser({ ...user, [e.target.name]: e.target.value });
@@ -22,16 +24,28 @@ function Register() {
 
   return (
     <div className="register-container">
-      <div className="register-box">
+      <form onSubmit={handleSubmit} className="register-box">
         <h2>Kayıt Ol</h2>
-        <form onSubmit={handleSubmit}>
-          <input name="name" placeholder="Ad" onChange={handleChange} required />
-          <input name="surname" placeholder="Soyad" onChange={handleChange} required />
-          <input name="number" placeholder="Numara" onChange={handleChange} required />
-          <input name="password" type="password" placeholder="Şifre" onChange={handleChange} required />
-          <button type="submit">Kayıt Ol</button>
-        </form>
-      </div>
+        
+        <input name="name" placeholder="Ad" onChange={handleChange} required />
+        <input name="surname" placeholder="Soyad" onChange={handleChange} required />
+        <input name="number" placeholder="Numara" onChange={handleChange} required />
+
+        <div className="password-container">
+          <input
+            name="password"
+            type={showPassword ? "text" : "password"}
+            placeholder="Şifre"
+            onChange={handleChange}
+            required
+          />
+          <span className="toggle-password" onClick={() => setShowPassword(!showPassword)}>
+            {showPassword ? <FaEyeSlash /> : <FaEye />}
+          </span>
+        </div>
+
+        <button type="submit">Kayıt Ol</button>
+      </form>
     </div>
   );
 }
