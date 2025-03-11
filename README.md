@@ -23,7 +23,7 @@ Before installing, make sure you have:
 ### 1️⃣ **Clone the Repository**
 First, download the project files from GitHub:
 ```bash
-git clone https://github.com/YOUR_GITHUB_USERNAME/SimpleAuth.git
+git clone https://github.com/onuralcaa/Employee360_Task_Manager
 cd SimpleAuth
 
 ******************************************************************************************************
