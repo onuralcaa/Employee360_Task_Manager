@@ -74,3 +74,23 @@
 .login-box button:hover {
   background-color: #e63e3e;
 }
+
+/* Kayıt Ol Linki */
+.register-link {
+  margin-top: 15px;
+  font-size: 14px;
+  color: #555;
+  text-align: center;
+}
+
+/* Kayıt Ol Butonu */
+.register-button {
+  color: #ff4d4d;
+  font-weight: bold;
+  cursor: pointer;
+  transition: color 0.3s;
+}
+
+.register-button:hover {
+  color: #e63e3e;
+}

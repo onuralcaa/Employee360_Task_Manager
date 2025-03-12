@@ -48,6 +48,14 @@ function Login() {
 
         {/* Giriş Butonu */}
         <button type="submit">Giriş Yap</button>
+
+        {/* Kayıt Ol Butonu */}
+        <p className="register-link">
+          Hesabınız yok mu?{" "}
+          <span onClick={() => navigate("/register")} className="register-button">
+            Kayıt Ol
+          </span>
+        </p>
       </form>
 
       <ToastContainer position="top-center" />

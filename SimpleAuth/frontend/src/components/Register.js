@@ -46,9 +46,16 @@ function Register() {
         </div>
 
         <button type="submit">Kayıt Ol</button>
+
+        {/* 📌 Giriş Yap Butonu */}
+        <p className="login-link">
+          Zaten hesabınız var mı?{" "}
+          <span onClick={() => navigate("/login")} className="login-button">
+            Giriş Yap
+          </span>
+        </p>
       </form>
 
-      {/* 📌 Toastify'i ekledik */}
       <ToastContainer position="top-center" />
     </div>
   );
