@@ -1,86 +1,76 @@
-/* Sayfayı ortalamak ve arka plan eklemek için */
+/* Sayfanın ortasında düzgün görünmesi için */
 .login-container {
   display: flex;
   justify-content: center;
   align-items: center;
   height: 100vh;
-  background: linear-gradient(to right, #f8f9fa, #e9ecef); /* Hafif gri degrade */
+  background-color: #f4f4f4;
 }
 
-/* Kutu şeklinde form stili */
+/* Login kutusu */
 .login-box {
   background: white;
-  padding: 40px;
-  border-radius: 12px;
-  box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.1);
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   text-align: center;
-  width: 360px;
-  transition: all 0.3s ease-in-out;
+  width: 350px;
 }
 
-.login-box:hover {
-  box-shadow: 0px 10px 25px rgba(0, 0, 0, 0.15);
-}
-
+/* Başlık */
 .login-box h2 {
   margin-bottom: 20px;
-  font-size: 26px;
-  color: #333;
-  font-weight: bold;
+  font-size: 24px;
 }
 
-/* Form içindeki input kapsayıcı */
-.input-container {
-  display: flex;
-  align-items: center;
-  background: #f1f3f5;
-  border-radius: 8px;
+/* Form içindeki tüm inputların eşit olması */
+.login-box input {
+  width: 100%; /* 📌 Tüm inputları eşit genişlikte yap */
   padding: 10px;
   margin: 10px 0;
-}
-
-.input-container input {
-  flex: 1;
-  border: none;
-  background: transparent;
+  border: 1px solid #ddd;
+  border-radius: 5px;
   font-size: 16px;
-  outline: none;
+  box-sizing: border-box; /* 📌 Padding genişliği değiştirmesin */
 }
 
 /* Şifre ve ikonun olduğu container */
 .password-container {
   position: relative;
+  width: 100%; /* 📌 Tüm inputlarla aynı genişlikte olsun */
+  display: flex;
+  align-items: center;
+}
+
+/* Şifre inputu */
+.password-container input {
+  flex: 1;
+  padding-right: 40px; /* 📌 Göz ikonuna yer bırak */
 }
 
 /* Göz ikonunun stili */
 .toggle-password {
   position: absolute;
-  right: 12px;
+  right: 10px;
   cursor: pointer;
   font-size: 18px;
   color: gray;
-  transition: 0.3s;
 }
 
-.toggle-password:hover {
-  color: #333;
-}
-
-/* Giriş butonunun stili */
+/* Giriş butonu */
 .login-box button {
   width: 100%;
-  padding: 12px;
-  background: #ff4d4d;
+  padding: 10px;
+  background-color: #ff4d4d;
   border: none;
   color: white;
   font-size: 18px;
-  border-radius: 8px;
+  border-radius: 5px;
   cursor: pointer;
-  transition: background 0.3s;
-  margin-top: 15px;
-  font-weight: bold;
+  transition: 0.3s;
+  margin-top: 10px;
 }
 
 .login-box button:hover {
-  background: #e63e3e;
+  background-color: #e63e3e;
 }

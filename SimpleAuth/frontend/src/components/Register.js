@@ -2,7 +2,9 @@ import { useState } from "react";
 import { register } from "../api/api";
 import { useNavigate } from "react-router-dom";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
-import "./Register.css"; // Görselleştirme için CSS dosyası eklendi
+import { ToastContainer, toast } from "react-toastify"; // 📌 Toastify ekledik
+import "react-toastify/dist/ReactToastify.css"; // 📌 Stil dosyası eklendi
+import "./Register.css";
 
 function Register() {
   const [user, setUser] = useState({ name: "", surname: "", number: "", password: "" });
@@ -15,10 +17,10 @@ function Register() {
     e.preventDefault();
     try {
       await register(user);
-      alert("Kayıt başarılı!");
-      navigate("/login");
+      toast.success("✅ Kayıt başarılı!", { autoClose: 2000 });
+      setTimeout(() => navigate("/login"), 2000);
     } catch (error) {
-      alert("Kayıt başarısız!");
+      toast.error("❌ Kayıt başarısız! Lütfen bilgilerinizi kontrol edin.");
     }
   };
 
@@ -26,7 +28,6 @@ function Register() {
     <div className="register-container">
       <form onSubmit={handleSubmit} className="register-box">
         <h2>Kayıt Ol</h2>
-        
         <input name="name" placeholder="Ad" onChange={handleChange} required />
         <input name="surname" placeholder="Soyad" onChange={handleChange} required />
         <input name="number" placeholder="Numara" onChange={handleChange} required />
@@ -46,6 +47,9 @@ function Register() {
 
         <button type="submit">Kayıt Ol</button>
       </form>
+
+      {/* 📌 Toastify'i ekledik */}
+      <ToastContainer position="top-center" />
     </div>
   );
 }

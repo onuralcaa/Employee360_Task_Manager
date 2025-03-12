@@ -1,4 +1,4 @@
-/* Sayfanın ortasında konumlandırma */
+/* Sayfanın ortasında düzgün görünmesi için */
 .register-container {
   display: flex;
   justify-content: center;
@@ -14,48 +14,44 @@
   border-radius: 10px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   text-align: center;
-  width: 400px;
+  width: 350px;
 }
 
 /* Başlık */
 .register-box h2 {
   margin-bottom: 20px;
   font-size: 24px;
-  font-weight: bold;
-  color: #333;
 }
 
-/* Input alanları */
+/* Form içindeki input alanları */
 .register-box input {
   width: 100%;
-  padding: 12px;
+  padding: 10px;
   margin: 10px 0;
   border: 1px solid #ddd;
   border-radius: 5px;
   font-size: 16px;
-  box-sizing: border-box; /* İçeriğe göre taşma yapmasını engeller */
+  box-sizing: border-box; /* 📌 Padding genişliği değiştirmesin */
 }
 
-/* Şifre alanını ve ikonunu içeren container */
+/* Şifre ve ikonun olduğu container */
 .password-container {
   position: relative;
+  width: 100%;
   display: flex;
   align-items: center;
-  width: 100%;
 }
 
-/* Şifre inputu -> diğer inputlarla aynı hizada */
+/* Şifre inputu */
 .password-container input {
   flex: 1;
-  padding-right: 40px; /* Göz ikonuna yer bırakmak için */
+  padding-right: 40px; /* 📌 Göz ikonuna yer bırak */
 }
 
-/* Göz ikonunun hizalanması */
+/* Göz ikonunun stili */
 .toggle-password {
   position: absolute;
-  right: 15px; /* Daha iyi hizalama için */
-  top: 50%;
-  transform: translateY(-50%);
+  right: 10px;
   cursor: pointer;
   font-size: 18px;
   color: gray;
@@ -64,7 +60,7 @@
 /* Kayıt butonu */
 .register-box button {
   width: 100%;
-  padding: 12px;
+  padding: 10px;
   background-color: #ff4d4d;
   border: none;
   color: white;

@@ -2,25 +2,25 @@ import { useState } from "react";
 import { login } from "../api/api";
 import { useNavigate } from "react-router-dom";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
-import "./Login.css"; // CSS dosyası yüklendi
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import "./Login.css";
 
 function Login() {
   const [user, setUser] = useState({ number: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
-  const handleChange = (e) => {
-    setUser({ ...user, [e.target.name]: e.target.value });
-  };
+  const handleChange = (e) => setUser({ ...user, [e.target.name]: e.target.value });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       await login(user);
-      alert("Giriş başarılı!");
-      navigate("/dashboard");
+      toast.success("✅ Giriş başarılı!", { autoClose: 2000 });
+      setTimeout(() => navigate("/dashboard"), 2000);
     } catch (error) {
-      alert("Giriş başarısız!");
+      toast.error("❌ Giriş başarısız! Lütfen bilgilerinizi kontrol edin.");
     }
   };
 
@@ -30,28 +30,18 @@ function Login() {
         <h2>Giriş Yap</h2>
 
         {/* Numara Alanı */}
-        <div className="input-container">
-          <input
-            name="number"
-            placeholder="📞 Numara"
-            onChange={handleChange}
-            required
-          />
-        </div>
+        <input name="number" placeholder="Numara" onChange={handleChange} required />
 
-        {/* Şifre Alanı */}
-        <div className="input-container password-container">
+        {/* Şifre Alanı ve Göz İkonu */}
+        <div className="password-container">
           <input
             name="password"
             type={showPassword ? "text" : "password"}
-            placeholder="🔑 Şifre"
+            placeholder="Şifre"
             onChange={handleChange}
             required
           />
-          <span
-            className="toggle-password"
-            onClick={() => setShowPassword(!showPassword)}
-          >
+          <span className="toggle-password" onClick={() => setShowPassword(!showPassword)}>
             {showPassword ? <FaEyeSlash /> : <FaEye />}
           </span>
         </div>
@@ -59,6 +49,8 @@ function Login() {
         {/* Giriş Butonu */}
         <button type="submit">Giriş Yap</button>
       </form>
+
+      <ToastContainer position="top-center" />
     </div>
   );
 }
