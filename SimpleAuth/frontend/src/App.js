@@ -7,7 +7,8 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Register />} />
+        <Route path="/" element={<Login />} /> {/* Giriş sayfasını varsayılan olarak aç */}
+        <Route path="/register" element={<Register />} /> {/* Kayıt sayfasının yolu değiştirildi */}
         <Route path="/login" element={<Login />} />
         <Route path="/dashboard" element={<Dashboard />} />
       </Routes>
