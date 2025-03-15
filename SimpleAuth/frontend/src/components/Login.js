@@ -7,7 +7,7 @@ import "react-toastify/dist/ReactToastify.css";
 import "./Login.css";
 
 function Login() {
-  const [user, setUser] = useState({ number: "", password: "" });
+  const [user, setUser] = useState({ username: "", password: "", role: "personel" });
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
@@ -16,9 +16,13 @@ function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await login(user);
-      toast.success("✅ Giriş başarılı!", { autoClose: 2000 });
-      setTimeout(() => navigate("/dashboard"), 2000);
+      const response = await login(user);
+      toast.success(`✅ ${response.data.message}`, { autoClose: 2000 });
+
+      // Kullanıcı rolüne göre yönlendirme
+      setTimeout(() => {
+        navigate("/dashboard", { state: { role: response.data.role } });
+      }, 2000);
     } catch (error) {
       toast.error("❌ Giriş başarısız! Lütfen bilgilerinizi kontrol edin.");
     }
@@ -27,10 +31,33 @@ function Login() {
   return (
     <div className="login-container">
       <form onSubmit={handleSubmit} className="login-box">
-        <h2>Giriş Yap</h2>
+        <h1>Personel360</h1>
+{/* Rol Seçimi (Geliştirilmiş Tasarım) */}
+<div className="role-selection">
+  <input
+    type="radio"
+    name="role"
+    id="personel"
+    value="personel"
+    checked={user.role === "personel"}
+    onChange={handleChange}
+  />
+  <label htmlFor="personel">Personel</label>
 
-        {/* Numara Alanı */}
-        <input name="number" placeholder="Numara" onChange={handleChange} required />
+  <input
+    type="radio"
+    name="role"
+    id="admin"
+    value="admin"
+    checked={user.role === "admin"}
+    onChange={handleChange}
+  />
+  <label htmlFor="admin">Yönetici</label>
+</div>
+
+
+        {/* Kullanıcı Adı Alanı */}
+        <input name="username" placeholder="Kullanıcı Adı" onChange={handleChange} required />
 
         {/* Şifre Alanı ve Göz İkonu */}
         <div className="password-container">
@@ -49,13 +76,15 @@ function Login() {
         {/* Giriş Butonu */}
         <button type="submit">Giriş Yap</button>
 
-        {/* Kayıt Ol Butonu */}
-        <p className="register-link">
-          Hesabınız yok mu?{" "}
-          <span onClick={() => navigate("/register")} className="register-button">
-            Kayıt Ol
-          </span>
-        </p>
+        {/* Kayıt Ol Butonu (Sadece Personel için gösterilecek) */}
+        {user.role === "personel" && (
+          <p className="register-link">
+            Hesabınız yok mu?{" "}
+            <span onClick={() => navigate("/register")} className="register-button">
+              Kayıt Ol
+            </span>
+          </p>
+        )}
       </form>
 
       <ToastContainer position="top-center" />

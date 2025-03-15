@@ -94,3 +94,36 @@
 .register-button:hover {
   color: #e63e3e;
 }
+
+.role-selection {
+  display: flex;
+  justify-content: center;
+  gap: 25px; /* Butonlar arasında boşluk */
+  margin-bottom: 15px;
+}
+
+.role-selection label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.role-selection input {
+  display: none; /* Varsayılan radyo butonlarını gizle */
+}
+
+.role-selection label:hover {
+  background-color: #f0f0f0;
+}
+
+.role-selection input:checked + label {
+  background-color: #ff4b5c;
+  color: white;
+  border-color: #ff4b5c;
+}

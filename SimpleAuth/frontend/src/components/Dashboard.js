@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import "./Dashboard.css";
 import { FaSignOutAlt } from "react-icons/fa";
 import { toast, ToastContainer } from "react-toastify";
@@ -6,6 +6,10 @@ import "react-toastify/dist/ReactToastify.css";
 
 function Dashboard() {
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Eğer rol bilgisi gelmediyse varsayılan olarak "personel" atanır
+  const userRole = location.state?.role || "personel";
 
   const handleLogout = () => {
     toast.success("Çıkış yapıldı!", {
@@ -26,8 +30,14 @@ function Dashboard() {
   return (
     <div className="dashboard-container">
       <div className="dashboard-box">
-        <h1>Hoş Geldiniz! 🎉</h1>
-        <p>Başarıyla giriş yaptınız. Şimdi uygulamayı kullanabilirsiniz.</p>
+        <h1>
+          {userRole === "admin" ? "Yönetici Girişi Başarılı! 👑" : "Personel Girişi Başarılı! 🎉"}
+        </h1>
+        <p>
+          {userRole === "admin"
+            ? "Yönetici olarak giriş yaptınız. Yönetim paneline erişebilirsiniz."
+            : "Başarıyla giriş yaptınız. Şimdi uygulamayı kullanabilirsiniz."}
+        </p>
         <button onClick={handleLogout}>
           <FaSignOutAlt className="logout-icon" />
           Çıkış Yap
