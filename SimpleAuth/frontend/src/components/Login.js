@@ -24,8 +24,10 @@ function Login() {
         navigate("/dashboard", { state: { role: response.data.role } });
       }, 2000);
     } catch (error) {
-      toast.error("❌ Giriş başarısız! Lütfen bilgilerinizi kontrol edin.");
-    }
+  const errMsg = error.response?.data?.message || "❌ Giriş başarısız! Lütfen bilgilerinizi kontrol edin.";
+  toast.error(errMsg);
+}
+
   };
 
   return (

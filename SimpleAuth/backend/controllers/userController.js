@@ -5,9 +5,9 @@ const jwt = require("jsonwebtoken");
 // 📝 Kullanıcı Kaydı
 const register = async (req, res) => {
   try {
-    const { name, surname, username, number, password, role } = req.body;
+    const { name, surname, username, number, email, birthdate, password, role } = req.body;
 
-    // Kullanıcı adı ve numara kontrolü
+    // Kullanıcı adı, numara ve email kontrolü
     const existingUser = await User.findOne({ username });
     if (existingUser) {
       return res.status(400).json({ message: "Bu kullanıcı adı zaten kayıtlı!" });
@@ -18,7 +18,11 @@ const register = async (req, res) => {
       return res.status(400).json({ message: "Bu numara zaten kayıtlı!" });
     }
 
-    // Numaranın sayısal olup olmadığını kontrol et
+    const existingEmail = await User.findOne({ email });
+    if (existingEmail) {
+      return res.status(400).json({ message: "Bu e-posta zaten kayıtlı!" });
+    }
+
     if (isNaN(number)) {
       return res.status(400).json({ message: "Numara sadece sayısal olabilir." });
     }
@@ -30,10 +34,12 @@ const register = async (req, res) => {
     const newUser = new User({
       name,
       surname,
-      username, // Kullanıcı adı eklendi
+      username,
       number: Number(number),
+      email,
+      birthdate,
       password: hashedPassword,
-      role: role || "personel" // Varsayılan olarak personel atanıyor
+      role: role || "personel"
     });
 
     await newUser.save();
@@ -44,27 +50,38 @@ const register = async (req, res) => {
   }
 };
 
-// 📝 Kullanıcı Girişi
 const login = async (req, res) => {
   try {
-    const { username, password } = req.body; // Kullanıcı adı ile giriş yapılıyor
+    const { username, password, role: requestedRole } = req.body;
 
-    // Kullanıcıyı bul
     const user = await User.findOne({ username });
     if (!user) {
       return res.status(404).json({ message: "Kullanıcı bulunamadı!" });
     }
 
-    // Şifre doğrulama
+   if (user.role !== requestedRole) {
+  return res.status(403).json({ message: `Bu bilgiler ile ${requestedRole === "admin" ? "Yönetici" : "Personel"} girişi yapılamaz.` });
+}
+
+
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(400).json({ message: "Geçersiz şifre!" });
     }
 
-    // JWT Token oluştur
-    const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: "1h" });
+    const tokenPayload = {
+      id: user._id,
+      name: user.name,
+      surname: user.surname,
+      username: user.username,
+      number: user.number,
+      email: user.email,
+      birthdate: user.birthdate,
+      role: user.role
+    };
 
-    // Başarı mesajı ve rol bilgisi döndür
+    const token = jwt.sign(tokenPayload, process.env.JWT_SECRET, { expiresIn: "1h" });
+
     res.status(200).json({
       message: `${user.role === "admin" ? "Yönetici" : "Personel"} girişi başarılı.`,
       token,
@@ -76,4 +93,8 @@ const login = async (req, res) => {
   }
 };
 
-module.exports = { register, login };
+module.exports = {
+  register,
+  login
+};
+

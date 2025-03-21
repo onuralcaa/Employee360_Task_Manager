@@ -3,8 +3,8 @@ const cors = require("cors");
 const bodyParser = require("body-parser");
 const connectDB = require("./config/db");
 const userRoutes = require("./routes/userRoutes");
-const User = require("./models/userModel"); // Kullanıcı modelini ekledik
-const bcrypt = require("bcryptjs"); // Şifreleme için bcrypt kullanıyoruz
+const User = require("./models/userModel");
+const bcrypt = require("bcryptjs");
 require("dotenv").config();
 
 const app = express();
@@ -19,12 +19,14 @@ const createAdminUser = async () => {
   try {
     const existingAdmin = await User.findOne({ role: "admin" });
     if (!existingAdmin) {
-      const hashedPassword = await bcrypt.hash("admin123", 10); // Yönetici için default şifre
+      const hashedPassword = await bcrypt.hash("admin123", 10);
       const adminUser = new User({
         name: "admin",
         surname: "user",
-        username: 'admin',
-        number: 9999, // Örnek numara
+        username: "admin",
+        number: 9999,
+        email: "admin@example.com",         // 📧 Eklendi
+        birthdate: "1970-01-01",            // 📅 Eklendi
         password: hashedPassword,
         role: "admin"
       });

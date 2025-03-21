@@ -10,12 +10,15 @@ function Register() {
   const [user, setUser] = useState({
     name: "",
     surname: "",
-    username: "", // Kullanıcı adı eklendi
+    username: "",
     number: "",
+    email: "",
+    birthdate: "",
     password: "",
-    role: "personel", // Varsayılan olarak personel
+    role: "personel",
   });
 
+  const [confirmPassword, setConfirmPassword] = useState(""); // 📌 Şifre tekrar
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
@@ -26,9 +29,13 @@ function Register() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Numara alanının sayısal olup olmadığını kontrol et
     if (isNaN(user.number)) {
       toast.error("❌ Numara sadece sayısal olabilir!");
+      return;
+    }
+
+    if (user.password !== confirmPassword) {
+      toast.error("❌ Şifreler uyuşmuyor!");
       return;
     }
 
@@ -46,19 +53,13 @@ function Register() {
       <form onSubmit={handleSubmit} className="register-box">
         <h2>Kayıt Ol</h2>
 
-        {/* Ad */}
         <input name="name" placeholder="Ad" onChange={handleChange} required />
-
-        {/* Soyad */}
         <input name="surname" placeholder="Soyad" onChange={handleChange} required />
-
-        {/* Kullanıcı Adı */}
         <input name="username" placeholder="Kullanıcı Adı" onChange={handleChange} required />
-
-        {/* Numara (Sadece Sayısal) */}
         <input name="number" type="text" placeholder="Numara" onChange={handleChange} required />
+        <input name="email" type="email" placeholder="E-posta" onChange={handleChange} required />
+        <input name="birthdate" type="date" onChange={handleChange} required />
 
-        {/* Şifre Alanı */}
         <div className="password-container">
           <input
             name="password"
@@ -72,10 +73,23 @@ function Register() {
           </span>
         </div>
 
-        {/* Kayıt Butonu */}
+        {/* 📌 Şifre Doğrulama Alanı */}
+        <div className="password-container">
+          <input
+            name="confirmPassword"
+            type={showPassword ? "text" : "password"}
+            placeholder="Şifre Tekrar"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            required
+          />
+          <span className="toggle-password" onClick={() => setShowPassword(!showPassword)}>
+            {showPassword ? <FaEyeSlash /> : <FaEye />}
+          </span>
+        </div>
+
         <button type="submit">Kayıt Ol</button>
 
-        {/* Giriş Yap Butonu */}
         <p className="login-link">
           Zaten hesabınız var mı?{" "}
           <span onClick={() => navigate("/login")} className="login-button">
