@@ -8,7 +8,7 @@ const bcrypt = require("bcryptjs");
 require("dotenv").config();
 
 const app = express();
-connectDB();
+connectDB(); // Connect to MongoDB
 
 app.use(cors());
 app.use(bodyParser.json());
