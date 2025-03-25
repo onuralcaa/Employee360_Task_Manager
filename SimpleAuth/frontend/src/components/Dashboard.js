@@ -10,6 +10,7 @@ function Dashboard() {
 
   // Eğer rol bilgisi gelmediyse varsayılan olarak "personel" atanır
   const userRole = location.state?.role || "personel";
+  const userName = location.state?.name || "Kullanıcı";
 
   const handleLogout = () => {
     toast.success("Çıkış yapıldı!", {
@@ -27,6 +28,10 @@ function Dashboard() {
     }, 2500);
   };
 
+  const handleLogin = () => {
+    navigate("/personel"); // Navigates without passing state
+  };
+
   return (
     <div className="dashboard-container">
       <div className="dashboard-box">
@@ -38,6 +43,9 @@ function Dashboard() {
             ? "Yönetici olarak giriş yaptınız. Yönetim paneline erişebilirsiniz."
             : "Başarıyla giriş yaptınız. Şimdi uygulamayı kullanabilirsiniz."}
         </p>
+        <button onClick={handleLogin}>
+          Giriş Yap
+        </button>
         <button onClick={handleLogout}>
           <FaSignOutAlt className="logout-icon" />
           Çıkış Yap

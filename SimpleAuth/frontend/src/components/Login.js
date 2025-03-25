@@ -17,6 +17,8 @@ function Login() {
     e.preventDefault();
     try {
       const response = await login(user);
+      // Store JWT token in localStorage
+      localStorage.setItem("token", response.data.token);
       toast.success(`✅ ${response.data.message}`, { autoClose: 2000 });
 
       // Kullanıcı rolüne göre yönlendirme
@@ -24,10 +26,9 @@ function Login() {
         navigate("/dashboard", { state: { role: response.data.role } });
       }, 2000);
     } catch (error) {
-  const errMsg = error.response?.data?.message || "❌ Giriş başarısız! Lütfen bilgilerinizi kontrol edin.";
-  toast.error(errMsg);
-}
-
+      const errMsg = error.response?.data?.message || "❌ Giriş başarısız! Lütfen bilgilerinizi kontrol edin.";
+      toast.error(errMsg);
+    }
   };
 
   return (
