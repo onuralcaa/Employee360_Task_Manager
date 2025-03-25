@@ -1,0 +1,12 @@
+.personel-page-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #f4f4f4;
+}
+
+.personel-page-container h1 {
+  font-size: 2rem;
+  color: #333;
+}
