@@ -36,7 +36,7 @@
 .dashboard-box button {
   width: 100%;
   padding: 12px;
-  background-color: #ff4d4d;
+  background-color: #4CAF50; /* Yeşil renk */
   border: none;
   color: white;
   font-size: 18px;
@@ -51,7 +51,7 @@
 
 /* Butona hover efekti */
 .dashboard-box button:hover {
-  background-color: #e63e3e;
+  background-color: #45a049; /* Daha koyu yeşil renk */
 }
 
 /* Çıkış ikonu */
