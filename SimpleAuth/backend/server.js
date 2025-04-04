@@ -1,6 +1,5 @@
 const express = require("express");
 const cors = require("cors");
-const bodyParser = require("body-parser");
 const connectDB = require("./config/db");
 const userRoutes = require("./routes/userRoutes");
 const User = require("./models/userModel");
@@ -11,7 +10,8 @@ const app = express();
 connectDB(); // Connect to MongoDB
 
 app.use(cors());
-app.use(bodyParser.json());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use("/api/users", userRoutes);
 
 // 🚀 Yönetici Kullanıcısını Otomatik Oluştur
