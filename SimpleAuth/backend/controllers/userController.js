@@ -46,7 +46,8 @@ const register = async (req, res) => {
     res.status(201).json({ message: "Kayıt başarılı!" });
 
   } catch (error) {
-    res.status(500).json({ message: "Kayıt sırasında hata oluştu.", error });
+    console.error("❌ Error during registration:", error);
+    res.status(500).json({ message: "An error occurred during registration.", error: error.message });
   }
 };
 

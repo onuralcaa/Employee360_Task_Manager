@@ -89,5 +89,36 @@ npm install -g concurrently
 3-Start the project:
 ---------------------------------------
 npm start
+```
+
+---
+
+## Troubleshooting
+
+### Common Issues
+
+1. **MongoDB Connection Error**
+   - Ensure MongoDB is running locally or the connection string in the `.env` file is correct.
+   - Check if the `MONGO_URI` environment variable is properly set.
+
+2. **Frontend Not Loading**
+   - Verify that the backend server is running on the correct port.
+   - Check the `REACT_APP_API_URL` environment variable in the frontend `.env` file.
+
+3. **JWT Token Issues**
+   - Ensure the `JWT_SECRET` environment variable is set in the backend `.env` file.
+   - Clear cookies if authentication issues persist.
+
+4. **CORS Errors**
+   - Update the CORS configuration in the backend to allow requests from the frontend's domain.
+
+5. **Dependencies Not Found**
+   - Run `npm install` in both the `frontend` and `backend` directories to install missing dependencies.
+
+6. **Build Errors**
+   - Ensure you are using the correct Node.js version as specified in the `engines` field of `package.json` (if present).
+
+### Contact
+For further assistance, please contact the project maintainer or open an issue on GitHub.
 
 
