@@ -1,101 +1,80 @@
-const User = require("../models/userModel");
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
+const asyncHandler = require('express-async-handler');
+const userService = require('../services/userService');
 
-// 📝 Kullanıcı Kaydı
-const register = async (req, res) => {
+/**
+ * User Controller - Handles HTTP requests for user-related operations
+ */
+
+// @desc    Register new user
+// @route   POST /api/users/register
+// @access  Public
+const registerUser = asyncHandler(async (req, res) => {
   try {
-    const { name, surname, username, number, email, birthdate, password, role } = req.body;
-
-    // Kullanıcı adı, numara ve email kontrolü
-    const existingUser = await User.findOne({ username });
-    if (existingUser) {
-      return res.status(400).json({ message: "Bu kullanıcı adı zaten kayıtlı!" });
-    }
-
-    const existingNumber = await User.findOne({ number });
-    if (existingNumber) {
-      return res.status(400).json({ message: "Bu numara zaten kayıtlı!" });
-    }
-
-    const existingEmail = await User.findOne({ email });
-    if (existingEmail) {
-      return res.status(400).json({ message: "Bu e-posta zaten kayıtlı!" });
-    }
-
-    if (isNaN(number)) {
-      return res.status(400).json({ message: "Numara sadece sayısal olabilir." });
-    }
-
-    // Şifre hashleme
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    // Kullanıcı oluştur
-    const newUser = new User({
-      name,
-      surname,
-      username,
-      number: Number(number),
-      email,
-      birthdate,
-      password: hashedPassword,
-      role: role || "personel"
+    const user = await userService.registerUser(req.body);
+    res.status(201).json({
+      success: true,
+      message: 'Kullanıcı kaydı başarılı!',
+      ...user
     });
-
-    await newUser.save();
-    res.status(201).json({ message: "Kayıt başarılı!" });
-
   } catch (error) {
-    console.error("❌ Error during registration:", error);
-    res.status(500).json({ message: "An error occurred during registration.", error: error.message });
+    res.status(400);
+    throw new Error(error.message);
   }
-};
+});
 
-const login = async (req, res) => {
+// @desc    Authenticate a user
+// @route   POST /api/users/login
+// @access  Public
+const loginUser = asyncHandler(async (req, res) => {
+  const { username, password, role } = req.body;
+
   try {
-    const { username, password, role: requestedRole } = req.body;
-
-    const user = await User.findOne({ username });
-    if (!user) {
-      return res.status(404).json({ message: "Kullanıcı bulunamadı!" });
-    }
-
-   if (user.role !== requestedRole) {
-  return res.status(403).json({ message: `Bu bilgiler ile ${requestedRole === "admin" ? "Yönetici" : "Personel"} girişi yapılamaz.` });
-}
-
-
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return res.status(400).json({ message: "Geçersiz şifre!" });
-    }
-
-    const tokenPayload = {
-      id: user._id,
-      name: user.name,
-      surname: user.surname,
-      username: user.username,
-      number: user.number,
-      email: user.email,
-      birthdate: user.birthdate,
-      role: user.role
-    };
-
-    const token = jwt.sign(tokenPayload, process.env.JWT_SECRET, { expiresIn: "1h" });
-
+    const user = await userService.loginUser(username, password, role);
     res.status(200).json({
-      message: `${user.role === "admin" ? "Yönetici" : "Personel"} girişi başarılı.`,
-      token,
-      role: user.role
+      success: true,
+      message: 'Giriş başarılı!',
+      ...user
     });
-
   } catch (error) {
-    res.status(500).json({ message: "Sunucu hatası", error });
+    res.status(401);
+    throw new Error(error.message);
   }
-};
+});
+
+// @desc    Get user profile
+// @route   GET /api/users/profile
+// @access  Private
+const getUserProfile = asyncHandler(async (req, res) => {
+  try {
+    const user = await userService.getUserProfile(req.user.id);
+    res.status(200).json(user);
+  } catch (error) {
+    res.status(404);
+    throw new Error(error.message);
+  }
+});
+
+// @desc    Update user profile
+// @route   PUT /api/users/profile
+// @access  Private
+const updateUserProfile = asyncHandler(async (req, res) => {
+  try {
+    const updatedUser = await userService.updateUserProfile(req.user.id, req.body);
+    res.status(200).json({
+      success: true,
+      message: 'Profil güncellendi!',
+      ...updatedUser
+    });
+  } catch (error) {
+    res.status(400);
+    throw new Error(error.message);
+  }
+});
 
 module.exports = {
-  register,
-  login
+  registerUser,
+  loginUser,
+  getUserProfile,
+  updateUserProfile,
 };
 

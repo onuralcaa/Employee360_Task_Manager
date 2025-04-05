@@ -1,34 +1,27 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { login } from "../api/api";
-import { ToastContainer, toast } from "react-toastify";
+import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import Cookies from "js-cookie";
 import "./Login.css";
 import PasswordToggle from "./PasswordToggle.jsx";
+import { useAuth } from "../contexts/AuthContext";
+import LoadingSpinner from "./common/LoadingSpinner";
 
 function Login() {
   const [user, setUser] = useState({ username: "", password: "", role: "personel" });
   const navigate = useNavigate();
+  const { login, loading } = useAuth();
 
   const handleChange = (e) => setUser({ ...user, [e.target.name]: e.target.value });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      const response = await login(user);
-      Cookies.set("token", response.data.token, { expires: 1, secure: true, sameSite: "Strict" });
-      toast.success(`✅ ${response.data.message}`, { autoClose: 2000 });
-
-      // Kullanıcı rolüne göre yönlendirme
-      setTimeout(() => {
-        navigate("/dashboard", { state: { role: response.data.role } });
-      }, 2000);
-    } catch (error) {
-      const errorMessage = error.response?.data?.message || "❌ Giriş başarısız! Lütfen bilgilerinizi kontrol edin.";
-      toast.error(errorMessage);
-    }
+    await login(user);
   };
+
+  if (loading) {
+    return <LoadingSpinner message="Giriş yapılıyor..." />;
+  }
 
   return (
     <div className="login-container">
@@ -59,7 +52,12 @@ function Login() {
         </div>
 
         {/* Kullanıcı Adı Alanı */}
-        <input name="username" placeholder="Kullanıcı Adı" onChange={handleChange} required />
+        <input 
+          name="username" 
+          placeholder="Kullanıcı Adı" 
+          onChange={handleChange} 
+          required 
+        />
 
         {/* Şifre Alanı ve Göz İkonu */}
         <div className="password-container">

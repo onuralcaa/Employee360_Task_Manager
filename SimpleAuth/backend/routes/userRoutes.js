@@ -1,12 +1,29 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
-const controller = require("../controllers/userController.js");  // ✅ .js uzantısı ile import
+const {
+  registerUser,
+  loginUser,
+  getUserProfile,
+  updateUserProfile,
+} = require('../controllers/userController');
+const { protect, admin } = require('../middleware/authMiddleware');
 
-console.log(controller); // ❗ Kontrol için log: { register: [Function], login: [Function] }
+/**
+ * User Routes
+ */
 
-const { register, login } = controller;  // Fonksiyonları düzgün şekilde çıkar
+// Public routes
+router.post('/register', registerUser);
+router.post('/login', loginUser);
 
-router.post("/register", register);  // Kullanıcı kaydı
-router.post("/login", login);        // Kullanıcı girişi
+// Protected routes 
+router.route('/profile')
+  .get(protect, getUserProfile) 
+  .put(protect, updateUserProfile);
+
+// Admin-only routes (for future features)
+router.get('/all', protect, admin, (req, res) => {
+  res.json({ message: 'Admin route for getting all users' });
+});
 
 module.exports = router;

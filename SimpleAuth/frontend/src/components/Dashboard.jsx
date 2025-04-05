@@ -1,57 +1,48 @@
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import "./Dashboard.css";
 import { FaSignOutAlt } from "react-icons/fa";
-import { toast, ToastContainer } from "react-toastify";
+import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { useAuth } from "../contexts/AuthContext";
+import LoadingSpinner from "./common/LoadingSpinner";
 
 function Dashboard() {
   const navigate = useNavigate();
-  const location = useLocation();
+  const { user, logout, loading } = useAuth();
 
-  // Eğer rol bilgisi gelmediyse varsayılan olarak "personel" atanır
-  const userRole = location.state?.role || "personel";
-  const userName = location.state?.name || "Kullanıcı";
+  // If still loading, show loading spinner
+  if (loading) {
+    return <LoadingSpinner message="Yükleniyor..." />;
+  }
 
   const handleLogout = () => {
-    toast.success("Çıkış yapıldı!", {
-      position: "top-center",
-      autoClose: 2000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: false,
-      draggable: true,
-    });
-
-    // Bildirim süresi kadar bekleyerek yönlendirme yapıyoruz
-    setTimeout(() => {
-      navigate("/login");
-    }, 2500);
+    logout();
   };
 
   const handleLogin = () => {
-    navigate("/personel"); // Navigates without passing state
+    navigate("/personel"); // Navigates to the personel page
   };
 
   return (
     <div className="dashboard-container">
       <div className="dashboard-box">
         <h1>
-          {userRole === "admin" ? "Yönetici Girişi Başarılı! 👑" : "Personel Girişi Başarılı! 🎉"}
+          {user?.role === "admin" ? "Yönetici Girişi Başarılı! 👑" : "Personel Girişi Başarılı! 🎉"}
         </h1>
         <p>
-          {userRole === "admin"
+          {user?.role === "admin"
             ? "Yönetici olarak giriş yaptınız. Yönetim paneline erişebilirsiniz."
             : "Başarıyla giriş yaptınız. Şimdi uygulamayı kullanabilirsiniz."}
         </p>
-        <button onClick={handleLogin}>
-          Giriş Yap
+        <button onClick={handleLogin} className="primary-button">
+          Personel Sayfasına Git
         </button>
-        <button onClick={handleLogout}>
+        <button onClick={handleLogout} className="logout-button">
           <FaSignOutAlt className="logout-icon" />
           Çıkış Yap
         </button>
       </div>
-      {/* 🚀 Toast bildirimlerinin çalışması için ekledik */}
+      {/* Toast bildirimlerinin çalışması için ekledik */}
       <ToastContainer />
     </div>
   );

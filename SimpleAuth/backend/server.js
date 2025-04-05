@@ -1,47 +1,41 @@
-const express = require("express");
-const cors = require("cors");
-const connectDB = require("./config/db");
-const userRoutes = require("./routes/userRoutes");
-const User = require("./models/userModel");
-const bcrypt = require("bcryptjs");
-require("dotenv").config();
+const express = require('express');
+const cors = require('cors');
+const dotenv = require('dotenv');
+const connectDB = require('./config/db');
+const { notFound, errorHandler } = require('./middleware/errorMiddleware');
 
+// Load environment variables
+dotenv.config();
+
+// Connect to database
+connectDB();
+
+// Initialize express app
 const app = express();
-connectDB(); // Connect to MongoDB
 
+// Middleware
 app.use(cors());
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use("/api/users", userRoutes);
+app.use(express.urlencoded({ extended: false }));
 
-// 🚀 Yönetici Kullanıcısını Otomatik Oluştur
-const createAdminUser = async () => {
-  try {
-    const existingAdmin = await User.findOne({ role: "admin" });
-    if (!existingAdmin) {
-      const hashedPassword = await bcrypt.hash("admin123", 10);
-      const adminUser = new User({
-        name: "admin",
-        surname: "user",
-        username: "admin",
-        number: 9999,
-        email: "admin@example.com",         // 📧 Eklendi
-        birthdate: "1970-01-01",            // 📅 Eklendi
-        password: hashedPassword,
-        role: "admin"
-      });
-      await adminUser.save();
-      console.log("✅ Yönetici kullanıcısı oluşturuldu!");
-    } else {
-      console.log("ℹ️ Zaten bir yönetici kullanıcısı var.");
-    }
-  } catch (error) {
-    console.error("❌ Yönetici oluşturma hatası:", error);
-  }
-};
+// Routes
+app.use('/api/users', require('./routes/userRoutes'));
 
-// Sunucu başlatılırken yönetici oluştur
-createAdminUser();
+// Health check route
+app.get('/', (req, res) => {
+  res.json({
+    message: 'Employee360 Task Manager API is running',
+    version: '1.0.0',
+    status: 'ok'
+  });
+});
 
+// Error handling middleware
+app.use(notFound);
+app.use(errorHandler);
+
+// Start the server
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`🚀 Server ${PORT} portunda çalışıyor!`));
+app.listen(PORT, () => {
+  console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
+});
