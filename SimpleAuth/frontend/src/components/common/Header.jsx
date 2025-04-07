@@ -12,7 +12,7 @@ const Header = () => {
   return (
     <header className="header">
       <div className="header-container">
-        <h1 className="logo">Çalışan360</h1>
+        <h1 className="logo">Employee360</h1>
         {location.pathname !== '/login' && (
           <nav className="nav-menu">
             <Link to="/dashboard">Gösterge Paneli</Link>
