@@ -2,6 +2,7 @@ const User = require('../models/userModel');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt'); // Changed from bcryptjs to bcrypt
 const logger = require('../utils/logger'); // Added logger
+const ErrorHandler = require('../utils/logger'); // Added centralized error handling utility
 
 /**
  * User Service - Handles business logic for user-related operations
@@ -57,8 +58,8 @@ const registerUser = async (userData) => {
       throw new Error('Geçersiz kullanıcı verileri');
     }
   } catch (error) {
-    logger.error('Error during user registration', { username, error: error.message });
-    throw error;
+    ErrorHandler.logError(error);
+    throw new Error(ErrorHandler.formatError(error).message);
   }
 };
 
@@ -66,36 +67,41 @@ const registerUser = async (userData) => {
 const loginUser = async (username, password, role) => {
   logger.info('Login attempt', { username, role });
 
-  // Find user
-  const user = await User.findOne({ username });
-  if (!user) {
-    logger.warn('User not found during login', { username });
-    throw new Error('Kullanıcı bulunamadı');
-  }
+  try {
+    // Find user
+    const user = await User.findOne({ username });
+    if (!user) {
+      logger.warn('User not found during login', { username });
+      throw new Error('Kullanıcı bulunamadı');
+    }
 
-  // Check if password matches
-  const isMatch = await bcrypt.compare(password, user.password);
-  if (!isMatch) {
-    logger.warn('Invalid password attempt', { username });
-    throw new Error('Geçersiz kimlik bilgileri');
-  }
+    // Check if password matches
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      logger.warn('Invalid password attempt', { username });
+      throw new Error('Geçersiz kimlik bilgileri');
+    }
 
-  // Check if role matches
-  if (user.role !== role) {
-    logger.warn('Role mismatch during login', { username, expectedRole: user.role, providedRole: role });
-    throw new Error(`${role === 'admin' ? 'Yönetici' : 'Personel'} girişi yapılamadı`);
-  }
+    // Check if role matches
+    if (user.role !== role) {
+      logger.warn('Role mismatch during login', { username, expectedRole: user.role, providedRole: role });
+      throw new Error(`${role === 'admin' ? 'Yönetici' : 'Personel'} girişi yapılamadı`);
+    }
 
-  logger.info('User authenticated successfully', { username });
-  return {
-    _id: user._id,
-    name: user.name,
-    surname: user.surname,
-    username: user.username,
-    email: user.email,
-    role: user.role,
-    token: generateToken(user._id, user.role, user.name, user.username),
-  };
+    logger.info('User authenticated successfully', { username });
+    return {
+      _id: user._id,
+      name: user.name,
+      surname: user.surname,
+      username: user.username,
+      email: user.email,
+      role: user.role,
+      token: generateToken(user._id, user.role, user.name, user.username),
+    };
+  } catch (error) {
+    ErrorHandler.logError(error);
+    throw new Error(ErrorHandler.formatError(error).message);
+  }
 };
 
 // Get user profile
@@ -111,34 +117,39 @@ const getUserProfile = async (userId) => {
 
 // Update user profile
 const updateUserProfile = async (userId, userData) => {
-  const user = await User.findById(userId);
-  
-  if (!user) {
-    throw new Error('Kullanıcı bulunamadı');
+  try {
+    const user = await User.findById(userId);
+    
+    if (!user) {
+      throw new Error('Kullanıcı bulunamadı');
+    }
+    
+    // Update fields
+    user.name = userData.name || user.name;
+    user.surname = userData.surname || user.surname;
+    user.email = userData.email || user.email;
+    user.number = userData.number || user.number;
+    
+    // Update password if provided
+    if (userData.password) {
+      const salt = await bcrypt.genSalt(10);
+      user.password = await bcrypt.hash(userData.password, salt);
+    }
+    
+    const updatedUser = await user.save();
+    
+    return {
+      _id: updatedUser._id,
+      name: updatedUser.name,
+      surname: updatedUser.surname,
+      username: updatedUser.username,
+      email: updatedUser.email,
+      role: updatedUser.role,
+    };
+  } catch (error) {
+    ErrorHandler.logError(error);
+    throw new Error(ErrorHandler.formatError(error).message);
   }
-  
-  // Update fields
-  user.name = userData.name || user.name;
-  user.surname = userData.surname || user.surname;
-  user.email = userData.email || user.email;
-  user.number = userData.number || user.number;
-  
-  // Update password if provided
-  if (userData.password) {
-    const salt = await bcrypt.genSalt(10);
-    user.password = await bcrypt.hash(userData.password, salt);
-  }
-  
-  const updatedUser = await user.save();
-  
-  return {
-    _id: updatedUser._id,
-    name: updatedUser.name,
-    surname: updatedUser.surname,
-    username: updatedUser.username,
-    email: updatedUser.email,
-    role: updatedUser.role,
-  };
 };
 
 // Assign card ID to user

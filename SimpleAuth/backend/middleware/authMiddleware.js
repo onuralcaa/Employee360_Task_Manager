@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 const asyncHandler = require('express-async-handler');
 const User = require('../models/userModel');
+const ErrorHandler = require('../utils/logger');
 
 /**
  * Authentication middleware for protecting routes
@@ -10,32 +11,23 @@ const User = require('../models/userModel');
 const protect = asyncHandler(async (req, res, next) => {
   let token;
 
-  // Check if authorization header exists and starts with Bearer
   if (
     req.headers.authorization &&
     req.headers.authorization.startsWith('Bearer')
   ) {
     try {
-      // Get token from header
       token = req.headers.authorization.split(' ')[1];
-
-      // Verify token
       const decoded = jwt.verify(token, process.env.JWT_SECRET || 'jwt_secret_key');
-
-      // Get user from the token (exclude password)
       req.user = await User.findById(decoded.id).select('-password');
-
       next();
     } catch (error) {
-      console.error('Token verification failed:', error.message, '\nStack Trace:', error.stack);
-      res.status(401);
-      throw new Error('Yetkisiz erişim, token geçersiz');
+      ErrorHandler.logError(error);
+      res.status(401).json(ErrorHandler.formatError(error));
     }
-  }
-
-  if (!token) {
-    res.status(401);
-    throw new Error('Yetkisiz erişim, token bulunamadı');
+  } else {
+    const error = new Error('Yetkisiz erişim, token bulunamadı');
+    ErrorHandler.logError(error);
+    res.status(401).json(ErrorHandler.formatError(error));
   }
 });
 

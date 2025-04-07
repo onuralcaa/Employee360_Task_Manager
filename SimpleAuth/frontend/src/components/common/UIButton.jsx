@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import './UIButton.css';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -13,6 +14,8 @@ import { useNavigate } from 'react-router-dom';
  * @param {boolean} props.isLoading - Loading state
  * @param {React.ReactNode} props.icon - Optional icon to display before text
  * @param {function} props.onClick - Click handler function
+ * @param {string} props.type - Button type (button, submit, reset)
+ * @param {string} props.className - Additional class names
  */
 const UIButton = ({ 
   variant = 'primary', 
@@ -22,10 +25,12 @@ const UIButton = ({
   icon = null,
   children, 
   className = '',
+  type = 'button',
   ...props 
 }) => {
   return (
     <button 
+      type={type}
       className={`ui-button ${variant} ${size} ${fullWidth ? 'full-width' : ''} ${isLoading ? 'loading' : ''} ${className}`}
       disabled={isLoading}
       {...props}
@@ -35,6 +40,18 @@ const UIButton = ({
       <span className="button-text">{children}</span>
     </button>
   );
+};
+
+UIButton.propTypes = {
+  variant: PropTypes.oneOf(['primary', 'secondary', 'danger', 'success']),
+  size: PropTypes.oneOf(['small', 'medium', 'large']),
+  fullWidth: PropTypes.bool,
+  isLoading: PropTypes.bool,
+  icon: PropTypes.node,
+  children: PropTypes.node.isRequired,
+  className: PropTypes.string,
+  type: PropTypes.oneOf(['button', 'submit', 'reset']),
+  onClick: PropTypes.func,
 };
 
 export const LogoutButton = () => {

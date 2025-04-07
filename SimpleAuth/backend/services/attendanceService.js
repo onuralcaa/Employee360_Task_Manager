@@ -1,6 +1,7 @@
 const Attendance = require('../models/attendanceModel');
 const User = require('../models/userModel');
 const CardReader = require('../models/cardReaderModel');
+const ErrorHandler = require('../utils/logger');
 
 /**
  * Attendance Service - Handles business logic for attendance tracking
@@ -71,7 +72,8 @@ const recordAttendance = async (cardId, readerId, type) => {
 
     return attendance;
   } catch (error) {
-    throw error;
+    ErrorHandler.logError(error);
+    throw new Error(ErrorHandler.formatError(error).message);
   }
 };
 
@@ -93,7 +95,8 @@ const getUserAttendance = async (userId, startDate, endDate) => {
 
     return records;
   } catch (error) {
-    throw error;
+    ErrorHandler.logError(error);
+    throw new Error(ErrorHandler.formatError(error).message);
   }
 };
 
@@ -124,7 +127,8 @@ const getDailyReport = async (date = new Date()) => {
 
     return records;
   } catch (error) {
-    throw error;
+    ErrorHandler.logError(error);
+    throw new Error(ErrorHandler.formatError(error).message);
   }
 };
 

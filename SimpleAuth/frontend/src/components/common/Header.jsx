@@ -1,36 +1,45 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import './Header.css';
-import { useLocation, Link } from 'react-router-dom';
-import { FaHome } from 'react-icons/fa';
-import ThemeToggle from './ThemeToggle.jsx';
+import { Link, useLocation } from 'react-router-dom';
+import ThemeToggle from './ThemeToggle';
+import { LogoutButton } from './UIButton';
 import { useAuth } from '../../contexts/AuthContext';
 
-const Header = () => {
-  const { logout } = useAuth();
+function Header({ title = 'Employee360', links = [] }) {
+  const { user } = useAuth();
   const location = useLocation();
 
-  // Hide header buttons only on login and root pages
-  const hideButtons = location.pathname === '/' || location.pathname === '/login';
+  const isLoginPage = location.pathname === '/login';
 
   return (
     <header className="header">
-      <div className="header-container">
-        <h1 className="logo">Employee360</h1>
-        {!hideButtons && (
-          <nav className="nav-menu">
-            <Link to="/dashboard">Dashboard</Link>
-            <Link to="/">
-              <FaHome /> Home
-            </Link>
-            <button onClick={logout} className="logout-button">Çıkış Yap</button>
-          </nav>
-        )}
-        <div className="theme-toggle-container">
-          <ThemeToggle className="theme-toggle" />
-        </div>
+      <div className="header-left">
+        <h1>{title}</h1>
+      </div>
+      <nav className="header-nav">
+        {links.map((link) => (
+          <Link key={link.path} to={link.path} className="header-link">
+            {link.label}
+          </Link>
+        ))}
+      </nav>
+      <div className="header-right">
+        <ThemeToggle />
+        {!isLoginPage && user && <LogoutButton />}
       </div>
     </header>
   );
+}
+
+Header.propTypes = {
+  title: PropTypes.string,
+  links: PropTypes.arrayOf(
+    PropTypes.shape({
+      path: PropTypes.string.isRequired,
+      label: PropTypes.string.isRequired,
+    })
+  ),
 };
 
 export default Header;

@@ -1,5 +1,6 @@
 const asyncHandler = require('express-async-handler');
 const attendanceService = require('../services/attendanceService');
+const ErrorHandler = require('../utils/logger');
 
 /**
  * Attendance Controller - Handles HTTP requests for attendance tracking
@@ -29,8 +30,8 @@ const recordAttendance = asyncHandler(async (req, res) => {
       data: attendance
     });
   } catch (error) {
-    res.status(400);
-    throw new Error(error.message);
+    ErrorHandler.logError(error);
+    res.status(400).json(ErrorHandler.formatError(error));
   }
 });
 

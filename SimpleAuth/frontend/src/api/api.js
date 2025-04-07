@@ -26,6 +26,7 @@ export const login = async (credentials) => {
   try {
     return await apiClient.post('/login', credentials);
   } catch (error) {
+    handleApiError(error, null); // Log error without showing toast
     throw error;
   }
 };
@@ -34,6 +35,7 @@ export const register = async (userData) => {
   try {
     return await apiClient.post('/register', userData);
   } catch (error) {
+    handleApiError(error, null); // Log error without showing toast
     throw error;
   }
 };

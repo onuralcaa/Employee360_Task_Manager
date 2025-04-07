@@ -33,7 +33,7 @@ export const validateForm = (formData, validationRules) => {
   };
 };
 
-// Global error handler for API requests
+// Enhanced global error handler for API requests
 export const handleApiError = (error, toast) => {
   const errorMessage = formatApiError(error);
   if (toast) {

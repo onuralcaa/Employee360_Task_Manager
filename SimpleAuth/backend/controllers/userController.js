@@ -1,6 +1,7 @@
 const asyncHandler = require('express-async-handler');
 const userService = require('../services/userService');
 const logger = require('../utils/logger');
+const ErrorHandler = require('../utils/logger');
 
 /**
  * User Controller - Handles HTTP requests for user-related operations
@@ -102,8 +103,8 @@ const assignCardToUser = asyncHandler(async (req, res) => {
       data: updatedUser
     });
   } catch (error) {
-    res.status(400);
-    throw new Error(error.message);
+    ErrorHandler.logError(error);
+    res.status(400).json(ErrorHandler.formatError(error));
   }
 });
 
@@ -119,8 +120,8 @@ const updateWorkSchedule = asyncHandler(async (req, res) => {
       data: updatedUser
     });
   } catch (error) {
-    res.status(400);
-    throw new Error(error.message);
+    ErrorHandler.logError(error);
+    res.status(400).json(ErrorHandler.formatError(error));
   }
 });
 

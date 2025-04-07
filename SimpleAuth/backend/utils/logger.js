@@ -17,3 +17,20 @@ const logger = winston.createLogger({
 });
 
 module.exports = logger;
+
+// Centralized error handling utility
+class ErrorHandler {
+  static formatError(error) {
+    return {
+      message: error.message || 'An unexpected error occurred.',
+      stack: process.env.NODE_ENV === 'production' ? null : error.stack,
+    };
+  }
+
+  static logError(error) {
+    const logger = require('./logger');
+    logger.error(error.message, { stack: error.stack });
+  }
+}
+
+module.exports = ErrorHandler;
