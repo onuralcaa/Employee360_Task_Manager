@@ -1,93 +1,86 @@
-# Employee360_Task_Manager
+# Employee360 Task Manager 👥
 
-# SimpleAuth - Full-Stack Authentication System
+A simple web application I created to help businesses manage their employees and projects. Think of it as a digital HR assistant! 
 
-SimpleAuth is a **full-stack authentication system** built with **React (Frontend)** and **Node.js/Express + MongoDB (Backend)**.  
-It allows users to **register, login, and access a protected dashboard**.
+## 🌟 What Can It Do?
 
-This guide will help you **install, configure, and run** the project from scratch.
+- **Login & Register**: Employees and admins can create accounts and log in securely
+- **Different User Roles**: 
+  - 👔 Admins can manage everything
+  - 👤 Employees can view their tasks and update their profiles
+- **Theme Options**: Switch between light and dark modes for comfortable viewing
+- **User Profiles**: Keep track of employee information
+- **Coming Soon**: 
+  - 📝 Task management
+  - 🎯 Project tracking
 
----
+## 🚀 Getting Started
 
-## 📌 Prerequisites (Requirements)
-Before installing, make sure you have:
+### What You Need First
+- Node.js installed on your computer ([Download here](https://nodejs.org/))
+- MongoDB database (I'm using MongoDB Atlas - it's free!)
+- Basic knowledge of command line/terminal
 
-- [Node.js (v14 or higher)](https://nodejs.org/)
-- [MongoDB (local or MongoDB Atlas)](https://www.mongodb.com/)
-- [Git](https://git-scm.com/) (to clone the repository)
+### Setup Steps
 
----
-
-## 📥 Installation & Setup
-
-### 1️⃣ **Clone the Repository**
-First, download the project files from GitHub:
+1. Clone this project to your computer:
 ```bash
-git clone https://github.com/onuralcaa/Employee360_Task_Manager
-cd SimpleAuth
+git clone https://github.com/yourusername/Employee360_Task_Manager.git
+cd Employee360_Task_Manager
+```
 
-******************************************************************************************************
- Backend Setup:
- Move into the backend folder:
- --------------------------------------
- cd backend
+2. Install everything you need (do this once):
+```bash
+npm run install:all
+```
 
- Run the following command to install all necessary packages:
- (This installs all required dependencies: Express (server), Mongoose (MongoDB), CORS, JWT, bcrypt, etc.)
- --------------------------------------
- npm install express mongoose dotenv cors body-parser bcrypt jsonwebtoken
+3. Create two files for your settings:
 
-
-Configure Environment Variables:
-Create a .env file inside the backend folder and add the following:
-Replace your_mongodb_connection_string with your MongoDB connection URI.
-Replace your_secret_key with a secret key for JSON Web Tokens.
---------------------------------------
+In `SimpleAuth/backend/.env`:
+```
+NODE_ENV=development
+PORT=5000
 MONGO_URI=your_mongodb_connection_string
-JWT_SECRET=your_secret_key
+JWT_SECRET=make_up_a_secret_key
+```
 
-Start the Backend Server:
----------------------------------------
-node server.js
+In `SimpleAuth/frontend/.env`:
+```
+VITE_API_URL=http://localhost:5000/api/users
+```
 
-->If everything is correct, the backend should start on http://localhost:5000.
-->You should see: ✅ "Server 5000 portunda çalışıyor!"
-
-******************************************************************************************************
-Frontend Setup
-Move into the frontend folder:
----------------------------------------
-cd ../frontend
-
- Install Frontend Dependencies:
- Run the following command:
- (This installs axios for API requests and react-router-dom for navigation.)
- -------------------------------------
- npm install axios react-router-dom
-
-  Start the Frontend Server:
-  ------------------------------------
-  npm start
-
-->The frontend should now be running on http://localhost:3000.
-->Open the URL in your browser and test the app.
-
-*****************************************************************************************************
-
-Run Backend & Frontend Together:
-To start both backend and frontend at the same time, use:
-1-Install concurrently:
---------------------------------------
-npm install -g concurrently
-
-2-Modify frontend/package.json:
---------------------------------------
-"scripts": {
-  "start": "concurrently \"cd ../backend && node server.js\" \"react-scripts start\""
-}
-
-3-Start the project:
----------------------------------------
+4. Start the app:
+```bash
 npm start
+```
+
+The website will open at `http://localhost:3000` 🎉
+
+## 🛠️ What's Inside
+
+- **Frontend**: Made with React (the stuff you see on screen)
+- **Backend**: Node.js + Express (handles all the behind-the-scenes work)
+- **Database**: MongoDB (where all the data is stored)
+
+## 🎨 Screenshots
+
+[Coming Soon!]
+
+## 🤝 Want to Help?
+
+Feel free to:
+- Report any bugs you find
+- Suggest new features
+- Help improve the code
+
+Just create an issue or submit a pull request!
+
+## 📝 License
+
+This project is under the MIT License - see the LICENSE file for details.
+
+---
+Made with ❤️ by [Your Name]
+Star ⭐ this repo if you found it helpful!
 
 

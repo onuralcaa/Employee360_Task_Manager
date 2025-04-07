@@ -1,44 +1,66 @@
-/* Sayfa ortalamak ve arka plan */
+/* CSS variables for theme support */
+:root {
+  --bg-color: #f4f4f4;
+  --card-bg: #ffffff;
+  --primary-button-bg: #4caf50;
+  --primary-button-bg-hover: #45a049;
+  --logout-button-bg: #ff4d4d;
+  background-color: var(--bg-color);
+  --title-color: #333;
+  --text-color: #666;
+  --warning-color: #ff4d4d;
+  --link-color: #4caf50;
+  background: var(--card-bg);
+}
+
+/* Dark mode adjustments */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-color: #1a1a1a;
+    --card-bg: #2c2c2c;
+    --primary-button-bg: #5cb85c;
+    --primary-button-bg-hover: #4cae4c;
+    --link-color: #5cb85c;
+    --link-hover-color: #4cae4c;
+  }
+}
+
 .dashboard-container {
   display: flex;
   justify-content: center;
   align-items: center;
   height: 100vh;
-  background-color: #f4f4f4;
+  background-color: var(--background-color); /* Use theme variable */
 }
 
-/* Kart stili */
 .dashboard-box {
-  background: white;
+  background-color: var(--card-background); /* Use theme variable */
   padding: 2rem;
   border-radius: 12px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 10px var(--shadow-color); /* Use theme variable */
+  width: 500px;
   text-align: center;
-  width: 400px;
   animation: fadeIn 0.8s ease-in-out;
 }
 
-/* Başlık */
 .dashboard-box h1 {
   font-size: 28px;
-  color: #333;
+  color: var(--text-color); /* Use theme variable */
   margin-bottom: 10px;
 }
 
-/* Açıklama metni */
 .dashboard-box p {
   font-size: 16px;
-  color: #666;
+  color: var(--text-color); /* Use theme variable */
   margin-bottom: 20px;
 }
 
-/* Çıkış butonu */
-.dashboard-box button {
+.dashboard-box .primary-button {
   width: 100%;
   padding: 12px;
-  background-color: #ff4d4d;
+  background-color: var(--primary-color); /* Use theme variable */
   border: none;
-  color: white;
+  color: var(--button-text); /* Use theme variable */
   font-size: 18px;
   border-radius: 8px;
   cursor: pointer;
@@ -47,16 +69,94 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
+  margin-bottom: 10px;
 }
 
-/* Butona hover efekti */
-.dashboard-box button:hover {
-  background-color: #e63e3e;
+.dashboard-box .primary-button:hover {
+  background-color: var(--secondary-color); /* Use theme variable */
 }
 
-/* Çıkış ikonu */
-.logout-icon {
-  font-size: 20px;
+.dashboard-box .logout-button {
+  width: 100%;
+  padding: 12px;
+  background-color: var(--error-color); /* Use theme variable */
+  border: none;
+  color: var(--button-text); /* Use theme variable */
+  font-size: 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.dashboard-box .logout-button:hover {
+  background-color: #d32f2f; /* Keep hardcoded color for hover effect */
+}
+
+.unauthorized-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background-color: var(--background-color); /* Use theme variable */
+  text-align: center;
+  padding: 2rem;
+}
+
+.unauthorized-container h1 {
+  color: var(--error-color); /* Use theme variable */
+  margin-bottom: 1rem;
+}
+
+.unauthorized-container p {
+  margin-bottom: 1.5rem;
+  color: var(--text-color); /* Use theme variable */
+}
+
+.unauthorized-container a {
+  color: var(--primary-color); /* Use theme variable */
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.unauthorized-container a:hover {
+  text-decoration: underline;
+}
+
+.not-found {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background-color: var(--background-color); /* Use theme variable */
+  text-align: center;
+  padding: 2rem;
+}
+
+.not-found h1 {
+  color: var(--text-color); /* Use theme variable */
+  margin-bottom: 1rem;
+}
+
+.not-found p {
+  margin-bottom: 1.5rem;
+  color: var(--text-color); /* Use theme variable */
+}
+
+.not-found a {
+  color: var(--primary-color); /* Use theme variable */
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.not-found a:hover {
+  text-decoration: underline;
 }
 
 /* Fade-in animasyonu */

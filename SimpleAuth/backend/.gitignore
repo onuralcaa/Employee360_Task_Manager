@@ -1,8 +1,1 @@
-# Node modules
-node_modules/
-
-# Environment variables
-.env
-
-# Logs
-*.log
+SimpleAuth/backend/.env

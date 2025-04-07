@@ -1,0 +1,43 @@
+/* Theme toggle button styles */
+.theme-toggle-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background-color: var(--button-background);
+  color: var(--button-text);
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s ease-in-out;
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.theme-toggle-button:hover {
+  background-color: var(--button-hover-background);
+  transform: translateY(-2px);
+}
+
+.theme-icon {
+  font-size: 16px;
+}
+
+.theme-text {
+  display: none;
+}
+
+/* Show text on larger screens */
+@media (min-width: 768px) {
+  .theme-text {
+    display: inline;
+  }
+  
+  .theme-toggle-button {
+    padding: 8px 16px;
+  }
+}
