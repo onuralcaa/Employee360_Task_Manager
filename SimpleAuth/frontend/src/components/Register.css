@@ -4,15 +4,15 @@
   justify-content: center;
   align-items: center;
   height: 100vh;
-  background-color: #f4f4f4;
+  background-color: var(--background-color);
 }
 
 /* Form kutusu */
 .register-box {
-  background: white;
+  background: var(--card-background);
   padding: 30px;
   border-radius: 10px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 10px var(--shadow-color);
   text-align: center;
   width: 350px;
 }
@@ -21,6 +21,7 @@
 .register-box h2 {
   margin-bottom: 20px;
   font-size: 24px;
+  color: var(--text-color);
 }
 
 /* Form içindeki input alanları */
@@ -28,10 +29,12 @@
   width: 100%;
   padding: 10px;
   margin: 10px 0;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border-color);
   border-radius: 5px;
   font-size: 16px;
   box-sizing: border-box; /* 📌 Padding genişliği değiştirmesin */
+  background-color: var(--input-background);
+  color: var(--text-color);
 }
 
 /* Şifre ve ikonun olduğu container */
@@ -54,16 +57,16 @@
   right: 10px;
   cursor: pointer;
   font-size: 18px;
-  color: gray;
+  color: var(--text-color);
 }
 
 /* Kayıt butonu */
 .register-box button {
   width: 100%;
   padding: 10px;
-  background-color: #ff4d4d;
+  background-color: var(--primary-color); /* Use theme variable */
   border: none;
-  color: white;
+  color: var(--button-text); /* Use theme variable */
   font-size: 18px;
   border-radius: 5px;
   cursor: pointer;
@@ -72,25 +75,25 @@
 }
 
 .register-box button:hover {
-  background-color: #e63e3e;
+  background-color: var(--secondary-color); /* Use theme variable */
 }
 
 /* Giriş Yap Linki */
 .login-link {
   margin-top: 15px;
   font-size: 14px;
-  color: #555;
+  color: var(--text-color);
   text-align: center;
 }
 
 /* Giriş Yap Butonu */
 .login-button {
-  color: #ff4d4d;
+  color: var(--primary-color); /* Use theme variable */
   font-weight: bold;
   cursor: pointer;
   transition: color 0.3s;
 }
 
 .login-button:hover {
-  color: #e63e3e;
+  color: var(--secondary-color); /* Use theme variable */
 }
