@@ -1,0 +1,21 @@
+/* Admin Panel Styles */
+.admin-panel-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background-color: var(--background-color);
+  color: var(--text-color);
+  padding: 2rem;
+}
+
+.admin-panel-container h1 {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+}
+
+.admin-panel-container p {
+  font-size: 1.2rem;
+  text-align: center;
+}

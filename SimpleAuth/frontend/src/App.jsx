@@ -8,6 +8,7 @@ import Login from './components/Login.jsx'
 import Register from './components/Register.jsx'
 import Dashboard from './components/Dashboard.jsx'
 import PersonelPage from './components/PersonelPage.jsx'
+import AdminPanel from './components/AdminPanel.jsx'
 import ThemeToggle from './components/common/ThemeToggle.jsx'
 import './App.css'
 
@@ -48,6 +49,11 @@ function App() {
             {/* Protected routes for personnel only */}
             <Route element={<ProtectedRoute roleRequired="personel" />}>
               <Route path="/personel" element={<PersonelPage />} />
+            </Route>
+
+            {/* Protected routes for admin only */}
+            <Route element={<ProtectedRoute roleRequired="admin" />}>
+              <Route path="/admin" element={<AdminPanel />} />
             </Route>
             
             {/* Unauthorized access page */}

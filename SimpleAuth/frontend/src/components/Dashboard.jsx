@@ -19,22 +19,39 @@ function Dashboard() {
     logout();
   };
 
-  const handleLogin = () => {
-    navigate("/personel"); // Navigates to the personel page
+  const handleNavigation = (path) => {
+    if (user?.role === "admin" && path === "/personel") {
+      alert("Yönetici olarak bu sayfaya erişemezsiniz.");
+      return;
+    }
+    navigate(path);
   };
+
+  if (user?.role === "admin") {
+    return (
+      <div className="dashboard-container">
+        <div className="dashboard-box">
+          <h1>Yönetici Girişi Başarılı! 👑</h1>
+          <p>Yönetici olarak giriş yaptınız. Yönetim paneline erişebilirsiniz.</p>
+          <button onClick={() => handleNavigation("/admin")} className="primary-button">
+            Yönetim Paneline Git
+          </button>
+          <button onClick={handleLogout} className="logout-button">
+            <FaSignOutAlt className="logout-icon" />
+            Çıkış Yap
+          </button>
+        </div>
+        <ToastContainer />
+      </div>
+    );
+  }
 
   return (
     <div className="dashboard-container">
       <div className="dashboard-box">
-        <h1>
-          {user?.role === "admin" ? "Yönetici Girişi Başarılı! 👑" : "Personel Girişi Başarılı! 🎉"}
-        </h1>
-        <p>
-          {user?.role === "admin"
-            ? "Yönetici olarak giriş yaptınız. Yönetim paneline erişebilirsiniz."
-            : "Başarıyla giriş yaptınız. Şimdi uygulamayı kullanabilirsiniz."}
-        </p>
-        <button onClick={handleLogin} className="primary-button">
+        <h1>Personel Girişi Başarılı! 🎉</h1>
+        <p>Başarıyla giriş yaptınız. Şimdi uygulamayı kullanabilirsiniz.</p>
+        <button onClick={() => handleNavigation("/personel")} className="primary-button">
           Personel Sayfasına Git
         </button>
         <button onClick={handleLogout} className="logout-button">
@@ -42,7 +59,6 @@ function Dashboard() {
           Çıkış Yap
         </button>
       </div>
-      {/* Toast bildirimlerinin çalışması için ekledik */}
       <ToastContainer />
     </div>
   );

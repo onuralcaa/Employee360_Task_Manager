@@ -33,4 +33,14 @@ router.get('/department/:department', protect, admin, getUsersByDepartment);
 router.post('/:id/assign-card', protect, admin, assignCardToUser);
 router.put('/:id/work-schedule', protect, admin, updateWorkSchedule);
 
+// Add a new route to fetch all users for the admin panel
+router.get('/admin/users', protect, admin, async (req, res) => {
+  try {
+    const users = await User.find({}).select('-password'); // Exclude passwords
+    res.status(200).json({ success: true, data: users });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
 module.exports = router;
