@@ -64,25 +64,29 @@ const registerUser = async (userData) => {
 
 // Login user
 const loginUser = async (username, password, role) => {
+  logger.info('Login attempt', { username, role });
+
   // Find user
   const user = await User.findOne({ username });
-
   if (!user) {
+    logger.warn('User not found during login', { username });
     throw new Error('Kullanıcı bulunamadı');
   }
 
   // Check if password matches
   const isMatch = await bcrypt.compare(password, user.password);
-
   if (!isMatch) {
+    logger.warn('Invalid password attempt', { username });
     throw new Error('Geçersiz kimlik bilgileri');
   }
 
   // Check if role matches
   if (user.role !== role) {
+    logger.warn('Role mismatch during login', { username, expectedRole: user.role, providedRole: role });
     throw new Error(`${role === 'admin' ? 'Yönetici' : 'Personel'} girişi yapılamadı`);
   }
 
+  logger.info('User authenticated successfully', { username });
   return {
     _id: user._id,
     name: user.name,

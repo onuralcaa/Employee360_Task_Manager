@@ -31,6 +31,13 @@ const registerUser = asyncHandler(async (req, res) => {
 const loginUser = asyncHandler(async (req, res) => {
   const { username, password, role } = req.body;
 
+  // Validate input
+  if (!username || !password || !role) {
+    logger.warn('Login attempt with missing fields', { username, role });
+    res.status(400);
+    throw new Error('Kullanıcı adı, şifre ve rol gereklidir');
+  }
+
   try {
     const user = await userService.loginUser(username, password, role);
     logger.info('User logged in successfully', { username });
