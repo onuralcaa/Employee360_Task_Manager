@@ -1,1 +1,20 @@
-SimpleAuth/backend/.env
+# Logs
+logs/
+*.log
+
+# Dependency directories
+node_modules/
+
+# Environment variables
+*.env
+
+# Build output
+dist/
+
+# System files
+.DS_Store
+Thumbs.db
+
+# IDE specific files
+.vscode/
+.idea/
