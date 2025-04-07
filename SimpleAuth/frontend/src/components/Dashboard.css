@@ -170,3 +170,18 @@
     transform: scale(1);
   }
 }
+
+/* Add responsive styles for Dashboard */
+@media (max-width: 768px) {
+  .dashboard-box {
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
+  }
+}
+
+@media (min-width: 769px) {
+  .dashboard-box {
+    width: 500px;
+  }
+}

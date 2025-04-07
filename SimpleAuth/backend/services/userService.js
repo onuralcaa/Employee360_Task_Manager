@@ -129,10 +129,108 @@ const updateUserProfile = async (userId, userData) => {
   };
 };
 
+// Assign card ID to user
+const assignCardToUser = async (userId, cardId) => {
+  // Check if card is already assigned to another user
+  const existingCard = await User.findOne({ cardId });
+  if (existingCard && existingCard._id.toString() !== userId) {
+    throw new Error('Bu kart numarası başka bir kullanıcıya atanmış');
+  }
+
+  const user = await User.findById(userId);
+  if (!user) {
+    throw new Error('Kullanıcı bulunamadı');
+  }
+
+  user.cardId = cardId;
+  
+  // If not set already, generate an employee ID
+  if (!user.employeeId) {
+    const prefix = 'EMP';
+    const numericPart = String(Math.floor(10000 + Math.random() * 90000));
+    user.employeeId = `${prefix}${numericPart}`;
+  }
+  
+  const updatedUser = await user.save();
+  
+  return {
+    _id: updatedUser._id,
+    name: updatedUser.name,
+    surname: updatedUser.surname,
+    username: updatedUser.username,
+    cardId: updatedUser.cardId,
+    employeeId: updatedUser.employeeId
+  };
+};
+
+// Update user work schedule
+const updateWorkSchedule = async (userId, scheduleData) => {
+  const user = await User.findById(userId);
+  if (!user) {
+    throw new Error('Kullanıcı bulunamadı');
+  }
+
+  // Validate schedule data
+  const { startTime, endTime, workDays } = scheduleData;
+  
+  // Simple validation for time format (HH:MM)
+  const timeRegex = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/;
+  if (startTime && !timeRegex.test(startTime)) {
+    throw new Error('Başlangıç zamanı geçerli bir zaman formatında olmalıdır (HH:MM)');
+  }
+  
+  if (endTime && !timeRegex.test(endTime)) {
+    throw new Error('Bitiş zamanı geçerli bir zaman formatında olmalıdır (HH:MM)');
+  }
+  
+  // Update work schedule fields
+  user.workSchedule = {
+    startTime: startTime || user.workSchedule?.startTime || '09:00',
+    endTime: endTime || user.workSchedule?.endTime || '18:00',
+    workDays: workDays || user.workSchedule?.workDays || [1, 2, 3, 4, 5] // Default: Mon-Fri
+  };
+  
+  // Update department and position if provided
+  if (scheduleData.department) {
+    user.department = scheduleData.department;
+  }
+  
+  if (scheduleData.position) {
+    user.position = scheduleData.position;
+  }
+  
+  const updatedUser = await user.save();
+  
+  return {
+    _id: updatedUser._id,
+    name: updatedUser.name,
+    workSchedule: updatedUser.workSchedule,
+    department: updatedUser.department,
+    position: updatedUser.position
+  };
+};
+
+// Get all users (admin only)
+const getAllUsers = async (filter = {}) => {
+  // Select all fields except password
+  const users = await User.find(filter).select('-password');
+  return users;
+};
+
+// Get users by department
+const getUsersByDepartment = async (department) => {
+  const users = await User.find({ department }).select('-password');
+  return users;
+};
+
 module.exports = {
   registerUser,
   loginUser,
   getUserProfile,
   updateUserProfile,
-  generateToken
+  generateToken,
+  assignCardToUser,
+  updateWorkSchedule,
+  getAllUsers,
+  getUsersByDepartment
 };

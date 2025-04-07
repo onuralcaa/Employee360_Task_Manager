@@ -1,9 +1,11 @@
 import { useAuth } from "../contexts/AuthContext";
 import LoadingSpinner from "./common/LoadingSpinner";
+import { useNavigate } from 'react-router-dom';
 import "./PersonelPage.css";
 
 function PersonelPage() {
   const { user, loading } = useAuth();
+  const navigate = useNavigate();
   
   if (loading) {
     return <LoadingSpinner message="Personel bilgileri yükleniyor..." />;
