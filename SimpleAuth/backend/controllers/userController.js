@@ -71,10 +71,103 @@ const updateUserProfile = asyncHandler(async (req, res) => {
   }
 });
 
+// @desc    Assign card ID to user
+// @route   POST /api/users/:id/assign-card
+// @access  Private (Admin)
+const assignCardToUser = asyncHandler(async (req, res) => {
+  const { cardId } = req.body;
+  
+  if (!cardId) {
+    res.status(400);
+    throw new Error('Kart ID gereklidir');
+  }
+  
+  try {
+    const updatedUser = await userService.assignCardToUser(req.params.id, cardId);
+    res.status(200).json({
+      success: true,
+      message: 'Kart başarıyla atandı',
+      data: updatedUser
+    });
+  } catch (error) {
+    res.status(400);
+    throw new Error(error.message);
+  }
+});
+
+// @desc    Update user work schedule
+// @route   PUT /api/users/:id/work-schedule
+// @access  Private (Admin)
+const updateWorkSchedule = asyncHandler(async (req, res) => {
+  try {
+    const updatedUser = await userService.updateWorkSchedule(req.params.id, req.body);
+    res.status(200).json({
+      success: true,
+      message: 'Çalışma programı güncellendi',
+      data: updatedUser
+    });
+  } catch (error) {
+    res.status(400);
+    throw new Error(error.message);
+  }
+});
+
+// @desc    Get all users
+// @route   GET /api/users
+// @access  Private (Admin)
+const getUsers = asyncHandler(async (req, res) => {
+  try {
+    // Handle optional query parameters
+    const filter = {};
+    
+    if (req.query.department) {
+      filter.department = req.query.department;
+    }
+    
+    if (req.query.hasCard === 'true') {
+      filter.cardId = { $exists: true, $ne: null };
+    } else if (req.query.hasCard === 'false') {
+      filter.cardId = { $exists: false };
+    }
+    
+    const users = await userService.getAllUsers(filter);
+    
+    res.status(200).json({
+      success: true,
+      count: users.length,
+      data: users
+    });
+  } catch (error) {
+    res.status(400);
+    throw new Error(error.message);
+  }
+});
+
+// @desc    Get users by department
+// @route   GET /api/users/department/:department
+// @access  Private (Admin)
+const getUsersByDepartment = asyncHandler(async (req, res) => {
+  try {
+    const users = await userService.getUsersByDepartment(req.params.department);
+    res.status(200).json({
+      success: true,
+      count: users.length,
+      data: users
+    });
+  } catch (error) {
+    res.status(400);
+    throw new Error(error.message);
+  }
+});
+
 module.exports = {
   registerUser,
   loginUser,
   getUserProfile,
   updateUserProfile,
+  assignCardToUser,
+  updateWorkSchedule,
+  getUsers,
+  getUsersByDepartment
 };
 

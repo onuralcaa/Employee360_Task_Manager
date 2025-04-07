@@ -5,6 +5,10 @@ const {
   loginUser,
   getUserProfile,
   updateUserProfile,
+  assignCardToUser,
+  updateWorkSchedule,
+  getUsers,
+  getUsersByDepartment
 } = require('../controllers/userController');
 const { protect, admin } = require('../middleware/authMiddleware');
 
@@ -21,9 +25,12 @@ router.route('/profile')
   .get(protect, getUserProfile) 
   .put(protect, updateUserProfile);
 
-// Admin-only routes (for future features)
-router.get('/all', protect, admin, (req, res) => {
-  res.json({ message: 'Admin route for getting all users' });
-});
+// Admin-only routes
+router.get('/', protect, admin, getUsers);
+router.get('/department/:department', protect, admin, getUsersByDepartment);
+
+// Card and work schedule management (admin only)
+router.post('/:id/assign-card', protect, admin, assignCardToUser);
+router.put('/:id/work-schedule', protect, admin, updateWorkSchedule);
 
 module.exports = router;
