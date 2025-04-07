@@ -10,7 +10,12 @@ import LoadingSpinner from "./common/LoadingSpinner";
 function Login() {
   const [user, setUser] = useState({ username: "", password: "", role: "personel" });
   const navigate = useNavigate();
-  const { login, loading } = useAuth();
+  const { login, loading, isAuthenticated } = useAuth();
+
+  if (isAuthenticated()) {
+    navigate('/dashboard');
+    return null;
+  }
 
   const handleChange = (e) => setUser({ ...user, [e.target.name]: e.target.value });
 
