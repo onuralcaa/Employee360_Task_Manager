@@ -12,7 +12,7 @@ function AdminPanel() {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const response = await axios.get('/api/users/admin/users', {
+        const response = await axios.get('/api/users', {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('token')}`,
           },
