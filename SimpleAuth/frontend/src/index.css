@@ -96,3 +96,38 @@ input, select, textarea {
   background-color: var(--card-background);
   box-shadow: 0 4px 10px var(--shadow-color);
 }
+
+/* Add responsive styles for mobile and desktop */
+@media (max-width: 768px) {
+  body {
+    font-size: 14px;
+  }
+
+  .login-container, .register-container, .dashboard-container, .personel-page-container, .admin-panel-container {
+    padding: 1rem;
+  }
+
+  .login-box, .register-box, .dashboard-box, .personel-card {
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
+  }
+
+  .user-table {
+    font-size: 12px;
+  }
+}
+
+@media (min-width: 769px) {
+  body {
+    font-size: 16px;
+  }
+
+  .login-box, .register-box, .dashboard-box, .personel-card {
+    width: 400px;
+  }
+
+  .user-table {
+    font-size: 14px;
+  }
+}

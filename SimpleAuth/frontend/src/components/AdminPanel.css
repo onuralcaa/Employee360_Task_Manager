@@ -19,3 +19,20 @@
   font-size: 1.2rem;
   text-align: center;
 }
+
+/* Add responsive styles for Admin Panel */
+@media (max-width: 768px) {
+  .admin-panel-container {
+    padding: 1rem;
+  }
+
+  .user-table {
+    font-size: 12px;
+  }
+}
+
+@media (min-width: 769px) {
+  .user-table {
+    font-size: 14px;
+  }
+}

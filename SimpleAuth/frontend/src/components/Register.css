@@ -97,3 +97,18 @@
 .login-button:hover {
   color: var(--secondary-color); /* Use theme variable */
 }
+
+/* Add responsive styles for Register */
+@media (max-width: 768px) {
+  .register-box {
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
+  }
+}
+
+@media (min-width: 769px) {
+  .register-box {
+    width: 350px;
+  }
+}
