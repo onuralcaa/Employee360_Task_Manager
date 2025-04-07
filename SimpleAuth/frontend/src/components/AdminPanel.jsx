@@ -12,7 +12,7 @@ function AdminPanel() {
   const [currentPage, setCurrentPage] = useState(1);
   const [usersPerPage] = useState(10);
   const [showAddUserPopup, setShowAddUserPopup] = useState(false);
-  const [newUser, setNewUser] = useState({ name: '', username: '', email: '', role: 'personel' });
+  const [newUser, setNewUser] = useState({ name: '', surname: '', username: '', email: '', role: 'personel', password: '', number: '', birthdate: '' });
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -43,7 +43,7 @@ function AdminPanel() {
       });
       setUsers([...users, response.data]);
       setShowAddUserPopup(false);
-      setNewUser({ name: '', username: '', email: '', role: 'personel' });
+      setNewUser({ name: '', surname: '', username: '', email: '', role: 'personel', password: '', number: '', birthdate: '' });
     } catch (error) {
       alert('Failed to add user. Please try again.');
     }
@@ -94,6 +94,12 @@ function AdminPanel() {
             />
             <input
               type="text"
+              placeholder="Soyad"
+              value={newUser.surname}
+              onChange={(e) => setNewUser({ ...newUser, surname: e.target.value })}
+            />
+            <input
+              type="text"
               placeholder="Kullanıcı Adı"
               value={newUser.username}
               onChange={(e) => setNewUser({ ...newUser, username: e.target.value })}
@@ -111,6 +117,24 @@ function AdminPanel() {
               <option value="personel">Personel</option>
               <option value="admin">Yönetici</option>
             </select>
+            <input
+              type="password"
+              placeholder="Şifre"
+              value={newUser.password}
+              onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
+            />
+            <input
+              type="text"
+              placeholder="Numara"
+              value={newUser.number}
+              onChange={(e) => setNewUser({ ...newUser, number: e.target.value })}
+            />
+            <input
+              type="date"
+              placeholder="Doğum Tarihi"
+              value={newUser.birthdate}
+              onChange={(e) => setNewUser({ ...newUser, birthdate: e.target.value })}
+            />
             <button onClick={handleAddUser}>Gönder</button>
             <button onClick={() => setShowAddUserPopup(false)}>İptal</button>
           </div>

@@ -33,6 +33,7 @@ export const login = async (credentials) => {
 
 export const register = async (userData) => {
   try {
+    console.log('Register API call with data:', userData);
     return await apiClient.post('/register', userData);
   } catch (error) {
     handleApiError(error, null); // Log error without showing toast

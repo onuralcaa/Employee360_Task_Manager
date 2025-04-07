@@ -34,7 +34,13 @@ function App() {
     <BrowserRouter>
       <ThemeProvider>
         <AuthProvider>
-          <Header />
+          <Header 
+            links={[
+              { path: '/dashboard', label: 'Dashboard' },
+              { path: '/', label: 'Ana Sayfa' }
+            ]}
+            hideOnLoginPage={true}
+          />
           <main>
             <Routes>
               {/* Public routes */}

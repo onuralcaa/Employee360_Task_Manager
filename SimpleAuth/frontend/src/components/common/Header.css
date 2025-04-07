@@ -3,12 +3,23 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 20px;
+  padding: 1rem 2rem;
   background-color: var(--card-background); /* Use theme variable for dark mode compatibility */
   color: var(--text-color); /* Ensure text is readable */
   position: relative;
   z-index: 1;
   box-shadow: 0 4px 6px var(--shadow-color);
+}
+
+.header-left h1 {
+  font-size: 1.8rem;
+  color: var(--text-color);
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
 }
 
 .header-container {
@@ -33,6 +44,22 @@
   color: var(--button-text);
   text-decoration: none;
   font-weight: 500;
+}
+
+/* Beautify the navigation links */
+.header-link {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: var(--primary-color);
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+  border-radius: 5px;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.header-link:hover {
+  background-color: var(--primary-color);
+  color: white;
 }
 
 /* Adjust dashboard and home button alignment */

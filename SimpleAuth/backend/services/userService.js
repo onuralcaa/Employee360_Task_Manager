@@ -20,6 +20,12 @@ const registerUser = async (userData) => {
   const { name, surname, username, email, password, number, birthdate, role } = userData;
 
   try {
+    // Validate password
+    if (!password || password.trim() === '') {
+      logger.error('Password validation failed: Password is empty or undefined', { username });
+      throw new Error('Şifre alanı boş olamaz');
+    }
+
     // Check if user already exists
     const userExists = await User.findOne({ username });
     if (userExists) {
@@ -29,7 +35,16 @@ const registerUser = async (userData) => {
 
     // Hash password
     const salt = await bcrypt.genSalt(10);
+    if (!salt) {
+      logger.error('Failed to generate salt for password hashing', { username });
+      throw new Error('Şifre oluşturulurken bir hata oluştu');
+    }
+
     const hashedPassword = await bcrypt.hash(password, salt);
+    if (!hashedPassword) {
+      logger.error('Failed to hash password', { username });
+      throw new Error('Şifre oluşturulurken bir hata oluştu');
+    }
 
     // Create user
     const user = await User.create({
@@ -58,6 +73,7 @@ const registerUser = async (userData) => {
       throw new Error('Geçersiz kullanıcı verileri');
     }
   } catch (error) {
+    logger.error('Error during user registration', { username, error: error.message });
     ErrorHandler.logError(error);
     throw new Error(ErrorHandler.formatError(error).message);
   }

@@ -6,11 +6,16 @@ import ThemeToggle from './ThemeToggle';
 import { LogoutButton } from './UIButton';
 import { useAuth } from '../../contexts/AuthContext';
 
-function Header({ title = 'Employee360', links = [] }) {
+function Header({ title = 'Employee360', links = [], hideOnLoginPage = false }) {
   const { user } = useAuth();
   const location = useLocation();
 
   const isLoginPage = location.pathname === '/login';
+  const isHomePage = location.pathname === '/';
+
+  if (hideOnLoginPage && (isLoginPage || isHomePage)) {
+    return null;
+  }
 
   return (
     <header className="header">
@@ -40,6 +45,7 @@ Header.propTypes = {
       label: PropTypes.string.isRequired,
     })
   ),
+  hideOnLoginPage: PropTypes.bool,
 };
 
 export default Header;
