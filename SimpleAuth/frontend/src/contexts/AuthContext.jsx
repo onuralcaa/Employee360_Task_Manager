@@ -33,7 +33,7 @@ export const AuthProvider = ({ children }) => {
           });
         }
       } catch (error) {
-        console.error('Error parsing token:', error);
+        console.error('Error parsing token:', error.message, '\nStack Trace:', error.stack);
         localStorage.removeItem('token');
       }
     } else {
@@ -47,7 +47,7 @@ export const AuthProvider = ({ children }) => {
     try {
       return JSON.parse(window.atob(token.split('.')[1]));
     } catch (e) {
-      console.error('Token parsing error:', e);
+      console.error('Token parsing error:', e.message, '\nStack Trace:', e.stack);
       return null;
     }
   };

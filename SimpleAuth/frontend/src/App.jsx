@@ -65,7 +65,7 @@ function App() {
               {/* 404 page */}
               <Route path="*" element={
                 <div className="not-found">
-                  <h1>Employee360 Task Manager</h1>
+                  <h1>Employee360 Görev Yöneticisi</h1>
                   <p>Sayfa bulunamadı. Lütfen <a href="/">giriş sayfasına</a> gidin.</p>
                 </div>
               } />

@@ -1,5 +1,6 @@
 const asyncHandler = require('express-async-handler');
 const userService = require('../services/userService');
+const logger = require('../utils/logger');
 
 /**
  * User Controller - Handles HTTP requests for user-related operations
@@ -11,12 +12,14 @@ const userService = require('../services/userService');
 const registerUser = asyncHandler(async (req, res) => {
   try {
     const user = await userService.registerUser(req.body);
+    logger.info('User registered successfully', { username: user.username });
     res.status(201).json({
       success: true,
       message: 'Kullanıcı kaydı başarılı!',
       ...user
     });
   } catch (error) {
+    logger.error('User registration failed', { error: error.message });
     res.status(400);
     throw new Error(error.message);
   }
@@ -30,12 +33,14 @@ const loginUser = asyncHandler(async (req, res) => {
 
   try {
     const user = await userService.loginUser(username, password, role);
+    logger.info('User logged in successfully', { username });
     res.status(200).json({
       success: true,
       message: 'Giriş başarılı!',
       ...user
     });
   } catch (error) {
+    logger.error('User login failed', { username, error: error.message });
     res.status(401);
     throw new Error(error.message);
   }

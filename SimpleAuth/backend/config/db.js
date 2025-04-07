@@ -25,7 +25,7 @@ const connectDB = async () => {
     
     console.log(`✅ MongoDB bağlantısı başarılı! ${conn.connection.host}`);
   } catch (error) {
-    console.error(`❌ MongoDB bağlantı hatası: ${error.message}`);
+    console.error(`❌ MongoDB connection error: ${error.message}`, '\nStack Trace:', error.stack);
     process.exit(1);
   }
 };

@@ -26,7 +26,7 @@ function Login() {
   return (
     <div className="login-container">
       <form onSubmit={handleSubmit} className="login-box">
-        <h1>Personel360</h1>
+        <h1>Çalışan360</h1>
         
         {/* Rol Seçimi */}
         <div className="role-selection">

@@ -71,36 +71,36 @@ function AdminPanel() {
 
   return (
     <div className="admin-panel-container">
-      <h1>Admin Panel</h1>
+      <h1>Yönetim Paneli</h1>
       <input
         type="text"
-        placeholder="Search users..."
+        placeholder="Kullanıcıları Ara..."
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
         className="search-bar"
       />
       <button className="add-user-button" onClick={() => setShowAddUserPopup(true)}>
-        Add User
+        Kullanıcı Ekle
       </button>
       {showAddUserPopup && (
         <div className="popup">
           <div className="popup-content">
-            <h2>Add New User</h2>
+            <h2>Yeni Kullanıcı Ekle</h2>
             <input
               type="text"
-              placeholder="Name"
+              placeholder="Ad"
               value={newUser.name}
               onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
             />
             <input
               type="text"
-              placeholder="Username"
+              placeholder="Kullanıcı Adı"
               value={newUser.username}
               onChange={(e) => setNewUser({ ...newUser, username: e.target.value })}
             />
             <input
               type="email"
-              placeholder="Email"
+              placeholder="E-posta"
               value={newUser.email}
               onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
             />
@@ -109,21 +109,21 @@ function AdminPanel() {
               onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
             >
               <option value="personel">Personel</option>
-              <option value="admin">Admin</option>
+              <option value="admin">Yönetici</option>
             </select>
-            <button onClick={handleAddUser}>Submit</button>
-            <button onClick={() => setShowAddUserPopup(false)}>Cancel</button>
+            <button onClick={handleAddUser}>Gönder</button>
+            <button onClick={() => setShowAddUserPopup(false)}>İptal</button>
           </div>
         </div>
       )}
       <table className="user-table">
         <thead>
           <tr>
-            <th>Name</th>
-            <th>Username</th>
-            <th>Email</th>
-            <th>Role</th>
-            <th>Actions</th>
+            <th>Ad</th>
+            <th>Kullanıcı Adı</th>
+            <th>E-posta</th>
+            <th>Rol</th>
+            <th>İşlemler</th>
           </tr>
         </thead>
         <tbody>
@@ -134,8 +134,8 @@ function AdminPanel() {
               <td>{user.email}</td>
               <td>{user.role}</td>
               <td>
-                <button className="edit-button">Edit</button>
-                <button className="delete-button">Delete</button>
+                <button className="edit-button">Düzenle</button>
+                <button className="delete-button">Sil</button>
               </td>
             </tr>
           ))}

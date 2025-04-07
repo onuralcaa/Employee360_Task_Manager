@@ -27,7 +27,7 @@ const protect = asyncHandler(async (req, res, next) => {
 
       next();
     } catch (error) {
-      console.error(error);
+      console.error('Token verification failed:', error.message, '\nStack Trace:', error.stack);
       res.status(401);
       throw new Error('Yetkisiz erişim, token geçersiz');
     }

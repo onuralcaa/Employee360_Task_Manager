@@ -12,16 +12,16 @@ const Header = () => {
   return (
     <header className="header">
       <div className="header-container">
-        <h1 className="logo">Employee360</h1>
-        <nav className="nav-menu">
-          <Link to="/dashboard">Dashboard</Link>
-          <Link to="/">
-            <FaHome /> Home
-          </Link>
-          {location.pathname !== '/login' && (
+        <h1 className="logo">Çalışan360</h1>
+        {location.pathname !== '/login' && (
+          <nav className="nav-menu">
+            <Link to="/dashboard">Gösterge Paneli</Link>
+            <Link to="/">
+              <FaHome /> Ana Sayfa
+            </Link>
             <button onClick={logout} className="logout-button">Çıkış Yap</button>
-          )}
-        </nav>
+          </nav>
+        )}
         <div className="theme-toggle-container">
           <ThemeToggle className="theme-toggle" />
         </div>

@@ -1,6 +1,7 @@
 const User = require('../models/userModel');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt'); // Changed from bcryptjs to bcrypt
+const logger = require('../utils/logger'); // Added logger
 
 /**
  * User Service - Handles business logic for user-related operations
@@ -17,40 +18,47 @@ const generateToken = (id, role, name, username) => {
 const registerUser = async (userData) => {
   const { name, surname, username, email, password, number, birthdate, role } = userData;
 
-  // Check if user already exists
-  const userExists = await User.findOne({ username });
-  if (userExists) {
-    throw new Error('Bu kullanıcı adı zaten alınmış!');
-  }
+  try {
+    // Check if user already exists
+    const userExists = await User.findOne({ username });
+    if (userExists) {
+      logger.warn('Attempt to register with an existing username', { username });
+      throw new Error('Bu kullanıcı adı zaten alınmış!');
+    }
 
-  // Hash password
-  const salt = await bcrypt.genSalt(10);
-  const hashedPassword = await bcrypt.hash(password, salt);
+    // Hash password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
 
-  // Create user
-  const user = await User.create({
-    name,
-    surname,
-    username,
-    email,
-    password: hashedPassword,
-    number,
-    birthdate,
-    role: role || 'personel',
-  });
+    // Create user
+    const user = await User.create({
+      name,
+      surname,
+      username,
+      email,
+      password: hashedPassword,
+      number,
+      birthdate,
+      role: role || 'personel',
+    });
 
-  if (user) {
-    return {
-      _id: user._id,
-      name: user.name,
-      surname: user.surname,
-      username: user.username,
-      email: user.email,
-      role: user.role,
-      token: generateToken(user._id, user.role, user.name, user.username),
-    };
-  } else {
-    throw new Error('Geçersiz kullanıcı verileri');
+    if (user) {
+      logger.info('User created successfully', { username });
+      return {
+        _id: user._id,
+        name: user.name,
+        surname: user.surname,
+        username: user.username,
+        email: user.email,
+        role: user.role,
+        token: generateToken(user._id, user.role, user.name, user.username),
+      };
+    } else {
+      throw new Error('Geçersiz kullanıcı verileri');
+    }
+  } catch (error) {
+    logger.error('Error during user registration', { username, error: error.message });
+    throw error;
   }
 };
 
