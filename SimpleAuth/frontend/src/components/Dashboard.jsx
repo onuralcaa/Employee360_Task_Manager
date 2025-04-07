@@ -5,10 +5,19 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useAuth } from "../contexts/AuthContext";
 import LoadingSpinner from "./common/LoadingSpinner";
+import { LogoutButton } from './common/UIButton';
 
 function Dashboard() {
   const navigate = useNavigate();
   const { user, logout, loading } = useAuth();
+
+  const handleNavigation = (path) => {
+    if (user?.role === "admin" && path === "/personel") {
+      alert("Yönetici olarak bu sayfaya erişemezsiniz.");
+      return;
+    }
+    navigate(path);
+  };
 
   // If still loading, show loading spinner
   if (loading) {
@@ -19,14 +28,6 @@ function Dashboard() {
     logout();
   };
 
-  const handleNavigation = (path) => {
-    if (user?.role === "admin" && path === "/personel") {
-      alert("Yönetici olarak bu sayfaya erişemezsiniz.");
-      return;
-    }
-    navigate(path);
-  };
-
   if (user?.role === "admin") {
     return (
       <div className="dashboard-container">
@@ -35,10 +36,6 @@ function Dashboard() {
           <p>Yönetici olarak giriş yaptınız. Yönetim paneline erişebilirsiniz.</p>
           <button onClick={() => handleNavigation("/admin")} className="primary-button">
             Yönetim Paneline Git
-          </button>
-          <button onClick={handleLogout} className="logout-button">
-            <FaSignOutAlt className="logout-icon" />
-            Çıkış Yap
           </button>
         </div>
         <ToastContainer />
@@ -53,10 +50,6 @@ function Dashboard() {
         <p>Başarıyla giriş yaptınız. Şimdi uygulamayı kullanabilirsiniz.</p>
         <button onClick={() => handleNavigation("/personel")} className="primary-button">
           Personel Sayfasına Git
-        </button>
-        <button onClick={handleLogout} className="logout-button">
-          <FaSignOutAlt className="logout-icon" />
-          Çıkış Yap
         </button>
       </div>
       <ToastContainer />

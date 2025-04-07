@@ -1,0 +1,119 @@
+/* Header styles */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 20px;
+  background-color: var(--card-background); /* Use theme variable for dark mode compatibility */
+  color: var(--text-color); /* Ensure text is readable */
+  position: relative;
+  z-index: 1;
+  box-shadow: 0 4px 6px var(--shadow-color);
+}
+
+.header-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  max-width: 1200px;
+}
+
+.logo {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.nav-menu {
+  display: flex;
+  gap: 15px;
+}
+
+.nav-menu a {
+  color: var(--button-text);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+/* Adjust dashboard and home button alignment */
+.header .nav-menu a {
+  display: flex;
+  align-items: center; /* Vertically align text and icons */
+  padding: 0 10px; /* Add consistent padding */
+  height: 40px; /* Match height with other buttons */
+}
+
+.nav-menu a:hover {
+  text-decoration: underline;
+}
+
+/* Add styles for ThemeToggle in the header */
+.theme-toggle-container {
+  position: absolute;
+  top: 50%;
+  right: 20px;
+  transform: translateY(-50%);
+  z-index: 2; /* Ensures it is above other elements */
+}
+
+.theme-toggle {
+  cursor: pointer;
+  margin-left: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--secondary-color);
+  border: none;
+  border-radius: 50%;
+  width: 2rem;
+  height: 2rem;
+  color: var(--button-text);
+  box-shadow: 0 2px 4px var(--shadow-color);
+  transition: background-color 0.3s ease;
+}
+
+.theme-toggle:hover {
+  background-color: var(--hover-color);
+}
+
+/* Update the logout button styles to make it consistent with the header */
+.logout-button {
+  background-color: var(--primary-color); /* Use theme variable */
+  color: var(--button-text); /* Use theme variable */
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  font-size: 0.9rem; /* Slightly smaller font size */
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  height: 30px; /* Further reduce height */
+  line-height: 30px; /* Center text vertically */
+  padding: 0 8px; /* Adjust padding */
+  display: flex;
+  align-items: center;
+  gap: 5px; /* Add spacing between icon and text */
+}
+
+.logout-button::before {
+  content: '\21B5'; /* Unicode for a return/enter arrow symbol */
+  font-family: inherit; /* Use the default font */
+  font-size: 1rem; /* Match the size with the text */
+}
+
+.logout-button:hover {
+  background-color: var(--secondary-color); /* Use theme variable */
+}
+
+/* Adjust button sizing and placement for consistency */
+.header .logout-button {
+  margin-left: auto; /* Push the button to the far right */
+  height: 40px; /* Ensure consistent height */
+  line-height: 40px; /* Center text vertically */
+  padding: 0 15px; /* Adjust padding for better spacing */
+}
+
+.header .theme-toggle {
+  margin-right: 15px; /* Add spacing between theme toggle and logout button */
+  height: 40px; /* Match height with logout button */
+  width: 40px; /* Ensure square shape */
+}

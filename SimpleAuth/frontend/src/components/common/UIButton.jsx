@@ -1,5 +1,7 @@
 import React from 'react';
 import './UIButton.css';
+import { useAuth } from '../../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 /**
  * Reusable button component with various styles
@@ -32,6 +34,22 @@ const UIButton = ({
       {!isLoading && icon && <span className="button-icon">{icon}</span>}
       <span className="button-text">{children}</span>
     </button>
+  );
+};
+
+export const LogoutButton = () => {
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
+
+  return (
+    <UIButton variant="danger" onClick={handleLogout}>
+      Çıkış Yap
+    </UIButton>
   );
 };
 

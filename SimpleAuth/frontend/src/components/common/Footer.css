@@ -1,0 +1,13 @@
+/* Footer styles */
+.footer {
+  background-color: var(--secondary-color);
+  color: var(--button-text);
+  padding: 1rem;
+  text-align: center;
+  box-shadow: 0 -4px 6px var(--shadow-color);
+}
+
+.footer-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
