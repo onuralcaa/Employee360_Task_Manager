@@ -1,7 +1,6 @@
 // Required imports
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
-import path from 'path'
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
 
 // Export Vite configuration
 export default defineConfig({
@@ -11,20 +10,20 @@ export default defineConfig({
   // Development server settings
   server: {
     port: 3000,
-    open: true,
     proxy: {
       '/api': {
         target: 'http://localhost:5000',
         changeOrigin: true,
-        secure: false
+        secure: false,
+        ws: true
       }
     }
   },
   
-  // Path aliases
+  // Module resolution settings
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src')
+      '@': '/src'
     }
   }
-})
+});

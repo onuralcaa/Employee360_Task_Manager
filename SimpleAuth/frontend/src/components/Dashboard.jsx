@@ -1,58 +1,94 @@
-import { useNavigate } from "react-router-dom";
-import "./Dashboard.css";
-import { FaSignOutAlt } from "react-icons/fa";
-import { ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import { useAuth } from "../contexts/AuthContext";
-import LoadingSpinner from "./common/LoadingSpinner";
-import { LogoutButton } from './common/UIButton';
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '../contexts/AuthContext';
+import { Card, Button, Alert } from './common/UIComponents';
+import { EmptyState } from './common/EmptyState';
+import './Dashboard.css';
 
 function Dashboard() {
-  const navigate = useNavigate();
-  const { user, logout, loading } = useAuth();
+  const { user, logout } = useAuth();
+  const [tasks, setTasks] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  const handleNavigation = (path) => {
-    if (user?.role === "admin" && path === "/personel") {
-      alert("Yönetici olarak bu sayfaya erişemezsiniz.");
-      return;
+  useEffect(() => {
+    const fetchTasks = async () => {
+      try {
+        setLoading(true);
+        // TODO: Implement task fetching from API
+        // For now, using mock data
+        const mockTasks = [
+          { id: 1, title: 'Complete project proposal', status: 'pending' },
+          { id: 2, title: 'Review team presentations', status: 'completed' }
+        ];
+        setTasks(mockTasks);
+      } catch (err) {
+        setError('Failed to fetch tasks');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTasks();
+  }, []);
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } catch (err) {
+      setError('Failed to log out');
     }
-    navigate(path);
   };
 
-  // If still loading, show loading spinner
   if (loading) {
-    return <LoadingSpinner message="Yükleniyor..." />;
-  }
-
-  const handleLogout = () => {
-    logout();
-  };
-
-  if (user?.role === "admin") {
-    return (
-      <div className="dashboard-container">
-        <div className="dashboard-box">
-          <h1>Yönetici Girişi Başarılı! 👑</h1>
-          <p>Yönetici olarak giriş yaptınız. Yönetim paneline erişebilirsiniz.</p>
-          <button onClick={() => handleNavigation("/admin")} className="primary-button">
-            Yönetim Paneline Git
-          </button>
-        </div>
-        <ToastContainer />
-      </div>
-    );
+    return <div className="dashboard-loading">Loading...</div>;
   }
 
   return (
     <div className="dashboard-container">
-      <div className="dashboard-box">
-        <h1>Personel Girişi Başarılı! 🎉</h1>
-        <p>Başarıyla giriş yaptınız. Şimdi uygulamayı kullanabilirsiniz.</p>
-        <button onClick={() => handleNavigation("/personel")} className="primary-button">
-          Personel Sayfasına Git
-        </button>
+      <div className="dashboard-header">
+        <h1>Welcome, {user?.firstName || 'User'}!</h1>
+        <Button variant="secondary" onClick={handleLogout}>
+          Logout
+        </Button>
       </div>
-      <ToastContainer />
+
+      {error && (
+        <Alert type="error" onDismiss={() => setError('')}>
+          {error}
+        </Alert>
+      )}
+
+      <div className="dashboard-content">
+        <Card title="Your Tasks" className="tasks-card">
+          {tasks.length === 0 ? (
+            <EmptyState
+              title="No tasks found"
+              description="You don't have any tasks assigned yet."
+              actionText="Refresh"
+              onAction={() => window.location.reload()}
+            />
+          ) : (
+            <div className="tasks-list">
+              {tasks.map(task => (
+                <div key={task.id} className={`task-item ${task.status}`}>
+                  <span className="task-title">{task.title}</span>
+                  <span className="task-status">{task.status}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </Card>
+
+        {user?.role === 'manager' && (
+          <Card title="Management Controls" className="management-card">
+            <div className="management-actions">
+              <Button variant="primary">Create Task</Button>
+              <Button variant="secondary">View Reports</Button>
+              <Button variant="outline">Manage Team</Button>
+            </div>
+          </Card>
+        )}
+      </div>
     </div>
   );
 }

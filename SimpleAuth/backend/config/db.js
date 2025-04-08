@@ -1,32 +1,48 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
+const { logger } = require('../utils/logger');
 
 const connectDB = async () => {
   try {
     const conn = await mongoose.connect(process.env.MONGO_URI, {
-      // These options ensure proper connection handling with MongoDB Atlas
       useNewUrlParser: true,
       useUnifiedTopology: true,
+      serverSelectionTimeoutMS: 5000,
+      socketTimeoutMS: 45000,
     });
     
-    // Configure MongoDB for attendance tracking optimization
-    // These settings help with high-frequency write operations like card scans
-    mongoose.set('autoIndex', true);
-    
-    // Enable read and write concerns for attendance data reliability
-    if (conn.connection.db) {
-      conn.connection.db.admin().command({ 
-        setParameter: 1, 
-        internalQueryExecMaxBlockingSortBytes: 33554432 
-      }).catch(err => {
-        // This is optional and might not work in some Atlas tiers
-        console.log('Note: Optional MongoDB optimization not applied');
-      });
-    }
-    
-    console.log(`✅ MongoDB bağlantısı başarılı! ${conn.connection.host}`);
+    logger.info(`MongoDB Connected: ${conn.connection.host}`);
+
+    // Handle connection events
+    mongoose.connection.on('error', (err) => {
+      logger.error('MongoDB connection error:', err);
+    });
+
+    mongoose.connection.on('disconnected', () => {
+      logger.warn('MongoDB disconnected. Attempting to reconnect...');
+    });
+
+    mongoose.connection.on('reconnected', () => {
+      logger.info('MongoDB reconnected');
+    });
+
+    // Handle process termination
+    process.on('SIGINT', async () => {
+      try {
+        await mongoose.connection.close();
+        logger.info('MongoDB connection closed through app termination');
+        process.exit(0);
+      } catch (err) {
+        logger.error('Error during MongoDB connection closure:', err);
+        process.exit(1);
+      }
+    });
+
   } catch (error) {
-    console.error(`❌ MongoDB connection error: ${error.message}`, '\nStack Trace:', error.stack);
-    process.exit(1);
+    logger.error(`MongoDB connection error: ${error.message}`);
+    // Exit with failure in production, but allow retries in development
+    if (process.env.NODE_ENV === 'production') {
+      process.exit(1);
+    }
   }
 };
 

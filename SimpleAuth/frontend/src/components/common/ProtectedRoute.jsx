@@ -1,41 +1,19 @@
 import { Navigate, Outlet } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { LoadingSpinner, Alert } from './UIComponents';
 
-// Component to protect routes that require authentication
-export const ProtectedRoute = ({ roleRequired }) => {
-  const { user, loading, isAuthenticated } = useAuth();
-  
-  // Show loading state while checking authentication
-  if (loading) {
-    return <div className="loading-container">Loading...</div>;
-  }
-  
-  // Redirect to login if not authenticated
-  if (!isAuthenticated()) {
-    return <Navigate to="/login" replace />;
-  }
-  
-  // Check role if required
-  if (roleRequired && user.role !== roleRequired) {
-    return <Navigate to="/unauthorized" replace />;
-  }
-  
-  // Render the protected content
-  return <Outlet />;
-};
+function ProtectedRoute() {
+  const { isAuthenticated, loading, error } = useAuth();
 
-// Component to redirect authenticated users away from auth pages
-export const AuthRoute = () => {
-  const { isAuthenticated, loading } = useAuth();
-  
   if (loading) {
-    return <div className="loading-container">Loading...</div>;
+    return <LoadingSpinner />;
   }
-  
-  // Redirect to dashboard if already authenticated
-  if (isAuthenticated()) {
-    return <Navigate to="/dashboard" replace />;
+
+  if (error) {
+    return <Alert type="error" message={error} />;
   }
-  
-  return <Outlet />;
-};
+
+  return isAuthenticated() ? <Outlet /> : <Navigate to="/login" />;
+}
+
+export default ProtectedRoute;

@@ -3,30 +3,37 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
-  background-color: var(--background-color);
+  min-height: calc(100vh - var(--header-height) - var(--footer-height));
+  padding: var(--spacing-xl);
+  background-color: var(--background-secondary);
 }
 
 /* Login kutusu */
-.login-box {
-  background: var(--card-background);
-  padding: 30px;
-  border-radius: 10px;
-  box-shadow: 0 4px 10px var(--shadow-color);
-  text-align: center;
-  width: 350px;
+.login-form {
+  width: 100%;
+  max-width: 400px;
+  background-color: var(--background-primary);
+  padding: var(--spacing-xl);
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--border-color);
+}
+
+.login-container .card {
+  width: 100%;
+  max-width: 400px;
 }
 
 /* Başlık */
-.login-box h2 {
-  margin-bottom: 20px;
-  font-size: 24px;
-  color: var(--text-color);
+.login-form h1 {
+  text-align: center;
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-xl);
 }
 
 /* Input groups for form validation */
 .input-group {
-  margin-bottom: 15px;
+  margin-bottom: var(--spacing-md);
   width: 100%;
   text-align: left;
 }
@@ -80,7 +87,14 @@
   right: 10px;
   cursor: pointer;
   font-size: 18px;
-  color: var(--text-color);
+  color: var(--text-secondary);
+  background: none;
+  border: none;
+  padding: 0;
+}
+
+.toggle-password:hover {
+  color: var(--primary-color);
 }
 
 /* Giriş butonu */
@@ -101,45 +115,64 @@
   background-color: var(--secondary-color); /* Use theme variable */
 }
 
+.login-button {
+  width: 100%;
+  margin-top: var(--spacing-lg);
+}
+
 /* Kayıt Ol Linki */
 .register-link {
-  margin-top: 15px;
-  font-size: 14px;
-  color: var(--text-color);
+  margin-top: var(--spacing-lg);
   text-align: center;
+  color: var(--text-secondary);
 }
 
-/* Kayıt Ol Butonu */
-.register-button {
-  color: var(--primary-color); /* Use theme variable */
-  font-weight: bold;
+.register-link span {
+  color: var(--primary-color);
   cursor: pointer;
-  transition: color 0.3s;
+  transition: color var(--transition-fast);
 }
 
-.register-button:hover {
-  color: var(--secondary-color); /* Use theme variable */
+.register-link span:hover {
+  color: var(--primary-dark);
+}
+
+.login-footer {
+  margin-top: var(--spacing-xl);
+  text-align: center;
+  color: var(--text-secondary);
+}
+
+.login-footer a {
+  color: var(--primary-color);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color var(--transition-fast);
+}
+
+.login-footer a:hover {
+  color: var(--primary-dark);
 }
 
 .role-selection {
   display: flex;
   justify-content: center;
-  gap: 25px; /* Butonlar arasında boşluk */
-  margin-bottom: 15px;
+  gap: var(--spacing-lg); /* Butonlar arasında boşluk */
+  margin: var(--spacing-lg) 0;
 }
 
 .role-selection label {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 10px 20px;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-lg);
   border: 2px solid var(--border-color);
-  border-radius: 8px;
+  border-radius: var(--border-radius-sm);
   cursor: pointer;
   font-weight: bold;
-  transition: all 0.3s ease;
-  background-color: var(--button-background);
-  color: var(--button-text);
+  transition: all var(--transition-fast);
+  background-color: var(--background-primary);
+  color: var(--text-primary);
 }
 
 .role-selection input {
@@ -147,13 +180,20 @@
 }
 
 .role-selection label:hover {
-  background-color: var(--button-hover-background);
+  border-color: var(--primary-color);
+  background-color: var(--background-secondary);
 }
 
-.role-selection input:checked + label {
-  background-color: var(--primary-color); /* Use theme variable */
-  color: var(--button-text); /* Use theme variable */
-  border-color: var(--primary-color); /* Use theme variable */
+.role-selection input[type="radio"] {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+}
+
+.role-selection input[type="radio"]:checked + label {
+  border-color: var(--primary-color);
+  background-color: var(--primary-light);
+  color: var(--primary-color);
 }
 
 /* Add responsive styles for Login */
@@ -162,6 +202,12 @@
     width: 100%;
     max-width: 400px;
     margin: 0 auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .login-container {
+    padding: var(--spacing-md);
   }
 }
 

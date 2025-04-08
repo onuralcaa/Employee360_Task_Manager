@@ -1,46 +1,100 @@
 const express = require('express');
 const router = express.Router();
-const {
-  registerUser,
-  loginUser,
-  getUserProfile,
-  updateUserProfile,
-  assignCardToUser,
-  updateWorkSchedule,
-  getUsers,
-  getUsersByDepartment
-} = require('../controllers/userController');
-const { protect, admin } = require('../middleware/authMiddleware');
-
-/**
- * User Routes
- */
+const auth = require('../middleware/authMiddleware');
+const userService = require('../services/userService');
+const { handleError } = require('../utils/logger');
+const { validateSchema, validateId, validateQueryParams } = require('../middleware/validationMiddleware');
+const { registerSchema, loginSchema, updateProfileSchema } = require('../utils/validationSchemas');
 
 // Public routes
-router.post('/register', registerUser);
-router.post('/login', loginUser);
+router.post('/register', 
+  validateSchema(registerSchema),
+  async (req, res) => {
+    try {
+      const user = await userService.registerUser(req.body);
+      res.status(201).json({
+        success: true,
+        data: user
+      });
+    } catch (error) {
+      res.status(error.status || 400).json(handleError(error));
+    }
+});
 
-// Protected routes 
-router.route('/profile')
-  .get(protect, getUserProfile) 
-  .put(protect, updateUserProfile);
+router.post('/login',
+  validateSchema(loginSchema),
+  async (req, res) => {
+    try {
+      const { username, password } = req.body;
+      const user = await userService.loginUser(username, password);
+      res.json({
+        success: true,
+        data: user
+      });
+    } catch (error) {
+      res.status(error.status || 401).json(handleError(error));
+    }
+});
 
-// Admin-only routes
-router.get('/', protect, admin, getUsers);
-router.get('/department/:department', protect, admin, getUsersByDepartment);
+// Protected routes
+router.get('/profile',
+  auth(),
+  async (req, res) => {
+    try {
+      const user = await userService.getUserById(req.user.id);
+      res.json({
+        success: true,
+        data: user
+      });
+    } catch (error) {
+      res.status(error.status || 400).json(handleError(error));
+    }
+});
 
-// Card and work schedule management (admin only)
-router.post('/:id/assign-card', protect, admin, assignCardToUser);
-router.put('/:id/work-schedule', protect, admin, updateWorkSchedule);
+router.put('/profile',
+  auth(),
+  validateSchema(updateProfileSchema),
+  async (req, res) => {
+    try {
+      const user = await userService.updateUser(req.user.id, req.body);
+      res.json({
+        success: true,
+        data: user
+      });
+    } catch (error) {
+      res.status(error.status || 400).json(handleError(error));
+    }
+});
 
-// Add a new route to fetch all users for the admin panel
-router.get('/admin/users', protect, admin, async (req, res) => {
-  try {
-    const users = await User.find({}).select('-password'); // Exclude passwords
-    res.status(200).json({ success: true, data: users });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
+// Admin routes
+router.get('/users',
+  auth('admin'),
+  validateQueryParams(['role', 'department', 'isActive']),
+  async (req, res) => {
+    try {
+      const users = await userService.getUsers(req.query);
+      res.json({
+        success: true,
+        data: users
+      });
+    } catch (error) {
+      res.status(error.status || 400).json(handleError(error));
+    }
+});
+
+router.get('/users/:id',
+  auth('admin'),
+  validateId,
+  async (req, res) => {
+    try {
+      const user = await userService.getUserById(req.params.id);
+      res.json({
+        success: true,
+        data: user
+      });
+    } catch (error) {
+      res.status(error.status || 400).json(handleError(error));
+    }
 });
 
 module.exports = router;

@@ -1,149 +1,116 @@
-// Context for managing authentication state across the application
-import { createContext, useContext, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { login as apiLogin, register as apiRegister } from '../api/api';
-import { toast } from 'react-toastify';
+import React, { createContext, useState, useContext, useEffect } from 'react';
+import { auth } from '../api/api';
+import { storage, handleApiError } from '../utils/helpers';
 
-// Create the auth context
 const AuthContext = createContext(null);
 
-// Custom hook for using the auth context
-export const useAuth = () => useContext(AuthContext);
-
-// Auth provider component to wrap the application
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
+  const [error, setError] = useState(null);
 
-  // Check if user is logged in on initial load
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
+    const initAuth = async () => {
       try {
-        // Parse the JWT token to get user info
-        const parsedToken = parseJwt(token);
-        if (parsedToken) {
-          console.log('Found token on load, parsed data:', parsedToken);
-          setUser({
-            name: parsedToken.name,
-            role: parsedToken.role,
-            username: parsedToken.username,
-            // Add other user properties as needed
-          });
+        const userData = storage.get('user');
+        const token = storage.get('token');
+        
+        if (userData && token) {
+          // Verify token is still valid
+          const response = await auth.getProfile();
+          if (response.data) {
+            setUser(userData);
+          } else {
+            throw new Error('Session expired');
+          }
         }
       } catch (error) {
-        console.error('Error parsing token:', error.message, '\nStack Trace:', error.stack);
-        localStorage.removeItem('token');
+        storage.clear();
+        setError(handleApiError(error));
+      } finally {
+        setLoading(false);
       }
-    } else {
-      console.log('No token found on initial load');
-    }
-    setLoading(false);
+    };
+
+    initAuth();
   }, []);
 
-  // Parse JWT function
-  const parseJwt = (token) => {
+  const login = async ({ username, password }) => {
     try {
-      return JSON.parse(window.atob(token.split('.')[1]));
-    } catch (e) {
-      console.error('Token parsing error:', e.message, '\nStack Trace:', e.stack);
-      return null;
-    }
-  };
-
-  // Login function
-  const login = async (credentials) => {
-    setLoading(true);
-    console.log('Login attempt with:', { ...credentials, password: '****' });
-    
-    try {
-      const response = await apiLogin(credentials);
-      console.log('Login API response:', response);
-      
-      if (!response.data) {
-        throw new Error('No data received from login API');
-      }
-      
-      const { token } = response.data;
-      
-      if (!token) {
-        throw new Error('No token received in login response');
-      }
-      
-      // Store token in localStorage
-      localStorage.setItem('token', token);
-      
-      // Set user state
-      const parsedToken = parseJwt(token);
-      console.log('Parsed token data:', parsedToken);
-      
-      if (!parsedToken) {
-        throw new Error('Failed to parse token data');
-      }
-      
-      setUser({
-        name: parsedToken.name,
-        role: parsedToken.role,
-        username: parsedToken.username,
-      });
-      
-      toast.success(`${response.data.message || 'Login successful!'}`, { autoClose: 2000 });
-      
-      // Navigate immediately instead of using setTimeout
-      navigate('/dashboard');
+      setError(null);
+      const response = await auth.login({ username, password });
+      const { token, ...userData } = response.data;
+      storage.set('token', token);
+      storage.set('user', userData);
+      setUser(userData);
       return { success: true };
     } catch (error) {
-      console.error('Login Error:', error);
-      console.error('Error details:', error.response?.data || error.message);
-      
-      const errorMessage = error.response?.data?.message || 'Giriş başarısız! Lütfen bilgilerinizi kontrol edin.';
-      toast.error(errorMessage);
-      return { success: false, message: errorMessage };
-    } finally {
-      setLoading(false);
+      const message = handleApiError(error);
+      setError(message);
+      return { success: false, message };
     }
   };
 
-  // Register function
   const register = async (userData) => {
-    setLoading(true);
     try {
-      await apiRegister(userData);
-      toast.success('Kayıt başarılı!', { autoClose: 2000 });
-      setTimeout(() => navigate('/login'), 2000);
+      setError(null);
+      await auth.register(userData);
       return { success: true };
     } catch (error) {
-      const errorMessage = error.response?.data?.message || 'Kayıt başarısız! Lütfen bilgilerinizi kontrol edin.';
-      toast.error(errorMessage);
-      return { success: false, message: errorMessage };
-    } finally {
-      setLoading(false);
+      const message = handleApiError(error);
+      setError(message);
+      return { success: false, message };
     }
   };
 
-  // Logout function
+  const updateProfile = async (profileData) => {
+    try {
+      setError(null);
+      const response = await auth.updateProfile(profileData);
+      const updatedUser = response.data;
+      storage.set('user', updatedUser);
+      setUser(updatedUser);
+      return { success: true };
+    } catch (error) {
+      const message = handleApiError(error);
+      setError(message);
+      return { success: false, message };
+    }
+  };
+
   const logout = () => {
-    localStorage.removeItem('token');
+    storage.clear();
     setUser(null);
-    toast.success('Çıkış yapıldı!', { autoClose: 2000 });
-    setTimeout(() => navigate('/login'), 2000);
+    setError(null);
   };
 
-  // Check if user is authenticated
-  const isAuthenticated = () => {
-    return !!user;
-  };
+  const clearError = () => setError(null);
 
-  // Context value
+  const isAuthenticated = () => !!user;
+
   const value = {
     user,
-    loading,
     login,
-    register,
     logout,
-    isAuthenticated
+    register,
+    updateProfile,
+    isAuthenticated,
+    loading,
+    error,
+    clearError
   };
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={value}>
+      {children}
+    </AuthContext.Provider>
+  );
+};
+
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
 };

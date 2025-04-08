@@ -2,7 +2,8 @@ const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const connectDB = require('./config/db');
-const { notFound, errorHandler } = require('./middleware/errorMiddleware');
+const userRoutes = require('./routes/userRoutes');
+const { logger, handleError } = require('./utils/logger');
 
 // Load environment variables
 dotenv.config();
@@ -16,28 +17,48 @@ const app = express();
 // Middleware
 app.use(cors());
 app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+
+// Request logging middleware
+app.use((req, res, next) => {
+  logger.info(`${req.method} ${req.originalUrl}`, {
+    ip: req.ip,
+    userAgent: req.get('user-agent')
+  });
+  next();
+});
 
 // Routes
-app.use('/api/users', require('./routes/userRoutes'));
-app.use('/api/attendance', require('./routes/attendanceRoutes'));
-app.use('/api/card-readers', require('./routes/cardReaderRoutes'));
+app.use('/api/users', userRoutes);
 
 // Health check route
-app.get('/', (req, res) => {
+app.get('/health', (req, res) => {
   res.json({
-    message: 'Employee360 Task Manager API is running',
-    version: '1.0.0',
-    status: 'ok'
+    success: true,
+    data: {
+      status: 'healthy',
+      timestamp: new Date(),
+      environment: process.env.NODE_ENV,
+      version: process.env.npm_package_version || '1.0.0'
+    }
   });
 });
 
-// Error handling middleware
-app.use(notFound);
-app.use(errorHandler);
+// 404 handler
+app.use((req, res) => {
+  res.status(404).json({
+    success: false,
+    message: `Route ${req.originalUrl} not found`
+  });
+});
+
+// Global error handler
+app.use((err, req, res, next) => {
+  const errorResponse = handleError(err);
+  res.status(errorResponse.status).json(errorResponse);
+});
 
 // Start the server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-  console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
+  logger.info(`Server running on port ${PORT} in ${process.env.NODE_ENV || 'development'} mode`);
 });

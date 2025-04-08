@@ -1,51 +1,43 @@
 import React from 'react';
-import PropTypes from 'prop-types';
-import './Header.css';
 import { Link, useLocation } from 'react-router-dom';
-import ThemeToggle from './ThemeToggle';
-import { LogoutButton } from './UIButton';
 import { useAuth } from '../../contexts/AuthContext';
+import './Header.css';
 
-function Header({ title = 'Employee360', links = [], hideOnLoginPage = false }) {
-  const { user } = useAuth();
+function Header() {
+  const { isAuthenticated, user, logout } = useAuth();
   const location = useLocation();
 
-  const isLoginPage = location.pathname === '/login';
-  const isHomePage = location.pathname === '/';
-
-  if (hideOnLoginPage && (isLoginPage || isHomePage)) {
+  // Hide header on login and register pages
+  if (['/login', '/register'].includes(location.pathname)) {
     return null;
   }
 
   return (
     <header className="header">
-      <div className="header-left">
-        <h1>{title}</h1>
-      </div>
-      <nav className="header-nav">
-        {links.map((link) => (
-          <Link key={link.path} to={link.path} className="header-link">
-            {link.label}
-          </Link>
-        ))}
-      </nav>
-      <div className="header-right">
-        <ThemeToggle />
-        {!isLoginPage && user && <LogoutButton />}
+      <div className="header-content">
+        <div className="logo">
+          <Link to="/dashboard">Employee360</Link>
+        </div>
+        
+        {isAuthenticated() && (
+          <nav>
+            <span className="user-name">
+              Welcome, {user?.name}
+            </span>
+            <Link to="/dashboard">Dashboard</Link>
+            {user?.role === 'admin' && (
+              <Link to="/users">Manage Users</Link>
+            )}
+            <Link to="/profile">Profile</Link>
+            <a href="#" onClick={(e) => {
+              e.preventDefault();
+              logout();
+            }}>Logout</a>
+          </nav>
+        )}
       </div>
     </header>
   );
 }
-
-Header.propTypes = {
-  title: PropTypes.string,
-  links: PropTypes.arrayOf(
-    PropTypes.shape({
-      path: PropTypes.string.isRequired,
-      label: PropTypes.string.isRequired,
-    })
-  ),
-  hideOnLoginPage: PropTypes.bool,
-};
 
 export default Header;

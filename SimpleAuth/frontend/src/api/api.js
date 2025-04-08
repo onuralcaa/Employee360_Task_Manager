@@ -1,92 +1,94 @@
 import axios from 'axios';
-import { handleApiError } from '../utils/errorHandling';
+import { storage } from '../utils/helpers';
 
-// Create axios instance with default config
-const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api/users',
+const api = axios.create({
+  baseURL: '/api',  // Changed to use relative path since we're using Vite's proxy
   headers: {
     'Content-Type': 'application/json'
   }
 });
 
-// Add request interceptor to attach auth token
-apiClient.interceptors.request.use(
+// Request interceptor
+api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('token');
+    const token = storage.get('token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
   },
-  (error) => Promise.reject(error)
+  (error) => {
+    return Promise.reject(error);
+  }
 );
 
-// Authentication API calls
-export const login = async (credentials) => {
-  try {
-    return await apiClient.post('/login', credentials);
-  } catch (error) {
-    handleApiError(error, null); // Log error without showing toast
-    throw error;
+// Response interceptor
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      // Clear stored data on authentication error
+      storage.clear();
+      window.location.href = '/login';
+    }
+    return Promise.reject(error);
+  }
+);
+
+export const auth = {
+  register: async (userData) => {
+    try {
+      const response = await api.post('/users/register', userData);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  login: async (credentials) => {
+    try {
+      const response = await api.post('/users/login', credentials);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  getProfile: async () => {
+    try {
+      const response = await api.get('/users/profile');
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  updateProfile: async (profileData) => {
+    try {
+      const response = await api.put('/users/profile', profileData);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  getUsers: async (params = {}) => {
+    try {
+      const response = await api.get('/users/users', { params });
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  getUserById: async (userId) => {
+    try {
+      const response = await api.get(`/users/users/${userId}`);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
   }
 };
 
-export const register = async (userData) => {
-  try {
-    console.log('Register API call with data:', userData);
-    return await apiClient.post('/register', userData);
-  } catch (error) {
-    handleApiError(error, null); // Log error without showing toast
-    throw error;
-  }
-};
-
-// User data API calls
-export const fetchUserProfile = async () => {
-  try {
-    return await apiClient.get('/profile');
-  } catch (error) {
-    throw error;
-  }
-};
-
-export const updateUserProfile = async (userData) => {
-  try {
-    return await apiClient.put('/profile', userData);
-  } catch (error) {
-    throw error;
-  }
-};
-
-// Task API calls (for future implementation)
-export const fetchTasks = async () => {
-  try {
-    return await apiClient.get('/tasks');
-  } catch (error) {
-    throw error;
-  }
-};
-
-export const createTask = async (taskData) => {
-  try {
-    return await apiClient.post('/tasks', taskData);
-  } catch (error) {
-    throw error;
-  }
-};
-
-export const updateTask = async (taskId, taskData) => {
-  try {
-    return await apiClient.put(`/tasks/${taskId}`, taskData);
-  } catch (error) {
-    throw error;
-  }
-};
-
-export const deleteTask = async (taskId) => {
-  try {
-    return await apiClient.delete(`/tasks/${taskId}`);
-  } catch (error) {
-    throw error;
-  }
-};
+export default api;

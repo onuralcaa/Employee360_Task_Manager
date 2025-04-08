@@ -1,35 +1,70 @@
 const winston = require('winston');
 
-// Logger instance
+// Custom log format
+const logFormat = winston.format.combine(
+  winston.format.timestamp(),
+  winston.format.json(),
+  winston.format.errors({ stack: true })
+);
+
+// Create logger instance
 const logger = winston.createLogger({
-  level: 'info',
-  format: winston.format.combine(
-    winston.format.timestamp(),
-    winston.format.printf(({ timestamp, level, message, ...meta }) => {
-      return `${timestamp} [${level.toUpperCase()}]: ${message} ${Object.keys(meta).length ? JSON.stringify(meta) : ''}`;
-    })
-  ),
+  level: process.env.NODE_ENV === 'development' ? 'debug' : 'info',
+  format: logFormat,
   transports: [
-    new winston.transports.Console(),
-    new winston.transports.File({ filename: 'logs/hata.log', level: 'error' }),
-    new winston.transports.File({ filename: 'logs/tüm.log' })
+    new winston.transports.Console({
+      format: winston.format.combine(
+        winston.format.colorize(),
+        winston.format.simple()
+      )
+    }),
+    new winston.transports.File({
+      filename: 'logs/error.log',
+      level: 'error'
+    }),
+    new winston.transports.File({
+      filename: 'logs/combined.log'
+    })
   ]
 });
 
-// Centralized error handling utility
-class ErrorHandler {
-  static formatError(error) {
-    return {
-      message: error.message || 'An unexpected error occurred.',
-      stack: process.env.NODE_ENV === 'production' ? null : error.stack,
-    };
+// Error handler helper
+const handleError = (error) => {
+  const status = error.status || 500;
+  const message = error.message || 'An unexpected error occurred';
+  
+  // Log the error with stack trace in development
+  if (process.env.NODE_ENV === 'development') {
+    logger.error({
+      message,
+      status,
+      stack: error.stack
+    });
+  } else {
+    // Log without stack trace in production
+    logger.error({
+      message,
+      status
+    });
   }
 
-  static logError(error) {
-    logger.error(error.message, { stack: error.stack }); // Use the logger instance here
-  }
-}
+  return {
+    success: false,
+    message,
+    status,
+    ...(process.env.NODE_ENV === 'development' && { stack: error.stack })
+  };
+};
 
-// filepath: d:\Github\Employee360_Task_Manager\SimpleAuth\backend\utils\logger.js
-module.exports = logger; // Export logger
-module.exports.ErrorHandler = ErrorHandler; // Export ErrorHandler
+// Create custom error
+const createError = (message, status = 500) => {
+  const error = new Error(message);
+  error.status = status;
+  return error;
+};
+
+module.exports = {
+  logger,
+  handleError,
+  createError
+};
