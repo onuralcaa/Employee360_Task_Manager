@@ -24,6 +24,13 @@
   color: var(--text-color);
 }
 
+/* Input groups for form validation */
+.input-group {
+  margin-bottom: 15px;
+  width: 100%;
+  text-align: left;
+}
+
 /* Form içindeki tüm inputların eşit olması */
 .login-box input {
   width: 100%; /* 📌 Tüm inputları eşit genişlikte yap */
@@ -35,6 +42,22 @@
   box-sizing: border-box; /* 📌 Padding genişliği değiştirmesin */
   background-color: var(--input-background);
   color: var(--text-color);
+}
+
+/* Input error styling */
+.login-box input.error,
+.password-container input.error {
+  border-color: var(--error-color);
+  background-color: rgba(255, 0, 0, 0.03);
+}
+
+/* Error message styling */
+.error-message {
+  color: var(--error-color);
+  font-size: 12px;
+  margin-top: 5px;
+  text-align: left;
+  padding-left: 2px;
 }
 
 /* Şifre ve ikonun olduğu container */

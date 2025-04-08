@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ToastContainer } from "react-toastify";
+import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "./Login.css";
 import PasswordToggle from "./PasswordToggle.jsx";
@@ -9,6 +9,7 @@ import LoadingSpinner from "./common/LoadingSpinner";
 
 function Login() {
   const [user, setUser] = useState({ username: "", password: "", role: "personel" });
+  const [errors, setErrors] = useState({ username: "", password: "" });
   const navigate = useNavigate();
   const { login, loading, isAuthenticated } = useAuth();
 
@@ -17,11 +18,58 @@ function Login() {
     return null;
   }
 
-  const handleChange = (e) => setUser({ ...user, [e.target.name]: e.target.value });
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setUser({ ...user, [name]: value });
+    
+    // Clear error when field changes
+    if (errors[name]) {
+      setErrors({ ...errors, [name]: "" });
+    }
+  };
+
+  const validateForm = () => {
+    let isValid = true;
+    const newErrors = { username: "", password: "" };
+
+    // Validate username
+    if (!user.username.trim()) {
+      newErrors.username = "Kullanıcı adı gereklidir";
+      isValid = false;
+    }
+
+    // Validate password
+    if (!user.password.trim()) {
+      newErrors.password = "Şifre gereklidir";
+      isValid = false;
+    }
+
+    setErrors(newErrors);
+    return isValid;
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await login(user);
+    
+    if (!validateForm()) {
+      return;
+    }
+    
+    const result = await login(user);
+    
+    if (!result.success) {
+      // If login failed, set appropriate field errors
+      if (result.message.toLowerCase().includes('kullanıcı') || 
+          result.message.toLowerCase().includes('user') ||
+          result.message.toLowerCase().includes('bulunamadı') ||
+          result.message.toLowerCase().includes('not found')) {
+        setErrors(prev => ({ ...prev, username: "Geçersiz kullanıcı adı" }));
+      } else if (result.message.toLowerCase().includes('şifre') || 
+                result.message.toLowerCase().includes('credentials') ||
+                result.message.toLowerCase().includes('password')) {
+        setErrors(prev => ({ ...prev, password: "Geçersiz şifre" }));
+      }
+    }
   };
 
   if (loading) {
@@ -57,21 +105,29 @@ function Login() {
         </div>
 
         {/* Kullanıcı Adı Alanı */}
-        <input 
-          name="username" 
-          placeholder="Kullanıcı Adı" 
-          onChange={handleChange} 
-          required 
-        />
+        <div className="input-group">
+          <input 
+            name="username" 
+            placeholder="Kullanıcı Adı" 
+            onChange={handleChange} 
+            className={errors.username ? "error" : ""}
+            required 
+          />
+          {errors.username && <div className="error-message">{errors.username}</div>}
+        </div>
 
         {/* Şifre Alanı ve Göz İkonu */}
-        <div className="password-container">
-          <PasswordToggle
-            name="password"
-            placeholder="Şifre"
-            value={user.password}
-            onChange={handleChange}
-          />
+        <div className="input-group">
+          <div className="password-container">
+            <PasswordToggle
+              name="password"
+              placeholder="Şifre"
+              value={user.password}
+              onChange={handleChange}
+              className={errors.password ? "error" : ""}
+            />
+          </div>
+          {errors.password && <div className="error-message">{errors.password}</div>}
         </div>
 
         {/* Giriş Butonu */}

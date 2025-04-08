@@ -2,7 +2,7 @@ const User = require('../models/userModel');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt'); // Changed from bcryptjs to bcrypt
 const logger = require('../utils/logger'); // Added logger
-const ErrorHandler = require('../utils/logger'); // Added centralized error handling utility
+const { ErrorHandler } = require('../utils/logger'); // Added centralized error handling utility
 
 /**
  * User Service - Handles business logic for user-related operations
@@ -20,39 +20,27 @@ const registerUser = async (userData) => {
   const { name, surname, username, email, password, number, birthdate, role } = userData;
 
   try {
-    // Validate password
     if (!password || password.trim() === '') {
       logger.error('Password validation failed: Password is empty or undefined', { username });
-      throw new Error('Şifre alanı boş olamaz');
+      throw new Error('Password cannot be empty');
     }
 
-    // Check if user already exists
     const userExists = await User.findOne({ username });
     if (userExists) {
       logger.warn('Attempt to register with an existing username', { username });
-      throw new Error('Bu kullanıcı adı zaten alınmış!');
+      throw new Error('Username already taken!');
     }
 
-    // Hash password
+    // Hash password before storing
     const salt = await bcrypt.genSalt(10);
-    if (!salt) {
-      logger.error('Failed to generate salt for password hashing', { username });
-      throw new Error('Şifre oluşturulurken bir hata oluştu');
-    }
-
     const hashedPassword = await bcrypt.hash(password, salt);
-    if (!hashedPassword) {
-      logger.error('Failed to hash password', { username });
-      throw new Error('Şifre oluşturulurken bir hata oluştu');
-    }
 
-    // Create user
     const user = await User.create({
       name,
       surname,
       username,
       email,
-      password: hashedPassword,
+      password: hashedPassword, // Store hashed password
       number,
       birthdate,
       role: role || 'personel',
@@ -70,7 +58,7 @@ const registerUser = async (userData) => {
         token: generateToken(user._id, user.role, user.name, user.username),
       };
     } else {
-      throw new Error('Geçersiz kullanıcı verileri');
+      throw new Error('Invalid user data');
     }
   } catch (error) {
     logger.error('Error during user registration', { username, error: error.message });
@@ -84,24 +72,22 @@ const loginUser = async (username, password, role) => {
   logger.info('Login attempt', { username, role });
 
   try {
-    // Find user
     const user = await User.findOne({ username });
     if (!user) {
       logger.warn('User not found during login', { username });
-      throw new Error('Kullanıcı bulunamadı');
+      throw new Error('User not found');
     }
 
-    // Check if password matches
+    // Use bcrypt to compare passwords
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       logger.warn('Invalid password attempt', { username });
-      throw new Error('Geçersiz kimlik bilgileri');
+      throw new Error('Invalid credentials');
     }
 
-    // Check if role matches
     if (user.role !== role) {
       logger.warn('Role mismatch during login', { username, expectedRole: user.role, providedRole: role });
-      throw new Error(`${role === 'admin' ? 'Yönetici' : 'Personel'} girişi yapılamadı`);
+      throw new Error(`${role === 'admin' ? 'Admin' : 'Personnel'} login failed`);
     }
 
     logger.info('User authenticated successfully', { username });
@@ -146,7 +132,7 @@ const updateUserProfile = async (userId, userData) => {
     user.email = userData.email || user.email;
     user.number = userData.number || user.number;
     
-    // Update password if provided
+    // Update password if provided, with proper hashing
     if (userData.password) {
       const salt = await bcrypt.genSalt(10);
       user.password = await bcrypt.hash(userData.password, salt);

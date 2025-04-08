@@ -4,23 +4,13 @@
 
 // Validate password strength
 export const validatePassword = (password) => {
-  const minLength = 8;
-  const hasUpperCase = /[A-Z]/.test(password);
-  const hasLowerCase = /[a-z]/.test(password);
-  const hasNumber = /[0-9]/.test(password);
-  const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
-
-  const isValid = 
-    password.length >= minLength &&
-    hasUpperCase &&
-    hasLowerCase &&
-    hasNumber &&
-    hasSpecialChar;
+  // Only check if password is not empty
+  const isValid = password.trim() !== '';
     
   // Return validation result and message
   return {
     isValid,
-    message: isValid ? '' : 'Şifre en az 8 karakter olmalı ve büyük harf, küçük harf, rakam ve özel karakter içermelidir.'
+    message: isValid ? '' : 'Şifre alanı boş bırakılamaz.'
   };
 };
 

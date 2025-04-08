@@ -1,7 +1,7 @@
 const asyncHandler = require('express-async-handler');
 const userService = require('../services/userService');
 const logger = require('../utils/logger');
-const ErrorHandler = require('../utils/logger');
+const { ErrorHandler } = require('../utils/logger');
 
 /**
  * User Controller - Handles HTTP requests for user-related operations

@@ -1,6 +1,6 @@
 const winston = require('winston');
 
-// Logger örneği oluştur
+// Logger instance
 const logger = winston.createLogger({
   level: 'info',
   format: winston.format.combine(
@@ -16,8 +16,6 @@ const logger = winston.createLogger({
   ]
 });
 
-module.exports = logger;
-
 // Centralized error handling utility
 class ErrorHandler {
   static formatError(error) {
@@ -28,9 +26,10 @@ class ErrorHandler {
   }
 
   static logError(error) {
-    const logger = require('./logger');
-    logger.error(error.message, { stack: error.stack });
+    logger.error(error.message, { stack: error.stack }); // Use the logger instance here
   }
 }
 
-module.exports = ErrorHandler;
+// filepath: d:\Github\Employee360_Task_Manager\SimpleAuth\backend\utils\logger.js
+module.exports = logger; // Export logger
+module.exports.ErrorHandler = ErrorHandler; // Export ErrorHandler

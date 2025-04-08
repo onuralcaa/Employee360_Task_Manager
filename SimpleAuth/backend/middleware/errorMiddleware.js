@@ -3,7 +3,8 @@
  */
 
 const logger = require('../utils/logger');
-const ErrorHandler = require('../utils/logger');
+// filepath: d:\Github\Employee360_Task_Manager\SimpleAuth\backend\middleware\errorMiddleware.js
+const { ErrorHandler } = require('../utils/logger');
 
 // Not Found middleware - Handle 404 errors
 const notFound = (req, res, next) => {
@@ -13,12 +14,12 @@ const notFound = (req, res, next) => {
   next(error);
 };
 
-// Error handler middleware - Format and send error responses
+// filepath: d:\Github\Employee360_Task_Manager\SimpleAuth\backend\middleware\errorMiddleware.js
 const errorHandler = (err, req, res, next) => {
   const statusCode = res.statusCode === 200 ? 500 : res.statusCode;
   res.status(statusCode);
 
-  ErrorHandler.logError(err);
+  ErrorHandler.logError(err); // Correct usage
   res.json(ErrorHandler.formatError(err));
 };
 

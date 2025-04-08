@@ -1,7 +1,7 @@
 const Attendance = require('../models/attendanceModel');
 const User = require('../models/userModel');
 const CardReader = require('../models/cardReaderModel');
-const ErrorHandler = require('../utils/logger');
+const { ErrorHandler } = require('../utils/logger');
 
 /**
  * Attendance Service - Handles business logic for attendance tracking
