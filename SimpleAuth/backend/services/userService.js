@@ -1,100 +1,75 @@
-const User = require('../models/userModel');
 const jwt = require('jsonwebtoken');
-const bcrypt = require('bcrypt');
-const { logger, createError } = require('../utils/logger');
+const bcrypt = require('bcryptjs');
+const User = require('../models/userModel');
+const { createError } = require('../utils/errorHandler');
 
 const generateToken = (id, role) => {
-  if (!process.env.JWT_SECRET) {
-    logger.warn('JWT_SECRET not set, using default secret');
-  }
   return jwt.sign(
-    { id, role }, 
+    { id, role },
     process.env.JWT_SECRET || 'jwt_secret_key',
     { expiresIn: '30d' }
   );
 };
 
 const registerUser = async (userData) => {
-  const { name, surname, username, email, password, role } = userData;
-
   try {
-    const userExists = await User.findOne({ 
-      $or: [{ username }, { email }] 
-    });
+    // Hash password before saving
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(userData.password, salt);
 
-    if (userExists) {
-      throw createError('User already exists', 400);
-    }
-
-    if (!password || password.length < 6) {
-      throw createError('Password must be at least 6 characters', 400);
-    }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
     const user = await User.create({
-      name,
-      surname,
-      username,
-      email,
-      password: hashedPassword,
-      role: role || 'personel'
+      ...userData,
+      password: hashedPassword
     });
+
+    const token = generateToken(user._id, user.role);
 
     return {
-      _id: user._id,
-      name: user.name,
-      username: user.username,
-      email: user.email,
-      role: user.role,
-      token: generateToken(user._id, user.role)
+      token,
+      user: user.toJSON()
     };
   } catch (error) {
-    logger.error('Registration error:', { error: error.message });
     throw error;
   }
 };
 
 const loginUser = async (username, password) => {
   try {
-    const user = await User.findOne({ username });
-    
+    const user = await User.findOne({ username }).select('+password');
+
     if (!user) {
       throw createError('Invalid credentials', 401);
     }
 
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) {
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
       throw createError('Invalid credentials', 401);
     }
 
+    const token = generateToken(user._id, user.role);
+
     return {
-      _id: user._id,
-      name: user.name,
-      username: user.username,
-      email: user.email,
-      role: user.role,
-      token: generateToken(user._id, user.role)
+      token,
+      user: user.toJSON()
     };
   } catch (error) {
-    logger.error('Login error:', { error: error.message });
     throw error;
   }
 };
 
 const updateUser = async (userId, updateData) => {
   try {
+    // If password is being updated, hash it
     if (updateData.password) {
-      if (updateData.password.length < 6) {
-        throw createError('Password must be at least 6 characters', 400);
-      }
-      updateData.password = await bcrypt.hash(updateData.password, 10);
+      const salt = await bcrypt.genSalt(10);
+      updateData.password = await bcrypt.hash(updateData.password, salt);
     }
-    
+
     const user = await User.findByIdAndUpdate(
       userId,
-      { $set: updateData },
-      { new: true }
-    ).select('-password');
+      updateData,
+      { new: true, runValidators: true }
+    );
 
     if (!user) {
       throw createError('User not found', 404);
@@ -102,29 +77,19 @@ const updateUser = async (userId, updateData) => {
 
     return user;
   } catch (error) {
-    logger.error('Update error:', { error: error.message });
     throw error;
   }
 };
 
-const getUsers = async (filter = {}) => {
+const getUsers = async () => {
   try {
-    return await User.find(filter).select('-password');
+    const users = await User.find({ isActive: true })
+      .select('-password')
+      .lean()
+      .exec();
+      
+    return users;
   } catch (error) {
-    logger.error('Get users error:', { error: error.message });
-    throw error;
-  }
-};
-
-const getUserById = async (userId) => {
-  try {
-    const user = await User.findById(userId).select('-password');
-    if (!user) {
-      throw createError('User not found', 404);
-    }
-    return user;
-  } catch (error) {
-    logger.error('Get user error:', { error: error.message });
     throw error;
   }
 };
@@ -133,6 +98,5 @@ module.exports = {
   registerUser,
   loginUser,
   updateUser,
-  getUsers,
-  getUserById
+  getUsers
 };

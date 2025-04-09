@@ -1,0 +1,105 @@
+.dashboard-container {
+  display: flex;
+  flex-direction: column;
+  padding: var(--spacing-xl);
+  background-color: var(--background-secondary);
+}
+
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-xl);
+  padding: var(--spacing-lg);
+  border-radius: var(--border-radius-md);
+  background-color: var(--background-primary);
+}
+
+.dashboard-header h1 {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: var(--font-size-xl);
+}
+
+.dashboard-content {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: var(--spacing-xl);
+}
+
+.tasks-card {
+  min-height: 400px;
+}
+
+.tasks-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.task-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-md);
+  background-color: var(--background-primary);
+  border-radius: var(--border-radius-sm);
+  border: 1px solid var(--border-color);
+  transition: all var(--transition-fast);
+}
+
+.task-item:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+}
+
+.task-item.pending .task-status {
+  color: var(--warning-color);
+}
+
+.task-item.completed .task-status {
+  color: var(--success-color);
+}
+
+.task-title {
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.task-status {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--border-radius-sm);
+  font-size: var(--font-size-sm);
+  text-transform: capitalize;
+}
+
+.management-card .management-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.dashboard-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - var(--header-height) - var(--footer-height));
+  color: var(--text-primary);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .dashboard-container {
+    padding: var(--spacing-md);
+  }
+
+  .dashboard-content {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-header {
+    flex-direction: column;
+    gap: var(--spacing-md);
+    text-align: center;
+  }
+}

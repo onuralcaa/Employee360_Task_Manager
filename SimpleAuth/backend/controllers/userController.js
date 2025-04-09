@@ -62,7 +62,10 @@ const updateUserProfile = asyncHandler(async (req, res) => {
 const getUsers = asyncHandler(async (req, res) => {
   try {
     const users = await userService.getUsers(req.query);
-    res.json(users);
+    res.json({
+      success: true,
+      data: users
+    });
   } catch (error) {
     logger.error('Get users failed', { error: error.message });
     res.status(400).json(handleError(error));

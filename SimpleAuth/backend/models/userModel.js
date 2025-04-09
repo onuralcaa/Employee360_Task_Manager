@@ -38,12 +38,7 @@ const userSchema = new mongoose.Schema({
   password: { 
     type: String, 
     required: [true, 'Password is required'],
-    validate: {
-      validator: function(value) {
-        return value.length >= 6;
-      },
-      message: 'Password must be at least 6 characters'
-    }
+    select: false
   },
   role: { 
     type: String, 
@@ -77,6 +72,12 @@ const userSchema = new mongoose.Schema({
       delete ret.password;
       return ret;
     }
+  },
+  toObject: {
+    transform: function(doc, ret) {
+      delete ret.password;
+      return ret;
+    }
   }
 });
 
@@ -85,19 +86,5 @@ userSchema.index({ username: 1 });
 userSchema.index({ email: 1 });
 userSchema.index({ role: 1 });
 userSchema.index({ department: 1 });
-
-// Pre-save middleware for validation
-userSchema.pre('save', function(next) {
-  // Only run this validation if password is modified
-  if (!this.isModified('password')) return next();
-  
-  if (!passwordRegex.test(this._password)) {
-    const error = new Error('Password must contain at least one letter, one number, and be at least 6 characters long');
-    error.status = 400;
-    return next(error);
-  }
-  
-  next();
-});
 
 module.exports = mongoose.model("User", userSchema);

@@ -1,6 +1,8 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { Button } from '../../shared/components';
+import { ROUTES, USER_ROLES } from '../../shared/constants';
 import './Header.css';
 
 function Header() {
@@ -8,7 +10,7 @@ function Header() {
   const location = useLocation();
 
   // Hide header on login and register pages
-  if (['/login', '/register'].includes(location.pathname)) {
+  if ([ROUTES.LOGIN, ROUTES.REGISTER].includes(location.pathname)) {
     return null;
   }
 
@@ -16,7 +18,7 @@ function Header() {
     <header className="header">
       <div className="header-content">
         <div className="logo">
-          <Link to="/dashboard">Employee360</Link>
+          <Link to={ROUTES.DASHBOARD}>Employee360</Link>
         </div>
         
         {isAuthenticated() && (
@@ -24,15 +26,17 @@ function Header() {
             <span className="user-name">
               Welcome, {user?.name}
             </span>
-            <Link to="/dashboard">Dashboard</Link>
-            {user?.role === 'admin' && (
-              <Link to="/users">Manage Users</Link>
+            <Link to={ROUTES.DASHBOARD}>Dashboard</Link>
+            {user?.role === USER_ROLES.ADMIN && (
+              <Link to={ROUTES.USERS}>Manage Users</Link>
             )}
-            <Link to="/profile">Profile</Link>
-            <a href="#" onClick={(e) => {
-              e.preventDefault();
-              logout();
-            }}>Logout</a>
+            <Link to={ROUTES.PROFILE}>Profile</Link>
+            <Button 
+              variant="secondary" 
+              onClick={logout}
+            >
+              Logout
+            </Button>
           </nav>
         )}
       </div>
