@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "employee360_task_manager": "file:../../.."
+  }
+}
