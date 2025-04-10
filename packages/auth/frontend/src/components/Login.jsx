@@ -20,10 +20,7 @@ function Login() {
     handleSubmit
   } = useForm(
     { username: '', password: '' },
-    {
-      username: (value) => !value ? 'Username is required' : '',
-      password: (value) => !value ? 'Password is required' : ''
-    }
+    ['username', 'password']
   );
 
   const onSubmit = async (formValues) => {
@@ -32,7 +29,7 @@ function Login() {
       await login(formValues);
       navigate('/dashboard');
     } catch (error) {
-      setApiError(error.message || 'Failed to log in');
+      setApiError(error.message || 'Failed to log in. Please check your credentials or try again later.');
     }
   };
 
