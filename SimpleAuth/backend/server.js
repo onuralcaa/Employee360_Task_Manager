@@ -1,6 +1,8 @@
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
+const swaggerUi = require('swagger-ui-express');
+const { specs } = require('./docs/swagger');
 const connectDB = require('./config/db');
 const userRoutes = require('./routes/userRoutes');
 const { logger, handleError } = require('./utils/logger');
@@ -17,6 +19,9 @@ const app = express();
 // Middleware
 app.use(cors());
 app.use(express.json());
+
+// API Documentation
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
 
 // Request logging middleware
 app.use((req, res, next) => {
