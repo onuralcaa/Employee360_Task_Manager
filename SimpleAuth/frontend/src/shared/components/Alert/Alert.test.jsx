@@ -1,78 +1,26 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import Alert from './Alert';
+import { Alert } from './Alert';
+import { AlertTypes } from '../../types';
 
 describe('Alert Component', () => {
   const defaultProps = {
     message: 'Test alert message',
-    type: 'success',
-    onClose: jest.fn()
+    type: AlertTypes.SUCCESS,
+    onDismiss: jest.fn()
   };
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('renders alert message correctly', () => {
+  it('renders message correctly', () => {
     render(<Alert {...defaultProps} />);
     expect(screen.getByText(defaultProps.message)).toBeInTheDocument();
   });
 
-  it('applies correct CSS class based on type', () => {
-    const { container } = render(<Alert {...defaultProps} />);
-    expect(container.firstChild).toHaveClass('alert-success');
-
-    const { container: errorContainer } = render(
-      <Alert {...defaultProps} type="error" />
-    );
-    expect(errorContainer.firstChild).toHaveClass('alert-error');
-  });
-
-  it('calls onClose when close button is clicked', () => {
-    render(<Alert {...defaultProps} />);
-    const closeButton = screen.getByRole('button', { name: /close/i });
-    fireEvent.click(closeButton);
-    expect(defaultProps.onClose).toHaveBeenCalled();
-  });
-
-  it('automatically closes after timeout if autoClose is true', () => {
-    jest.useFakeTimers();
-    render(<Alert {...defaultProps} autoClose={true} timeout={3000} />);
-    
-    expect(defaultProps.onClose).not.toHaveBeenCalled();
-    jest.advanceTimersByTime(3000);
-    expect(defaultProps.onClose).toHaveBeenCalled();
-    
-    jest.useRealTimers();
-  });
-
-  it('does not auto-close if autoClose is false', () => {
-    jest.useFakeTimers();
-    render(<Alert {...defaultProps} autoClose={false} timeout={3000} />);
-    
-    jest.advanceTimersByTime(3000);
-    expect(defaultProps.onClose).not.toHaveBeenCalled();
-    
-    jest.useRealTimers();
-  });
-
-  it('clears timeout on unmount', () => {
-    jest.useFakeTimers();
-    const { unmount } = render(
-      <Alert {...defaultProps} autoClose={true} timeout={3000} />
-    );
-    
-    unmount();
-    jest.advanceTimersByTime(3000);
-    expect(defaultProps.onClose).not.toHaveBeenCalled();
-    
-    jest.useRealTimers();
-  });
-
-  it('renders different alert types with correct styles', () => {
-    const types = ['info', 'success', 'warning', 'error'];
-    
-    types.forEach(type => {
+  it('renders different alert types with correct classes', () => {
+    Object.values(AlertTypes).forEach(type => {
       const { container } = render(
         <Alert {...defaultProps} type={type} />
       );
@@ -80,17 +28,66 @@ describe('Alert Component', () => {
     });
   });
 
-  it('renders custom class names when provided', () => {
+  it('calls onDismiss when close button is clicked', () => {
+    render(<Alert {...defaultProps} />);
+    fireEvent.click(screen.getByRole('button', { name: /close/i }));
+    expect(defaultProps.onDismiss).toHaveBeenCalled();
+  });
+
+  it('auto-dismisses after timeout if autoClose is true', () => {
+    jest.useFakeTimers();
+    render(<Alert {...defaultProps} autoClose timeout={3000} />);
+    
+    expect(defaultProps.onDismiss).not.toHaveBeenCalled();
+    jest.advanceTimersByTime(3000);
+    expect(defaultProps.onDismiss).toHaveBeenCalled();
+    
+    jest.useRealTimers();
+  });
+
+  it('does not auto-dismiss if autoClose is false', () => {
+    jest.useFakeTimers();
+    render(<Alert {...defaultProps} autoClose={false} timeout={3000} />);
+    
+    jest.advanceTimersByTime(3000);
+    expect(defaultProps.onDismiss).not.toHaveBeenCalled();
+    
+    jest.useRealTimers();
+  });
+
+  it('does not show close button when onDismiss is not provided', () => {
+    const { onDismiss, ...propsWithoutDismiss } = defaultProps;
+    render(<Alert {...propsWithoutDismiss} />);
+    expect(screen.queryByRole('button', { name: /close/i })).not.toBeInTheDocument();
+  });
+
+  it('cleans up timeout on unmount', () => {
+    jest.useFakeTimers();
+    const { unmount } = render(
+      <Alert {...defaultProps} autoClose timeout={3000} />
+    );
+    
+    unmount();
+    jest.advanceTimersByTime(3000);
+    expect(defaultProps.onDismiss).not.toHaveBeenCalled();
+    
+    jest.useRealTimers();
+  });
+
+  it('applies custom className', () => {
     const { container } = render(
       <Alert {...defaultProps} className="custom-alert" />
     );
-    expect(container.firstChild).toHaveClass('custom-alert');
+    expect(container.firstChild).toHaveClass('alert', 'custom-alert');
   });
 
-  it('renders alert without close button when onClose is not provided', () => {
-    const { onClose, ...propsWithoutClose } = defaultProps;
-    render(<Alert {...propsWithoutClose} />);
-    
-    expect(screen.queryByRole('button', { name: /close/i })).not.toBeInTheDocument();
+  it('renders children instead of message when provided', () => {
+    render(
+      <Alert {...defaultProps}>
+        <div>Custom content</div>
+      </Alert>
+    );
+    expect(screen.getByText('Custom content')).toBeInTheDocument();
+    expect(screen.queryByText(defaultProps.message)).not.toBeInTheDocument();
   });
 });

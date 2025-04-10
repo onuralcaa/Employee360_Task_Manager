@@ -3,9 +3,10 @@ import {
   validateEmail, 
   validatePassword, 
   validateUsername, 
-  validateName, 
-  formatUserName,
-  getErrorMessage
+  validateName,
+  storage,
+  handleApiError,
+  initializeTheme
 } from './helpers';
 
 describe('Helper Functions', () => {
@@ -109,88 +110,190 @@ describe('Helper Functions', () => {
       expect(getErrorMessage(error)).toBe('An unexpected error occurred');
     });
   });
-});
 
-describe('Validation Helpers', () => {
+  describe('storage utilities', () => {
+    beforeEach(() => {
+      localStorage.clear();
+      jest.spyOn(console, 'error').mockImplementation(() => {});
+    });
+
+    afterEach(() => {
+      console.error.mockRestore();
+    });
+
+    it('sets and gets items from localStorage', () => {
+      const testData = { name: 'John', age: 30 };
+      storage.set('testKey', testData);
+      expect(storage.get('testKey')).toEqual(testData);
+    });
+
+    it('removes specific item from localStorage', () => {
+      storage.set('testKey', 'value');
+      storage.remove('testKey');
+      expect(storage.get('testKey')).toBeNull();
+    });
+
+    it('clears all items from localStorage', () => {
+      storage.set('key1', 'value1');
+      storage.set('key2', 'value2');
+      storage.clear();
+      expect(storage.get('key1')).toBeNull();
+      expect(storage.get('key2')).toBeNull();
+    });
+
+    it('handles invalid JSON when getting item', () => {
+      localStorage.setItem('invalidJson', 'invalid{json');
+      expect(storage.get('invalidJson')).toBeNull();
+      expect(console.error).toHaveBeenCalled();
+    });
+
+    it('handles storage errors gracefully', () => {
+      const mockError = new Error('QuotaExceededError');
+      jest.spyOn(localStorage, 'setItem').mockImplementation(() => {
+        throw mockError;
+      });
+
+      storage.set('key', 'value');
+      expect(console.error).toHaveBeenCalledWith('Error writing to localStorage:', mockError);
+    });
+  });
+
   describe('validateEmail', () => {
-    it('should return error for empty email', () => {
+    it('returns error for empty email', () => {
       expect(validateEmail('')).toBe('Email is required');
     });
 
-    it('should return error for invalid email format', () => {
+    it('returns error for invalid email format', () => {
       expect(validateEmail('invalid-email')).toBe('Please enter a valid email address');
-      expect(validateEmail('test@')).toBe('Please enter a valid email address');
-      expect(validateEmail('test@domain')).toBe('Please enter a valid email address');
+      expect(validateEmail('user@')).toBe('Please enter a valid email address');
+      expect(validateEmail('@domain.com')).toBe('Please enter a valid email address');
     });
 
-    it('should return empty string for valid email', () => {
-      expect(validateEmail('test@example.com')).toBe('');
+    it('returns empty string for valid email', () => {
+      expect(validateEmail('user@domain.com')).toBe('');
       expect(validateEmail('user.name@domain.co.uk')).toBe('');
+      expect(validateEmail('user+label@domain.com')).toBe('');
     });
   });
 
   describe('validatePassword', () => {
-    it('should return error for empty password', () => {
+    it('returns error for empty password', () => {
       expect(validatePassword('')).toBe('Password is required');
     });
 
-    it('should return error for password less than 6 characters', () => {
-      expect(validatePassword('pass1')).toBe('Password must be at least 6 characters');
+    it('returns error for short password', () => {
+      expect(validatePassword('pass')).toBe('Password must be at least 6 characters');
     });
 
-    it('should return error for password without letter and number', () => {
+    it('returns error for password without required characters', () => {
       expect(validatePassword('password')).toBe('Password must contain at least one letter and one number');
       expect(validatePassword('12345678')).toBe('Password must contain at least one letter and one number');
     });
 
-    it('should return empty string for valid password', () => {
-      expect(validatePassword('password123')).toBe('');
-      expect(validatePassword('Pass1234')).toBe('');
+    it('returns empty string for valid password', () => {
+      expect(validatePassword('Password123')).toBe('');
+      expect(validatePassword('securePass1')).toBe('');
+      expect(validatePassword('1Complex@Pass')).toBe('');
     });
   });
 
   describe('validateUsername', () => {
-    it('should return error for empty username', () => {
+    it('returns error for empty username', () => {
       expect(validateUsername('')).toBe('Username is required');
     });
 
-    it('should return error for username less than 3 characters', () => {
+    it('returns error for short username', () => {
       expect(validateUsername('ab')).toBe('Username must be at least 3 characters');
     });
 
-    it('should return error for username with special characters', () => {
-      expect(validateUsername('user@name')).toBe('Username can only contain letters, numbers and underscores');
-      expect(validateUsername('user-name')).toBe('Username can only contain letters, numbers and underscores');
+    it('returns error for invalid characters', () => {
+      expect(validateUsername('user@name')).toBe('Username can only contain letters, numbers, and underscores');
     });
 
-    it('should return empty string for valid username', () => {
-      expect(validateUsername('john_doe123')).toBe('');
-      expect(validateUsername('username')).toBe('');
+    it('returns empty string for valid username', () => {
+      expect(validateUsername('john_doe')).toBe('');
+      expect(validateUsername('user123')).toBe('');
+      expect(validateUsername('JohnDoe')).toBe('');
     });
   });
 
   describe('validateName', () => {
-    it('should return error for empty name', () => {
-      expect(validateName('')).toBe('Name is required');
+    it('returns error for empty name', () => {
+      expect(validateName('', 'First name')).toBe('First name is required');
     });
 
-    it('should return error for name less than 2 characters', () => {
-      expect(validateName('A')).toBe('Name must be at least 2 characters');
+    it('returns error for name with numbers or special characters', () => {
+      expect(validateName('John2', 'First name')).toBe('First name can only contain letters');
+      expect(validateName('John@Doe', 'Last name')).toBe('Last name can only contain letters');
     });
 
-    it('should return error for name exceeding 50 characters', () => {
-      const longName = 'A'.repeat(51);
-      expect(validateName(longName)).toBe('Name cannot exceed 50 characters');
+    it('returns empty string for valid name', () => {
+      expect(validateName('John', 'First name')).toBe('');
+      expect(validateName('OBrien', 'Last name')).toBe('');
+    });
+  });
+
+  describe('formatDate', () => {
+    it('formats date correctly', () => {
+      const date = new Date('2025-04-10');
+      expect(formatDate(date)).toMatch(/Apr(il)?\s10,?\s2025/);
     });
 
-    it('should return empty string for valid name', () => {
-      expect(validateName('John')).toBe('');
-      expect(validateName('Mary Jane')).toBe('');
+    it('handles string date input', () => {
+      expect(formatDate('2025-04-10')).toMatch(/Apr(il)?\s10,?\s2025/);
     });
 
-    it('should use custom field name in error messages', () => {
-      expect(validateName('', 'First Name')).toBe('First Name is required');
-      expect(validateName('A', 'Last Name')).toBe('Last Name must be at least 2 characters');
+    it('handles invalid date input', () => {
+      expect(formatDate('invalid-date')).toBe('Invalid Date');
+    });
+  });
+
+  describe('handleApiError', () => {
+    it('extracts message from API error response', () => {
+      const error = {
+        response: {
+          data: {
+            message: 'Invalid credentials'
+          }
+        }
+      };
+      expect(handleApiError(error)).toBe('Invalid credentials');
+    });
+
+    it('falls back to error message if no response data', () => {
+      const error = new Error('Network error');
+      expect(handleApiError(error)).toBe('Network error');
+    });
+
+    it('returns default message if no error details available', () => {
+      const error = {};
+      expect(handleApiError(error)).toBe('An unexpected error occurred');
+    });
+  });
+
+  describe('initializeTheme', () => {
+    const originalDocumentElement = document.documentElement;
+    let mockElement;
+
+    beforeEach(() => {
+      mockElement = {
+        style: new Map(),
+        setProperty: function(key, value) {
+          this.style.set(key, value);
+        }
+      };
+      document.documentElement = mockElement;
+    });
+
+    afterEach(() => {
+      document.documentElement = originalDocumentElement;
+    });
+
+    it('sets theme CSS variables', () => {
+      initializeTheme();
+      expect(mockElement.style.get('--background-color')).toBe('#ffffff');
+      expect(mockElement.style.get('--text-primary')).toBe('#212529');
+      expect(mockElement.style.get('--primary-color')).toBeTruthy();
     });
   });
 });

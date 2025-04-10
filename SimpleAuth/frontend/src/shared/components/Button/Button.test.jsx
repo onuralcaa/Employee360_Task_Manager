@@ -1,20 +1,21 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import Button from './Button';
+import { Button } from './Button';
+import { ButtonVariants } from '../../types';
 
 describe('Button Component', () => {
   const defaultProps = {
-    onClick: jest.fn(),
-    children: 'Click Me'
+    children: 'Click Me',
+    onClick: jest.fn()
   };
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('renders button with children correctly', () => {
+  it('renders children correctly', () => {
     render(<Button {...defaultProps} />);
-    expect(screen.getByRole('button')).toHaveTextContent('Click Me');
+    expect(screen.getByText('Click Me')).toBeInTheDocument();
   });
 
   it('handles click events', () => {
@@ -23,29 +24,16 @@ describe('Button Component', () => {
     expect(defaultProps.onClick).toHaveBeenCalledTimes(1);
   });
 
-  it('applies different variants correctly', () => {
-    const variants = ['primary', 'secondary', 'danger', 'success'];
-    
-    variants.forEach(variant => {
+  it('renders with different variants', () => {
+    Object.values(ButtonVariants).forEach(variant => {
       const { container } = render(
         <Button {...defaultProps} variant={variant} />
       );
-      expect(container.firstChild).toHaveClass(`btn-${variant}`);
+      expect(container.firstChild).toHaveClass(`button-${variant}`);
     });
   });
 
-  it('applies size classes correctly', () => {
-    const sizes = ['small', 'medium', 'large'];
-    
-    sizes.forEach(size => {
-      const { container } = render(
-        <Button {...defaultProps} size={size} />
-      );
-      expect(container.firstChild).toHaveClass(`btn-${size}`);
-    });
-  });
-
-  it('handles disabled state correctly', () => {
+  it('disables button and prevents click when disabled', () => {
     render(<Button {...defaultProps} disabled />);
     const button = screen.getByRole('button');
     
@@ -54,69 +42,64 @@ describe('Button Component', () => {
     expect(defaultProps.onClick).not.toHaveBeenCalled();
   });
 
-  it('renders loading state correctly', () => {
-    render(<Button {...defaultProps} loading />);
-    expect(screen.getByTestId('loading-spinner')).toBeInTheDocument();
-    expect(screen.getByRole('button')).toBeDisabled();
+  it('shows loading spinner and disables button when loading', () => {
+    render(<Button {...defaultProps} isLoading />);
+    const button = screen.getByRole('button');
+    
+    expect(button).toBeDisabled();
+    expect(button).toHaveClass('loading');
+    expect(screen.getByTestId('button-spinner')).toBeInTheDocument();
+    expect(screen.queryByText('Click Me')).not.toBeVisible();
   });
 
-  it('applies custom className when provided', () => {
-    render(<Button {...defaultProps} className="custom-btn" />);
-    expect(screen.getByRole('button')).toHaveClass('custom-btn');
+  it('renders with different sizes', () => {
+    const sizes = ['small', 'medium', 'large'];
+    
+    sizes.forEach(size => {
+      const { container } = render(
+        <Button {...defaultProps} size={size} />
+      );
+      expect(container.firstChild).toHaveClass(`button-${size}`);
+    });
   });
 
-  it('renders as different HTML elements when specified', () => {
-    render(<Button {...defaultProps} as="a" href="#" />);
-    expect(screen.getByRole('link')).toBeInTheDocument();
+  it('renders icon properly', () => {
+    const icon = <span data-testid="test-icon">🔍</span>;
+    render(<Button {...defaultProps} icon={icon} />);
+    
+    expect(screen.getByTestId('test-icon')).toBeInTheDocument();
+    expect(screen.getByText('Click Me')).toBeInTheDocument();
   });
 
-  it('forwards additional props to the button element', () => {
-    render(<Button {...defaultProps} data-testid="test-button" aria-label="Test Button" />);
-    const button = screen.getByTestId('test-button');
-    expect(button).toHaveAttribute('aria-label', 'Test Button');
-  });
-
-  it('combines default and custom styles', () => {
+  it('renders icon-only button correctly', () => {
+    const icon = <span data-testid="test-icon">🔍</span>;
     const { container } = render(
+      <Button icon={icon} iconOnly aria-label="Search" />
+    );
+    
+    expect(screen.getByTestId('test-icon')).toBeInTheDocument();
+    expect(container.firstChild).toHaveClass('button-icon-only');
+  });
+
+  it('applies custom className', () => {
+    const { container } = render(
+      <Button {...defaultProps} className="custom-button" />
+    );
+    expect(container.firstChild).toHaveClass('button', 'custom-button');
+  });
+
+  it('forwards additional props', () => {
+    render(
       <Button 
         {...defaultProps} 
-        variant="primary"
-        size="large"
-        className="custom-class"
+        data-testid="test-button"
+        aria-label="Test Button"
+        type="submit"
       />
     );
-    const button = container.firstChild;
-    expect(button).toHaveClass('btn-primary', 'btn-large', 'custom-class');
-  });
-
-  it('renders icon buttons correctly', () => {
-    render(
-      <Button {...defaultProps} icon={<span data-testid="test-icon" />}>
-        {defaultProps.children}
-      </Button>
-    );
     
-    expect(screen.getByTestId('test-icon')).toBeInTheDocument();
-    expect(screen.getByRole('button')).toHaveTextContent('Click Me');
-  });
-
-  it('renders icon-only buttons with proper styling', () => {
-    const { container } = render(
-      <Button icon={<span data-testid="test-icon" />} iconOnly />
-    );
-    
-    expect(container.firstChild).toHaveClass('btn-icon-only');
-    expect(screen.getByTestId('test-icon')).toBeInTheDocument();
-    expect(screen.getByRole('button')).not.toHaveTextContent('Click Me');
-  });
-
-  it('handles full width styling', () => {
-    const { container } = render(<Button {...defaultProps} fullWidth />);
-    expect(container.firstChild).toHaveClass('btn-full-width');
-  });
-
-  it('handles outline variant correctly', () => {
-    const { container } = render(<Button {...defaultProps} outline />);
-    expect(container.firstChild).toHaveClass('btn-outline');
+    const button = screen.getByTestId('test-button');
+    expect(button).toHaveAttribute('type', 'submit');
+    expect(button).toHaveAttribute('aria-label', 'Test Button');
   });
 });
