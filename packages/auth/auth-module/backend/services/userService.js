@@ -4,10 +4,13 @@ const User = require('../models/userModel');
 const { createError } = require('../utils/errorHandler');
 
 const generateToken = (id, role) => {
+  if (!process.env.JWT_SECRET) {
+    throw new Error('JWT_SECRET environment variable is not set');
+  }
   return jwt.sign(
     { id, role },
-    process.env.JWT_SECRET || 'jwt_secret_key',
-    { expiresIn: '30d' }
+    process.env.JWT_SECRET,
+    { expiresIn: process.env.JWT_EXPIRES_IN || '30d' }
   );
 };
 

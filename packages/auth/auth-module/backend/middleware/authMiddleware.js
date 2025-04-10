@@ -3,6 +3,10 @@ const User = require('../models/userModel');
 
 const auth = (requiredRole) => async (req, res, next) => {
   try {
+    if (!process.env.JWT_SECRET) {
+      throw new Error('JWT_SECRET environment variable is not set');
+    }
+
     if (!req.headers.authorization || !req.headers.authorization.startsWith('Bearer ')) {
       return res.status(401).json({ message: 'Not authorized, no token' });
     }
@@ -10,7 +14,7 @@ const auth = (requiredRole) => async (req, res, next) => {
     const token = req.headers.authorization.split(' ')[1];
     
     try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'jwt_secret_key');
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
       const user = await User.findById(decoded.id)
         .select('-password');
 

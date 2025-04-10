@@ -1,5 +1,5 @@
 // Set test environment variables
-process.env.JWT_SECRET = 'test_jwt_secret';
+process.env.JWT_SECRET = 'test-jwt-secret-' + Math.random().toString(36).substring(7);
 process.env.NODE_ENV = 'test';
 
 // Increase test timeout

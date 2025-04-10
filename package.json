@@ -17,7 +17,9 @@
     "test:frontend": "cd packages/auth/frontend && npm test",
     "test:coverage": "concurrently \"npm run test:backend -- --coverage\" \"npm run test:frontend -- --coverage\"",
     "install:all": "npm install && cd packages/auth/backend && npm install && cd ../frontend && npm install",
-    "init": "node init.js"
+    "init": "node init.js",
+    "predeploy": "node scripts/update-config.js",
+    "deploy": "npm run predeploy && cd packages/auth/backend && npm run start && cd ../../"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.3.4",
