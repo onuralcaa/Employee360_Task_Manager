@@ -1,70 +1,126 @@
 # Employee360 Task Manager 👥
 
-A simple web application I created to help businesses manage their employees and projects. Think of it as a digital HR assistant! 
+A comprehensive employee management and task tracking system with authentication and role-based permissions.
 
-## 🌟 What Can It Do?
+## 🌟 System Architecture
 
-- **Login & Register**: Employees and admins can create accounts and log in securely
-- **Different User Roles**: 
+Employee360 uses a modular architecture to promote reusability, maintainability, and separation of concerns:
+
+```
+employee360/
+├── auth-module/          # Authentication and user management
+│   ├── backend/          # Authentication API
+│   └── frontend/         # Authentication UI components
+├── employee-core/        # Employee management 
+│   ├── backend/          # Employee profiles and departments API
+│   └── frontend/         # Employee management UI
+├── task-module/          # Task and project management
+│   ├── backend/          # Tasks and projects API
+│   └── frontend/         # Task management UI
+└── shared/               # Shared utilities and components
+```
+
+### Module Responsibilities
+
+#### Auth Module
+- User authentication (login/register)
+- JWT token management
+- User roles and permissions
+- Basic user profiles
+
+#### Employee Core
+- Extended employee profiles
+- Department management
+- Employee skills and certifications
+- Performance reviews
+
+#### Task Module
+- Task creation and assignment
+- Project management
+- Task statuses and priorities
+- Comments and attachments
+
+## 🌟 Features
+
+- **Authentication**: Secure user login and registration
+- **Role-Based Access**: 
   - 👔 Admins can manage everything
   - 👤 Employees can view their tasks and update their profiles
-- **Theme Options**: Switch between light and dark modes for comfortable viewing
-- **User Profiles**: Keep track of employee information
-- **Coming Soon**: 
-  - 📝 Task management
-  - 🎯 Project tracking
+- **Employee Management**: Complete employee information and department organization
+- **Task Management**: Assign, track, and complete tasks
+- **Project Management**: Group tasks into projects with team members
+- **Theme Options**: Light and dark modes
 
-## 🚀 Getting Started
+## 🛠️ Technologies
 
-### What You Need First
-- Node.js installed on your computer ([Download here](https://nodejs.org/))
-- MongoDB database (I'm using MongoDB Atlas - it's free!)
-- Basic knowledge of command line/terminal
+- **Frontend**: React
+- **Backend**: Node.js + Express
+- **Database**: MongoDB
+- **Authentication**: JWT
 
-### Setup Steps
+## 📋 Getting Started
 
-1. Clone this project to your computer:
-```bash
-git clone https://github.com/yourusername/Employee360_Task_Manager.git
-cd Employee360_Task_Manager
-```
+### Prerequisites
 
-2. Install everything you need (do this once):
-```bash
-npm run install:all
-```
+- Node.js (v14 or higher)
+- MongoDB instance (local or Atlas)
 
-3. Create two files for your settings:
+### Installation
 
-In `SimpleAuth/backend/.env`:
-```
-NODE_ENV=development
-PORT=5000
-MONGO_URI=your_mongodb_connection_string
-JWT_SECRET=make_up_a_secret_key
-```
+1. Clone the repository:
+   ```
+   git clone https://github.com/yourusername/employee360.git
+   ```
 
-In `SimpleAuth/frontend/.env`:
-```
-VITE_API_URL=http://localhost:5000/api/users
-```
+2. Set up environment variables:
+   - Create `.env` files in each module's backend directory
+   - See the `.env.example` files for required variables
 
-4. Start the app:
-```bash
-npm start
-```
+3. Install dependencies and start services:
 
-The website will open at `http://localhost:3000` 🎉
+   ```
+   # Auth module setup
+   cd auth-module/backend
+   npm install
+   npm run dev
+   
+   # In a new terminal
+   cd employee-core/backend
+   npm install
+   npm run dev
+   
+   # In a new terminal
+   cd task-module/backend
+   npm install
+   npm run dev
+   
+   # Frontend setup (when available)
+   cd frontend
+   npm install
+   npm run dev
+   ```
 
-## 🛠️ What's Inside
+## 🔄 API Endpoints
 
-- **Frontend**: Made with React (the stuff you see on screen)
-- **Backend**: Node.js + Express (handles all the behind-the-scenes work)
-- **Database**: MongoDB (where all the data is stored)
+### Auth Module API (Port 5000)
+- `POST /api/auth/register` - Register a new user
+- `POST /api/auth/login` - Authenticate a user
+- `GET /api/auth/profile` - Get current user profile
+- `PUT /api/auth/profile` - Update user profile
 
-## 🎨 Screenshots
+### Employee Core API (Port 5001)
+- `GET /api/employees` - Get all employees (admin only)
+- `GET /api/employees/:userId` - Get employee profile
+- `PUT /api/employees/:userId` - Update employee profile
+- `GET /api/departments` - Get all departments
+- `POST /api/departments` - Create department (admin only)
 
-[Coming Soon!]
+### Task Module API (Port 5002)
+- `GET /api/tasks` - Get user tasks
+- `POST /api/tasks` - Create a new task (admin only)
+- `PUT /api/tasks/:id` - Update task status
+- `GET /api/projects` - Get all projects
+- `POST /api/projects` - Create project (admin only)
 
 ## 🤝 Want to Help?
 

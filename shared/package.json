@@ -1,0 +1,15 @@
+{
+  "name": "@employee360/shared",
+  "version": "1.0.0",
+  "description": "Shared utilities for Employee360 Task Manager",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "dependencies": {
+    "winston": "^3.8.2"
+  },
+  "devDependencies": {
+    "jest": "^29.5.0"
+  }
+}
