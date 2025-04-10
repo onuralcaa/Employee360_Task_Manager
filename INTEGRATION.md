@@ -9,8 +9,8 @@ The system uses the following module dependency structure:
 ```
 @employee360/shared
   └─── @employee360/auth-module-backend
-        └─── @employee360/employee-core-backend
-              └─── @employee360/task-module-backend
+        └─── @employee360/packages/employee-backend
+              └─── @employee360/packages/task
 ```
 
 ## Local Development Setup
@@ -25,9 +25,9 @@ For local development, you'll need to use npm workspace or link the modules loca
    npm link
    cd ../auth-module/backend
    npm link @employee360/shared
-   cd ../../employee-core/backend
+   cd ../../packages/employee/backend
    npm link @employee360/shared
-   cd ../../task-module/backend
+   cd ../../../packages/task
    npm link @employee360/shared
    ```
 
@@ -35,18 +35,18 @@ For local development, you'll need to use npm workspace or link the modules loca
    ```bash
    cd auth-module/backend
    npm link
-   cd ../../employee-core/backend
+   cd ../../packages/employee/backend
    npm link @employee360/auth-module-backend
-   cd ../../task-module/backend
+   cd ../../../packages/task
    npm link @employee360/auth-module-backend
    ```
 
 3. Link the employee-core module:
    ```bash
-   cd employee-core/backend
+   cd packages/employee/backend
    npm link
-   cd ../../task-module/backend
-   npm link @employee360/employee-core-backend
+   cd ../../../packages/task
+   npm link @employee360/packages/employee-backend
    ```
 
 ### Option 2: Using a Monorepo Tool
@@ -62,8 +62,8 @@ Consider setting up a monorepo using one of these tools:
 Start the services in this order:
 
 1. Auth Module: `cd auth-module/backend && npm run dev`
-2. Employee Core: `cd employee-core/backend && npm run dev`
-3. Task Module: `cd task-module/backend && npm run dev`
+2. Employee Core: `cd packages/employee/backend && npm run dev`
+3. Task Module: `cd packages/task && npm run dev`
 
 ## Module Communication
 

@@ -11,10 +11,10 @@ employee360/
 ├── auth-module/          # Authentication and user management
 │   ├── backend/          # Authentication API
 │   └── frontend/         # Authentication UI components
-├── employee-core/        # Employee management 
+├── packages/employee/    # Employee management 
 │   ├── backend/          # Employee profiles and departments API
 │   └── frontend/         # Employee management UI
-├── task-module/          # Task and project management
+├── packages/task/        # Task and project management
 │   ├── backend/          # Tasks and projects API
 │   └── frontend/         # Task management UI
 └── shared/               # Shared utilities and components
@@ -85,12 +85,12 @@ employee360/
    npm run dev
    
    # In a new terminal
-   cd employee-core/backend
+   cd packages/employee/backend
    npm install
    npm run dev
    
    # In a new terminal
-   cd task-module/backend
+   cd packages/task/backend
    npm install
    npm run dev
    

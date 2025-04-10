@@ -1,0 +1,218 @@
+/* Sayfanın ortasında düzgün görünmesi için */
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - var(--header-height) - var(--footer-height));
+  padding: var(--spacing-xl);
+  background-color: var(--background-secondary);
+}
+
+/* Login kutusu */
+.login-form {
+  width: 100%;
+  max-width: 400px;
+  background-color: var(--background-primary);
+  padding: var(--spacing-xl);
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--border-color);
+}
+
+.login-container .card {
+  width: 100%;
+  max-width: 400px;
+}
+
+/* Başlık */
+.login-form h1 {
+  text-align: center;
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-xl);
+}
+
+/* Input groups for form validation */
+.input-group {
+  margin-bottom: var(--spacing-md);
+  width: 100%;
+  text-align: left;
+}
+
+/* Form içindeki tüm inputların eşit olması */
+.login-box input {
+  width: 100%; /* 📌 Tüm inputları eşit genişlikte yap */
+  padding: 10px;
+  margin: 10px 0;
+  border: 1px solid var(--border-color);
+  border-radius: 5px;
+  font-size: 16px;
+  box-sizing: border-box; /* 📌 Padding genişliği değiştirmesin */
+  background-color: var(--input-background);
+  color: var(--text-color);
+}
+
+/* Input error styling */
+.login-box input.error,
+.password-container input.error {
+  border-color: var(--error-color);
+  background-color: rgba(255, 0, 0, 0.03);
+}
+
+/* Error message styling */
+.error-message {
+  color: var(--error-color);
+  font-size: 12px;
+  margin-top: 5px;
+  text-align: left;
+  padding-left: 2px;
+}
+
+/* Şifre ve ikonun olduğu container */
+.password-container {
+  position: relative;
+  width: 100%; /* 📌 Tüm inputlarla aynı genişlikte olsun */
+  display: flex;
+  align-items: center;
+}
+
+/* Şifre inputu */
+.password-container input {
+  flex: 1;
+  padding-right: 40px; /* 📌 Göz ikonuna yer bırak */
+}
+
+/* Göz ikonunun stili */
+.toggle-password {
+  position: absolute;
+  right: 10px;
+  cursor: pointer;
+  font-size: 18px;
+  color: var(--text-secondary);
+  background: none;
+  border: none;
+  padding: 0;
+}
+
+.toggle-password:hover {
+  color: var(--primary-color);
+}
+
+/* Giriş butonu */
+.login-box button {
+  width: 100%;
+  padding: 10px;
+  background-color: var(--primary-color); /* Use theme variable */
+  border: none;
+  color: var(--button-text); /* Use theme variable */
+  font-size: 18px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: 0.3s;
+  margin-top: 10px;
+}
+
+.login-box button:hover {
+  background-color: var(--secondary-color); /* Use theme variable */
+}
+
+.login-button {
+  width: 100%;
+  margin-top: var(--spacing-lg);
+}
+
+/* Kayıt Ol Linki */
+.register-link {
+  margin-top: var(--spacing-lg);
+  text-align: center;
+  color: var(--text-secondary);
+}
+
+.register-link span {
+  color: var(--primary-color);
+  cursor: pointer;
+  transition: color var(--transition-fast);
+}
+
+.register-link span:hover {
+  color: var(--primary-dark);
+}
+
+.login-footer {
+  margin-top: var(--spacing-xl);
+  text-align: center;
+  color: var(--text-secondary);
+}
+
+.login-footer a {
+  color: var(--primary-color);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color var(--transition-fast);
+}
+
+.login-footer a:hover {
+  color: var(--primary-dark);
+}
+
+.role-selection {
+  display: flex;
+  justify-content: center;
+  gap: var(--spacing-lg); /* Butonlar arasında boşluk */
+  margin: var(--spacing-lg) 0;
+}
+
+.role-selection label {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-lg);
+  border: 2px solid var(--border-color);
+  border-radius: var(--border-radius-sm);
+  cursor: pointer;
+  font-weight: bold;
+  transition: all var(--transition-fast);
+  background-color: var(--background-primary);
+  color: var(--text-primary);
+}
+
+.role-selection input {
+  display: none; /* Varsayılan radyo butonlarını gizle */
+}
+
+.role-selection label:hover {
+  border-color: var(--primary-color);
+  background-color: var(--background-secondary);
+}
+
+.role-selection input[type="radio"] {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+}
+
+.role-selection input[type="radio"]:checked + label {
+  border-color: var(--primary-color);
+  background-color: var(--primary-light);
+  color: var(--primary-color);
+}
+
+/* Add responsive styles for Login */
+@media (max-width: 768px) {
+  .login-box {
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .login-container {
+    padding: var(--spacing-md);
+  }
+}
+
+@media (min-width: 769px) {
+  .login-box {
+    width: 350px;
+  }
+}

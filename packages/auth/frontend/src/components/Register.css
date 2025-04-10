@@ -1,0 +1,200 @@
+/* Sayfanın ortasında düzgün görünmesi için */
+.register-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - var(--header-height) - var(--footer-height));
+  padding: var(--spacing-xl);
+  background-color: var(--background-secondary);
+}
+
+/* Form kutusu */
+.register-container .card {
+  width: 100%;
+  max-width: 500px;
+}
+
+.register-form {
+  width: 100%;
+  max-width: 400px;
+  background-color: var(--background-primary);
+  padding: var(--spacing-xl);
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--shadow-md);
+}
+
+/* Başlık */
+.register-form h1 {
+  text-align: center;
+  color: var(--primary-color);
+  margin-bottom: var(--spacing-xl);
+}
+
+/* Form içindeki input alanları */
+.register-box input {
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  border: 1px solid var(--border-color);
+  border-radius: 5px;
+  font-size: 16px;
+  box-sizing: border-box; /* 📌 Padding genişliği değiştirmesin */
+  background-color: var(--input-background);
+  color: var(--text-color);
+}
+
+/* Şifre ve ikonun olduğu container */
+.password-container {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+
+/* Şifre inputu */
+.password-container input {
+  flex: 1;
+  padding-right: 40px; /* 📌 Göz ikonuna yer bırak */
+}
+
+/* Göz ikonunun stili */
+.toggle-password {
+  position: absolute;
+  right: 10px;
+  cursor: pointer;
+  font-size: 18px;
+  color: var(--text-color);
+}
+
+/* Kayıt butonu */
+.register-box button {
+  width: 100%;
+  padding: 10px;
+  background-color: var(--primary-color); /* Use theme variable */
+  border: none;
+  color: var(--button-text); /* Use theme variable */
+  font-size: 18px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: 0.3s;
+  margin-top: 10px;
+}
+
+.register-box button:hover {
+  background-color: var(--secondary-color); /* Use theme variable */
+}
+
+/* Giriş Yap Linki */
+.login-link {
+  margin-top: var(--spacing-lg);
+  text-align: center;
+  color: var(--text-secondary);
+}
+
+.login-link span {
+  color: var(--primary-color);
+  cursor: pointer;
+  transition: color var(--transition-fast);
+}
+
+.login-link span:hover {
+  color: var(--primary-dark);
+}
+
+/* Form row */
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+}
+
+/* Role selection */
+.role-selection {
+  display: flex;
+  justify-content: center;
+  gap: var(--spacing-lg);
+  margin: var(--spacing-lg) 0;
+}
+
+.role-selection label {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-lg);
+  border: 2px solid var(--border-color);
+  border-radius: var(--border-radius-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.role-selection label:hover {
+  border-color: var(--primary-color);
+}
+
+.role-selection input[type="radio"] {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+}
+
+.role-selection input[type="radio"]:checked + label {
+  border-color: var(--primary-color);
+  background-color: var(--primary-light);
+  color: var(--primary-color);
+}
+
+/* Register button */
+.register-button {
+  width: 100%;
+  margin-top: var(--spacing-lg);
+}
+
+/* Register footer */
+.register-footer {
+  margin-top: var(--spacing-xl);
+  text-align: center;
+  color: var(--text-secondary);
+}
+
+.register-footer a {
+  color: var(--primary-color);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color var(--transition-fast);
+}
+
+.register-footer a:hover {
+  color: var(--primary-dark);
+}
+
+/* Add responsive styles for Register */
+@media (max-width: 768px) {
+  .register-box {
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
+  }
+}
+
+@media (min-width: 769px) {
+  .register-box {
+    width: 350px;
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+  .register-container {
+    padding: var(--spacing-md);
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .role-selection {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}

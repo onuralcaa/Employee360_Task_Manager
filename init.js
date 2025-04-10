@@ -13,8 +13,8 @@ console.log('\x1b[36m%s\x1b[0m', '🚀 Employee360 Görev Yöneticisi Başlatıl
 
 // Function to create .env file if it doesn't exist
 function createEnvFile() {
-  const backendEnvPath = path.join(__dirname, 'SimpleAuth', 'backend', '.env');
-  const frontendEnvPath = path.join(__dirname, 'SimpleAuth', 'frontend', '.env');
+  const backendEnvPath = path.join(__dirname, 'packages', 'auth', 'backend', '.env');
+  const frontendEnvPath = path.join(__dirname, 'packages', 'auth', 'frontend', '.env');
   
   if (!fs.existsSync(backendEnvPath)) {
     console.log('\x1b[33m%s\x1b[0m', '📝 Backend .env dosyası oluşturuluyor...');
