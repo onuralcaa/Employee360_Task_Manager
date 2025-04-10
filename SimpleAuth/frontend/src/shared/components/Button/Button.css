@@ -1,18 +1,19 @@
 .button {
-  padding: var(--spacing-sm) var(--spacing-lg);
-  border-radius: var(--border-radius-sm);
-  border: none;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all var(--transition-fast);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 40px;
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+  gap: 8px;
 }
 
 .button:disabled {
-  opacity: 0.7;
+  opacity: 0.6;
   cursor: not-allowed;
 }
 
@@ -26,8 +27,9 @@
 }
 
 .button-secondary {
-  background-color: var(--text-secondary);
-  color: white;
+  background-color: transparent;
+  border: 1px solid var(--primary-color);
+  color: var(--primary-color);
 }
 
 .button-secondary:hover:not(:disabled) {
@@ -54,19 +56,55 @@
   filter: brightness(90%);
 }
 
+.button-text {
+  background-color: transparent;
+  color: var(--primary-color);
+  padding: 4px 8px;
+}
+
+.button-small {
+  padding: 4px 8px;
+  font-size: 12px;
+}
+
+.button-large {
+  padding: 12px 24px;
+  font-size: 16px;
+}
+
+.button-icon-only {
+  padding: 8px;
+  width: 36px;
+  height: 36px;
+}
+
+.button-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .button.loading {
-  color: transparent;
   position: relative;
+  color: transparent;
 }
 
 .button-spinner {
   position: absolute;
-  width: 16px;
-  height: 16px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  border-radius: 50%;
-  border-top-color: white;
-  animation: spin 0.8s linear infinite;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.button:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+.button:active:not(:disabled) {
+  transform: scale(0.98);
 }
 
 @keyframes spin {

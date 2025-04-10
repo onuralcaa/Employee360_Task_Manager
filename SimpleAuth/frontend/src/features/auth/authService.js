@@ -1,39 +1,33 @@
 import api from '../../api/api';
-import { storage } from '../../utils/helpers';
-import { AuthActionTypes } from './types';
 
 export const authService = {
   login: async (credentials) => {
-    const response = await api.post('/users/login', credentials);
-    if (response.data) {
-      storage.set('token', response.data.token);
-      storage.set('user', response.data.user);
-    }
-    return response.data;
+    const response = await api.post('/auth/login', credentials);
+    return response;
   },
 
   register: async (userData) => {
-    const response = await api.post('/users/register', userData);
-    return response.data;
+    const response = await api.post('/auth/register', userData);
+    return response;
   },
 
-  logout: () => {
-    storage.clear();
+  logout: async () => {
+    const response = await api.post('/auth/logout');
+    return response;
   },
 
-  updateProfile: async (profileData) => {
-    const response = await api.put('/users/profile', profileData);
-    if (response.data) {
-      storage.set('user', response.data);
-    }
-    return response.data;
+  getProfile: async () => {
+    const response = await api.get('/users/profile');
+    return response;
   },
 
-  getCurrentUser: () => {
-    return storage.get('user');
+  updateProfile: async (userData) => {
+    const response = await api.put('/users/profile', userData);
+    return response;
   },
 
-  isAuthenticated: () => {
-    return !!storage.get('token');
+  verifyToken: async (token) => {
+    const response = await api.post('/auth/verify', { token });
+    return response;
   }
 };

@@ -1,110 +1,91 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
-import { auth } from '../api/api';
-import { storage, handleApiError } from '../utils/helpers';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { storage } from '../utils/storage';
+import * as authService from '../features/auth/authService';
 
-const AuthContext = createContext(null);
+const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const initAuth = async () => {
-      try {
-        const userData = storage.get('user');
-        const token = storage.get('token');
-        
-        if (userData && token) {
-          // Verify token is still valid
-          const response = await auth.getProfile();
-          if (response.data) {
-            setUser(userData);
-          } else {
-            throw new Error('Session expired');
-          }
-        }
-      } catch (error) {
-        storage.clear();
-        setError(handleApiError(error));
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    initAuth();
+    // Check for stored user data on mount
+    const storedUser = storage.get('user');
+    if (storedUser) {
+      setUser(storedUser);
+    }
+    setLoading(false);
   }, []);
 
-  const login = async ({ username, password }) => {
+  const login = useCallback(async (credentials) => {
     try {
+      const response = await authService.login(credentials);
+      storage.set('token', response.data.token);
+      storage.set('user', response.data.user);
+      setUser(response.data.user);
       setError(null);
-      const response = await auth.login({ username, password });
-      const { token, ...userData } = response.data;
-      storage.set('token', token);
-      storage.set('user', userData);
-      setUser(userData);
-      return { success: true };
+      return response.data;
     } catch (error) {
-      const message = handleApiError(error);
-      setError(message);
-      return { success: false, message };
+      setError(error.message);
+      throw error;
     }
-  };
+  }, []);
 
-  const register = async (userData) => {
+  const register = useCallback(async (userData) => {
     try {
+      const response = await authService.register(userData);
+      storage.set('token', response.data.token);
+      storage.set('user', response.data.user);
+      setUser(response.data.user);
       setError(null);
-      await auth.register(userData);
-      return { success: true };
+      return response.data;
     } catch (error) {
-      const message = handleApiError(error);
-      setError(message);
-      return { success: false, message };
+      setError(error.message);
+      throw error;
     }
-  };
+  }, []);
 
-  const updateProfile = async (profileData) => {
+  const updateUser = useCallback(async (userData) => {
     try {
+      const response = await authService.updateProfile(userData);
+      storage.set('user', response.data);
+      setUser(response.data);
       setError(null);
-      const response = await auth.updateProfile(profileData);
-      const updatedUser = response.data;
-      storage.set('user', updatedUser);
-      setUser(updatedUser);
-      return { success: true };
+      return response.data;
     } catch (error) {
-      const message = handleApiError(error);
-      setError(message);
-      return { success: false, message };
+      setError(error.message);
+      throw error;
     }
-  };
+  }, []);
 
-  const logout = () => {
+  const logout = useCallback(() => {
     storage.clear();
     setUser(null);
     setError(null);
-  };
+  }, []);
 
-  const clearError = () => setError(null);
+  const clearError = useCallback(() => {
+    setError(null);
+  }, []);
 
-  const isAuthenticated = () => !!user;
+  const isAuthenticated = useCallback(() => {
+    return !!user;
+  }, [user]);
 
   const value = {
     user,
-    login,
-    logout,
-    register,
-    updateProfile,
-    isAuthenticated,
-    loading,
     error,
-    clearError
+    loading,
+    login,
+    register,
+    updateUser,
+    logout,
+    clearError,
+    isAuthenticated
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
 export const useAuth = () => {
@@ -114,3 +95,5 @@ export const useAuth = () => {
   }
   return context;
 };
+
+export { AuthContext };

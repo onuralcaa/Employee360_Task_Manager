@@ -1,31 +1,26 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import './ErrorBoundary.css';
 
-class ErrorBoundary extends React.Component {
+export class ErrorBoundary extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { 
-      hasError: false,
-      error: null,
-      errorInfo: null
-    };
+    this.state = { hasError: false, error: null };
   }
 
   static getDerivedStateFromError(error) {
-    return { hasError: true };
+    return { hasError: true, error };
   }
 
   componentDidCatch(error, errorInfo) {
-    this.setState({
-      error: error,
-      errorInfo: errorInfo
-    });
-
-    // Log error to logging service
-    console.error('Error:', error);
-    console.error('Error Info:', errorInfo);
+    // Log error to error reporting service
+    console.error('ErrorBoundary caught an error:', error, errorInfo);
   }
+
+  handleRefresh = () => {
+    window.location.reload();
+  };
 
   render() {
     if (this.state.hasError) {
@@ -33,28 +28,19 @@ class ErrorBoundary extends React.Component {
         <div className="error-boundary">
           <h1>Something went wrong</h1>
           <p>We're sorry for the inconvenience. Please try refreshing the page or returning to the dashboard.</p>
-          
+          {process.env.NODE_ENV === 'development' && (
+            <pre className="error-details">
+              {this.state.error && this.state.error.toString()}
+            </pre>
+          )}
           <div className="error-actions">
-            <button 
-              onClick={() => window.location.reload()}
-              className="retry-button"
-            >
-              Refresh Page
+            <button className="retry-button" onClick={this.handleRefresh}>
+              Try again
             </button>
-            <Link to="/dashboard" className="home-link">
-              Return to Dashboard
+            <Link to="/" className="home-link">
+              Back to Home
             </Link>
           </div>
-
-          {process.env.NODE_ENV === 'development' && (
-            <details className="error-details">
-              <summary>Error Details</summary>
-              <pre>
-                {this.state.error?.toString()}
-                {this.state.errorInfo?.componentStack}
-              </pre>
-            </details>
-          )}
         </div>
       );
     }
@@ -63,4 +49,6 @@ class ErrorBoundary extends React.Component {
   }
 }
 
-export default ErrorBoundary;
+ErrorBoundary.propTypes = {
+  children: PropTypes.node.isRequired
+};

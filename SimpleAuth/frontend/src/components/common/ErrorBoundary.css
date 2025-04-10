@@ -3,37 +3,38 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 100vh;
-  padding: var(--spacing-lg);
+  padding: 2rem;
   text-align: center;
+  min-height: 50vh;
   background-color: var(--background-secondary);
 }
 
 .error-boundary h1 {
   color: var(--error-color);
-  margin-bottom: var(--spacing-md);
+  margin-bottom: 1rem;
 }
 
 .error-boundary p {
   color: var(--text-secondary);
+  margin-bottom: 2rem;
   max-width: 600px;
-  margin-bottom: var(--spacing-xl);
 }
 
 .error-actions {
   display: flex;
-  gap: var(--spacing-md);
-  margin-bottom: var(--spacing-xl);
+  gap: 1rem;
+  margin-top: 1rem;
 }
 
 .retry-button {
   background-color: var(--primary-color);
   color: white;
-  padding: var(--spacing-sm) var(--spacing-lg);
+  padding: 0.5rem 1rem;
   border: none;
-  border-radius: var(--border-radius-sm);
+  border-radius: 4px;
   cursor: pointer;
-  transition: background-color var(--transition-fast);
+  font-weight: 500;
+  transition: background-color 0.2s;
 }
 
 .retry-button:hover {
@@ -41,23 +42,29 @@
 }
 
 .home-link {
-  background-color: var(--text-secondary);
-  color: white;
-  padding: var(--spacing-sm) var(--spacing-lg);
-  border-radius: var(--border-radius-sm);
+  color: var(--primary-color);
   text-decoration: none;
-  transition: background-color var(--transition-fast);
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--primary-color);
+  border-radius: 4px;
+  transition: all 0.2s;
 }
 
 .home-link:hover {
-  background-color: var(--text-primary);
+  background-color: var(--primary-color);
+  color: white;
 }
 
 .error-details {
-  width: 100%;
-  max-width: 800px;
-  margin-top: var(--spacing-lg);
-  text-align: left;
+  background-color: var(--background-secondary);
+  padding: 1rem;
+  border-radius: 4px;
+  margin: 1rem 0;
+  max-width: 100%;
+  overflow-x: auto;
+  font-family: monospace;
+  font-size: 0.875rem;
+  color: var(--error-color);
 }
 
 .error-details summary {

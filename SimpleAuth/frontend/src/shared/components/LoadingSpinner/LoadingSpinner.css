@@ -6,28 +6,31 @@
 }
 
 .loading-spinner {
-  border-radius: 50%;
-  border: 3px solid rgba(0, 0, 0, 0.1);
-  border-top-color: var(--primary-color);
-  animation: spin 1s linear infinite;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.loading-spinner-small {
+.spinner-circle {
+  border: 3px solid rgba(0, 0, 0, 0.1);
+  border-top-color: #3498db;
+  border-radius: 50%;
+  animation: spin 1s ease-in-out infinite;
+}
+
+.loading-spinner-small .spinner-circle {
   width: 20px;
   height: 20px;
-  border-width: 2px;
 }
 
-.loading-spinner-medium {
+.loading-spinner-medium .spinner-circle {
+  width: 30px;
+  height: 30px;
+}
+
+.loading-spinner-large .spinner-circle {
   width: 40px;
   height: 40px;
-  border-width: 3px;
-}
-
-.loading-spinner-large {
-  width: 60px;
-  height: 60px;
-  border-width: 4px;
 }
 
 @keyframes spin {

@@ -8,6 +8,10 @@
     "start:frontend": "cd SimpleAuth/frontend && npm run dev",
     "dev": "concurrently \"npm run start:backend\" \"npm run start:frontend\"",
     "build": "cd SimpleAuth/frontend && npm run build",
+    "test": "concurrently \"npm run test:backend\" \"npm run test:frontend\"",
+    "test:backend": "cd SimpleAuth/backend && npm test",
+    "test:frontend": "cd SimpleAuth/frontend && npm test",
+    "test:coverage": "concurrently \"npm run test:backend -- --coverage\" \"npm run test:frontend -- --coverage\"",
     "install:all": "npm install && cd SimpleAuth/backend && npm install && cd ../frontend && npm install",
     "init": "node init.js"
   },

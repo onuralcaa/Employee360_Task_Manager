@@ -1,15 +1,14 @@
 import { useState, useCallback } from 'react';
 
-export function useForm(initialValues = {}, validationFields = []) {
+export const useForm = (initialValues = {}, validationRules = {}) => {
   const [values, setValues] = useState(initialValues);
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const validateField = (name, value) => {
-    // Add your validation logic here
-    if (!value && validationFields.includes(name)) {
-      return `${name} is required`;
+    if (validationRules[name]) {
+      return validationRules[name](value);
     }
     return '';
   };
@@ -18,54 +17,50 @@ export function useForm(initialValues = {}, validationFields = []) {
     const { name, value } = e.target;
     setValues(prev => ({ ...prev, [name]: value }));
     
+    // Clear error when field is changed
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: validateField(name, value) }));
     }
-  }, [errors]);
+  }, [errors, validationRules]);
 
   const handleBlur = useCallback((e) => {
-    const { name, value } = e.target;
+    const { name } = e.target;
     setTouched(prev => ({ ...prev, [name]: true }));
-    setErrors(prev => ({ ...prev, [name]: validateField(name, value) }));
-  }, []);
+    setErrors(prev => ({ ...prev, [name]: validateField(name, values[name]) }));
+  }, [values, validationRules]);
 
-  const handleSubmit = useCallback(async (onSubmit) => {
-    try {
-      setIsSubmitting(true);
-      
-      // Validate all fields
-      const newErrors = {};
-      validationFields.forEach(field => {
-        const error = validateField(field, values[field]);
-        if (error) newErrors[field] = error;
-      });
+  const handleSubmit = useCallback((onSubmit) => async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
 
-      setErrors(newErrors);
-      
-      // Mark all fields as touched
-      const touchedFields = validationFields.reduce((acc, field) => ({
-        ...acc,
-        [field]: true
-      }), {});
-      setTouched(touchedFields);
-
-      // If there are errors, don't submit
-      if (Object.keys(newErrors).length > 0) {
-        return;
+    // Validate all fields
+    const newErrors = {};
+    Object.keys(values).forEach(name => {
+      const error = validateField(name, values[name]);
+      if (error) {
+        newErrors[name] = error;
       }
+    });
 
-      await onSubmit(values);
-    } catch (error) {
-      setErrors(prev => ({
-        ...prev,
-        submit: error.message || 'An error occurred'
-      }));
-    } finally {
-      setIsSubmitting(false);
+    setErrors(newErrors);
+    setTouched(Object.keys(values).reduce((acc, key) => ({ ...acc, [key]: true }), {}));
+
+    // If there are no errors, submit
+    if (Object.keys(newErrors).length === 0) {
+      try {
+        await onSubmit(values);
+      } catch (error) {
+        setErrors(prev => ({
+          ...prev,
+          submit: error.message || 'An error occurred'
+        }));
+      }
     }
-  }, [values, validationFields]);
 
-  const reset = useCallback(() => {
+    setIsSubmitting(false);
+  }, [values, validationRules]);
+
+  const resetForm = useCallback(() => {
     setValues(initialValues);
     setErrors({});
     setTouched({});
@@ -80,6 +75,6 @@ export function useForm(initialValues = {}, validationFields = []) {
     handleChange,
     handleBlur,
     handleSubmit,
-    reset
+    resetForm
   };
-}
+};

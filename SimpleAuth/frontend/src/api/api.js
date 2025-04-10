@@ -1,14 +1,15 @@
 import axios from 'axios';
-import { storage } from '../utils/helpers';
+import { storage } from '../utils/storage';
 
 const api = axios.create({
-  baseURL: '/api',  // Changed to use relative path since we're using Vite's proxy
+  baseURL: process.env.VITE_API_URL || '/api',
   headers: {
-    'Content-Type': 'application/json'
+    'Content-Type': 'application/json',
+    'Accept': 'application/json'
   }
 });
 
-// Request interceptor
+// Add auth header if token exists
 api.interceptors.request.use(
   (config) => {
     const token = storage.get('token');
@@ -17,78 +18,23 @@ api.interceptors.request.use(
     }
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
-// Response interceptor
+// Handle response errors
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
-      // Clear stored data on authentication error
-      storage.clear();
-      window.location.href = '/login';
+    if (error.response) {
+      if (error.response.status === 401) {
+        // Clear auth data on unauthorized
+        storage.remove('token');
+        storage.remove('user');
+      }
+      throw new Error(error.response.data.message || 'An error occurred');
     }
-    return Promise.reject(error);
+    throw new Error('Network Error');
   }
 );
-
-export const auth = {
-  register: async (userData) => {
-    try {
-      const response = await api.post('/users/register', userData);
-      return response.data;
-    } catch (error) {
-      throw error;
-    }
-  },
-
-  login: async (credentials) => {
-    try {
-      const response = await api.post('/users/login', credentials);
-      return response.data;
-    } catch (error) {
-      throw error;
-    }
-  },
-
-  getProfile: async () => {
-    try {
-      const response = await api.get('/users/profile');
-      return response.data;
-    } catch (error) {
-      throw error;
-    }
-  },
-
-  updateProfile: async (profileData) => {
-    try {
-      const response = await api.put('/users/profile', profileData);
-      return response.data;
-    } catch (error) {
-      throw error;
-    }
-  },
-
-  getUsers: async (params = {}) => {
-    try {
-      const response = await api.get('/users/users', { params });
-      return response.data;
-    } catch (error) {
-      throw error;
-    }
-  },
-
-  getUserById: async (userId) => {
-    try {
-      const response = await api.get(`/users/users/${userId}`);
-      return response.data;
-    } catch (error) {
-      throw error;
-    }
-  }
-};
 
 export default api;
