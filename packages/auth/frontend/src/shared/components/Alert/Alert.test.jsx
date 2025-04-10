@@ -36,11 +36,22 @@ describe('Alert Component', () => {
 
   it('auto-dismisses after timeout if autoClose is true', () => {
     jest.useFakeTimers();
-    render(<Alert {...defaultProps} autoClose timeout={3000} />);
     
+    render(
+      <Alert 
+        {...defaultProps} 
+        autoClose 
+        timeout={3000} 
+      />
+    );
+
     expect(defaultProps.onDismiss).not.toHaveBeenCalled();
+    
+    // Fast-forward time
     jest.advanceTimersByTime(3000);
-    expect(defaultProps.onDismiss).toHaveBeenCalled();
+    
+    // Verify onDismiss was called
+    expect(defaultProps.onDismiss).toHaveBeenCalledTimes(1);
     
     jest.useRealTimers();
   });

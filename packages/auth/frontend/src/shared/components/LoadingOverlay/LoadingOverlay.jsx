@@ -7,19 +7,31 @@ export const LoadingOverlay = ({
   isLoading,
   children,
   message = 'Loading...',
-  className = ''
+  className = '',
+  ...props
 }) => {
-  if (!isLoading) return children;
-
-  const overlayClasses = ['loading-overlay', className].filter(Boolean).join(' ');
+  const containerClasses = [
+    'loading-overlay-container',
+    className
+  ].filter(Boolean).join(' ');
 
   return (
-    <div className="loading-overlay-container">
+    <div className={containerClasses} style={{ position: 'relative' }} {...props}>
       {children}
       {isLoading && (
-        <div className={overlayClasses}>
+        <div 
+          className="loading-overlay" 
+          style={{ 
+            position: 'absolute',
+            backgroundColor: 'rgba(255, 255, 255, 0.8)'
+          }}
+        >
           <div className="loading-overlay-content">
-            <LoadingSpinner size="large" />
+            <LoadingSpinner 
+              size="large" 
+              data-testid="loading-spinner"
+              aria-label="Loading content"
+            />
             {message && (
               <div className="loading-message" role="status">
                 {message}

@@ -9,6 +9,8 @@ export const Button = ({
   isLoading = false,
   disabled = false,
   className = '',
+  icon,
+  iconOnly = false,
   ...props
 }) => {
   const buttonClasses = [
@@ -16,6 +18,7 @@ export const Button = ({
     `button-${variant}`,
     `button-${size}`,
     isLoading && 'loading',
+    iconOnly && 'button-icon-only',
     className
   ].filter(Boolean).join(' ');
 
@@ -31,12 +34,17 @@ export const Button = ({
             className="button-spinner" 
             data-testid="button-spinner"
             role="progressbar"
-            aria-label="Loading"
+            aria-valuetext="Loading..."
           />
-          <span className="visually-hidden">Loading...</span>
+          <span className="sr-only">Loading...</span>
         </>
       ) : (
-        children
+        <>
+          {icon && <span className="button-icon">{icon}</span>}
+          <span className={isLoading ? 'sr-only' : undefined}>
+            {children}
+          </span>
+        </>
       )}
     </button>
   );
@@ -49,5 +57,7 @@ Button.propTypes = {
   isLoading: PropTypes.bool,
   disabled: PropTypes.bool,
   className: PropTypes.string,
-  onClick: PropTypes.func
+  onClick: PropTypes.func,
+  icon: PropTypes.node,
+  iconOnly: PropTypes.bool
 };

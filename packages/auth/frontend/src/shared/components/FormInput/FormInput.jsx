@@ -14,13 +14,12 @@ export const FormInput = ({
   const inputId = id || `input-${Math.random().toString(36).substr(2, 9)}`;
   const inputClasses = [
     'form-control',
-    error && touched && 'input-error',
+    error && 'input-error',
     touched && 'input-touched',
-    className
   ].filter(Boolean).join(' ');
 
   return (
-    <div className={`form-group ${error && touched ? 'has-error' : ''} ${className}`}>
+    <div className="form-group">
       {label && (
         <label htmlFor={inputId}>
           {label}
@@ -30,11 +29,12 @@ export const FormInput = ({
       <input
         id={inputId}
         className={inputClasses}
-        aria-invalid={!!(error && touched)}
+        aria-invalid={!!error}
         aria-describedby={error ? `${inputId}-error` : undefined}
+        required={required}
         {...props}
       />
-      {error && touched && (
+      {error && (
         <div id={`${inputId}-error`} className="error-message" role="alert">
           {error}
         </div>

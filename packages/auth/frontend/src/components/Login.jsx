@@ -20,7 +20,10 @@ function Login() {
     handleSubmit
   } = useForm(
     { username: '', password: '' },
-    ['username', 'password']
+    {
+      username: (value) => !value ? 'Username is required' : '',
+      password: (value) => !value ? 'Password is required' : ''
+    }
   );
 
   const onSubmit = async (formValues) => {

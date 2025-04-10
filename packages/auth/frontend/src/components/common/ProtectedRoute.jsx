@@ -6,7 +6,14 @@ function ProtectedRoute() {
   const { isAuthenticated, loading, error } = useAuth();
 
   if (loading) {
-    return <LoadingSpinner />;
+    return (
+      <div className="loading-container">
+        <LoadingSpinner 
+          role="progressbar" 
+          aria-valuetext="Loading..."
+        />
+      </div>
+    );
   }
 
   if (error) {

@@ -55,7 +55,7 @@ export const Modal = ({
             ×
           </button>
         </div>
-        <div className="modal-content" data-testid="modal-content">
+        <div className={`modal-content ${className}`} data-testid="modal-content">
           {children}
         </div>
         {footerButtons && (
