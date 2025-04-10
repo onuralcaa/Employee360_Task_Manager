@@ -19,49 +19,53 @@ function Login() {
       const response = await login(user);
       toast.success(`✅ ${response.data.message}`, { autoClose: 2000 });
 
-      // Kullanıcı rolüne göre yönlendirme
+      // 👇 DEBUG: Gelen veriyi konsola yaz
+      console.log("🟢 Giriş başarılı, gelen data:", response.data);
+
+      // id kontrolü
+      if (!response.data.id) {
+        throw new Error("ID bilgisi eksik! Backend'den dönmedi.");
+      }
+
+      const userState = {
+        id: response.data.id,
+        role: response.data.role,
+        name: response.data.name,
+        surname: response.data.surname,
+        username: response.data.username,
+        phone: response.data.phone,
+        email: response.data.email,
+        birthdate: response.data.birthdate,
+      };
+
       setTimeout(() => {
-        navigate("/dashboard", { state: { role: response.data.role } });
+        if (response.data.role === "personel") {
+          navigate("/user-panel", { replace: true, state: userState });
+        } else {
+          navigate("/dashboard", { replace: true, state: userState });
+        }
       }, 2000);
     } catch (error) {
-  const errMsg = error.response?.data?.message || "❌ Giriş başarısız! Lütfen bilgilerinizi kontrol edin.";
-  toast.error(errMsg);
-}
-
+      const errMsg = error.response?.data?.message || error.message || "❌ Giriş başarısız! Lütfen bilgilerinizi kontrol edin.";
+      toast.error(errMsg);
+    }
   };
 
   return (
     <div className="login-container">
       <form onSubmit={handleSubmit} className="login-box">
         <h1>Personel360</h1>
-{/* Rol Seçimi (Geliştirilmiş Tasarım) */}
-<div className="role-selection">
-  <input
-    type="radio"
-    name="role"
-    id="personel"
-    value="personel"
-    checked={user.role === "personel"}
-    onChange={handleChange}
-  />
-  <label htmlFor="personel">Personel</label>
 
-  <input
-    type="radio"
-    name="role"
-    id="admin"
-    value="admin"
-    checked={user.role === "admin"}
-    onChange={handleChange}
-  />
-  <label htmlFor="admin">Yönetici</label>
-</div>
+        <div className="role-selection">
+          <input type="radio" name="role" id="personel" value="personel" checked={user.role === "personel"} onChange={handleChange} />
+          <label htmlFor="personel">Personel</label>
 
+          <input type="radio" name="role" id="admin" value="admin" checked={user.role === "admin"} onChange={handleChange} />
+          <label htmlFor="admin">Yönetici</label>
+        </div>
 
-        {/* Kullanıcı Adı Alanı */}
         <input name="username" placeholder="Kullanıcı Adı" onChange={handleChange} required />
 
-        {/* Şifre Alanı ve Göz İkonu */}
         <div className="password-container">
           <input
             name="password"
@@ -75,10 +79,8 @@ function Login() {
           </span>
         </div>
 
-        {/* Giriş Butonu */}
         <button type="submit">Giriş Yap</button>
 
-        {/* Kayıt Ol Butonu (Sadece Personel için gösterilecek) */}
         {user.role === "personel" && (
           <p className="register-link">
             Hesabınız yok mu?{" "}

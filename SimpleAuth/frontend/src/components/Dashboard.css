@@ -70,3 +70,9 @@
     transform: scale(1);
   }
 }
+
+
+/* Yeni: iki buton arasında boşluk */
+.dashboard-box button + button {
+  margin-top: 10px;
+}

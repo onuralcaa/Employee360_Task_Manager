@@ -8,8 +8,9 @@ function Dashboard() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Eğer rol bilgisi gelmediyse varsayılan olarak "personel" atanır
   const userRole = location.state?.role || "personel";
+  const userName = location.state?.name || "Kullanıcı";
+  const userSurname = location.state?.surname || "";
 
   const handleLogout = () => {
     toast.success("Çıkış yapıldı!", {
@@ -21,29 +22,58 @@ function Dashboard() {
       draggable: true,
     });
 
-    // Bildirim süresi kadar bekleyerek yönlendirme yapıyoruz
     setTimeout(() => {
       navigate("/login");
     }, 2500);
   };
 
+const goToPanel = () => {
+  if (userRole === "admin") {
+    navigate("/admin-panel");
+  } else {
+    navigate("/user-panel", {
+      state: {
+        id: location.state.id,  // ✅ Burası önemli
+        role: userRole,
+        name: userName,
+        surname: userSurname,
+        username: location.state.username,
+        phone: location.state.phone,
+        email: location.state.email,
+        birthdate: location.state.birthdate,
+      },
+    });
+  }
+};
+
+
+
   return (
     <div className="dashboard-container">
       <div className="dashboard-box">
         <h1>
-          {userRole === "admin" ? "Yönetici Girişi Başarılı! 👑" : "Personel Girişi Başarılı! 🎉"}
+          {userRole === "admin"
+            ? "Hoşgeldiniz Yönetici"
+            : `Hoşgeldiniz ${userName} ${userSurname}`}
         </h1>
         <p>
           {userRole === "admin"
             ? "Yönetici olarak giriş yaptınız. Yönetim paneline erişebilirsiniz."
             : "Başarıyla giriş yaptınız. Şimdi uygulamayı kullanabilirsiniz."}
         </p>
+
+        {userRole === "admin" ? (
+          <button onClick={goToPanel}>Yönetici Paneline Git</button>
+        ) : (
+          <button onClick={goToPanel}>Kullanıcı Paneline Git</button>
+        )}
+
         <button onClick={handleLogout}>
           <FaSignOutAlt className="logout-icon" />
           Çıkış Yap
         </button>
       </div>
-      {/* 🚀 Toast bildirimlerinin çalışması için ekledik */}
+
       <ToastContainer />
     </div>
   );

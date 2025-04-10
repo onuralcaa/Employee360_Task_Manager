@@ -2,7 +2,7 @@ const User = require("../models/userModel");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
-// 📝 Kullanıcı Kaydı
+// 🖍 Kullanıcı Kaydı
 const register = async (req, res) => {
   try {
     const { name, surname, username, number, email, birthdate, password, role } = req.body;
@@ -59,10 +59,9 @@ const login = async (req, res) => {
       return res.status(404).json({ message: "Kullanıcı bulunamadı!" });
     }
 
-   if (user.role !== requestedRole) {
-  return res.status(403).json({ message: `Bu bilgiler ile ${requestedRole === "admin" ? "Yönetici" : "Personel"} girişi yapılamaz.` });
-}
-
+    if (user.role !== requestedRole) {
+      return res.status(403).json({ message: `Bu bilgiler ile ${requestedRole === "admin" ? "Yönetici" : "Personel"} girişi yapılamaz.` });
+    }
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
@@ -85,7 +84,14 @@ const login = async (req, res) => {
     res.status(200).json({
       message: `${user.role === "admin" ? "Yönetici" : "Personel"} girişi başarılı.`,
       token,
-      role: user.role
+      id: user._id,
+      role: user.role,
+      name: user.name,
+      surname: user.surname,
+      username: user.username,
+      phone: user.number,
+      email: user.email,
+      birthdate: user.birthdate
     });
 
   } catch (error) {
@@ -93,8 +99,44 @@ const login = async (req, res) => {
   }
 };
 
-module.exports = {
-  register,
-  login
+// 🔧 Kullanıcı Bilgilerini Güncelle
+const updateUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, surname, username, phone, email, birthdate } = req.body;
+
+    const updated = await User.findByIdAndUpdate(
+      id,
+      { name, surname, username, number: phone, email, birthdate },
+      { new: true }
+    );
+
+    if (!updated) {
+      return res.status(404).json({ message: "Kullanıcı bulunamadı" });
+    }
+
+    res.status(200).json({ message: "Bilgiler başarıyla güncellendi", updated });
+
+  } catch (error) {
+    res.status(500).json({ message: "Güncelleme sırasında hata oluştu", error });
+  }
 };
 
+const getUserById = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ message: "Kullanıcı bulunamadı" });
+
+    res.status(200).json(user);
+  } catch (error) {
+    res.status(500).json({ message: "Kullanıcı getirme hatası", error });
+  }
+};
+
+
+module.exports = {
+  register,
+  login,
+  updateUser,
+   getUserById,
+};
