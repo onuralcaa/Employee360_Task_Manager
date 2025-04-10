@@ -6,6 +6,8 @@ const { specs } = require('./docs/swagger');
 const connectDB = require('./config/db');
 const userRoutes = require('./routes/userRoutes');
 const { logger, handleError } = require('./utils/logger');
+const morgan = require('morgan');
+const { stream } = require('../../../shared/utils/logger');
 
 // Load environment variables
 dotenv.config();
@@ -22,6 +24,9 @@ app.use(express.json());
 
 // API Documentation
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
+
+// Add Morgan middleware for HTTP request logging
+app.use(morgan('combined', { stream }));
 
 // Request logging middleware
 app.use((req, res, next) => {
