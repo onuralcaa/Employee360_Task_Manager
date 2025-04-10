@@ -66,6 +66,23 @@ router.put('/profile',
     }
 });
 
+// Add a route for changing passwords
+router.put('/profile/password',
+  auth(),
+  async (req, res) => {
+    try {
+      const { currentPassword, newPassword } = req.body;
+      await userService.changePassword(req.user.id, currentPassword, newPassword);
+      res.json({
+        success: true,
+        message: 'Password updated successfully'
+      });
+    } catch (error) {
+      res.status(error.status || 400).json(handleError(error));
+    }
+  }
+);
+
 // Admin routes
 router.get('/users',
   auth('admin'),

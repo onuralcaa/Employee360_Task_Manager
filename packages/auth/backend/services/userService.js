@@ -94,9 +94,33 @@ const getUsers = async () => {
   }
 };
 
+const changePassword = async (userId, currentPassword, newPassword) => {
+  try {
+    const user = await User.findById(userId).select('+password');
+
+    if (!user) {
+      throw createError('User not found', 404);
+    }
+
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) {
+      throw createError('Current password is incorrect', 400);
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    user.password = hashedPassword;
+    await user.save();
+  } catch (error) {
+    throw error;
+  }
+};
+
 module.exports = {
   registerUser,
   loginUser,
   updateUser,
-  getUsers
+  getUsers,
+  changePassword
 };

@@ -1,6 +1,6 @@
 const { MongoMemoryServer } = require('mongodb-memory-server');
 const mongoose = require('mongoose');
-const { registerUser, loginUser, updateUser, getUsers } = require('./userService');
+const { registerUser, loginUser, updateUser, getUsers, changePassword } = require('./userService');
 const User = require('../models/userModel');
 const bcrypt = require('bcryptjs');
 
@@ -159,6 +159,41 @@ describe('User Service', () => {
         expect(user).toHaveProperty('username');
         expect(user).not.toHaveProperty('password');
       });
+    });
+  });
+
+  describe('changePassword', () => {
+    let testUser;
+    let userId;
+
+    beforeEach(async () => {
+      testUser = {
+        username: 'testuser',
+        email: 'test@example.com',
+        password: 'Password123',
+        name: 'Test',
+        surname: 'User'
+      };
+      const result = await registerUser(testUser);
+      userId = result.user._id;
+    });
+
+    it('should change the password successfully', async () => {
+      await changePassword(userId, 'Password123', 'NewPassword123');
+      const user = await User.findById(userId).select('+password');
+      const isMatch = await bcrypt.compare('NewPassword123', user.password);
+      expect(isMatch).toBe(true);
+    });
+
+    it('should throw an error for incorrect current password', async () => {
+      await expect(changePassword(userId, 'WrongPassword', 'NewPassword123'))
+        .rejects.toThrow('Current password is incorrect');
+    });
+
+    it('should throw an error for non-existent user', async () => {
+      const fakeId = new mongoose.Types.ObjectId();
+      await expect(changePassword(fakeId, 'Password123', 'NewPassword123'))
+        .rejects.toThrow('User not found');
     });
   });
 });
