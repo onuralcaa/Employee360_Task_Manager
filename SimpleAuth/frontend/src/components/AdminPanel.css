@@ -71,15 +71,15 @@
 .person-card {
   background-color: #f4f0fa; /* açık mor ton */
   border: 1px solid #d1c4e9;
-  padding: 12px 15px;
+  padding: 5px 15px;
   border-radius: 8px;
-  margin-bottom: 15px;
+  margin-bottom: 10px;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
-  box-shadow: 0 2px 5px rgba(128, 90, 213, 0.05);
+  box-shadow: 0 4px 5px rgba(128, 90, 213, 0.05);
 }
 
 .person-card:hover {
-  transform: scale(1.05);
+  transform: scale(1.0);
   box-shadow: 0 4px 10px rgba(128, 90, 213, 0.15);
   background-color: #ace3ff;
 }
@@ -92,4 +92,41 @@
 
 .person-card strong {
   color: #5b3f7a;
+}
+
+/* Sağ paneli dikey kaydırılabilir hale getir */
+.panel-right {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+}
+
+/* Personel listesi scroll alanı */
+.personnel-scroll {
+  flex-grow: 1;
+  overflow-y: auto;
+  max-height: calc(100vh - 180px); /* başlık ve buton için boşluk */
+  padding-right: 6px;
+}
+
+.logout-container {
+  margin-top: 20px;
+  padding-top: 10px;
+  border-top: 1px solid #ccc;
+}
+
+.logout-button {
+  background-color: #f44336;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  width: 100%;
+  font-weight: bold;
+  transition: background-color 0.2s ease;
+}
+.logout-button:hover {
+  background-color: #d32f2f;
 }

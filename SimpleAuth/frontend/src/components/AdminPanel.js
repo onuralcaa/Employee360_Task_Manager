@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import { getAllPersonnel } from "../api/api";
 import "./AdminPanel.css";
+import { useNavigate } from "react-router-dom";
 
 function AdminPanel() {
   const [activeTab, setActiveTab] = useState("personel");
   const [personnelList, setPersonnelList] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchPersonnel = async () => {
@@ -30,6 +32,13 @@ function AdminPanel() {
     }
   };
 
+  const handleLogout = () => {
+    const confirmed = window.confirm("Oturumu kapatmak istediğinize emin misiniz?");
+    if (confirmed) {
+      navigate("/login");
+    }
+  };
+
   return (
     <div className="panel-wrapper">
       {/* Sol Menü */}
@@ -50,15 +59,22 @@ function AdminPanel() {
       {/* Sağ Bilgi Paneli */}
       <div className="panel-right">
         <h2>👥 PERSONEL LİSTESİ</h2>
-        {personnelList.map((person) => (
-          <div key={person._id} className="person-card">
-            <p><strong>ID:</strong> {person._id}</p>
-            <p><strong>Ad:</strong> {person.name}</p>
-            <p><strong>Soyad:</strong> {person.surname}</p>
-            <p><strong>E-posta:</strong> {person.email}</p>
-            <hr />
-          </div>
-        ))}
+        <div style={{ maxHeight: "calc(100vh - 240px)", overflowY: "auto" }}>
+          {personnelList.map((person) => (
+            <div key={person._id} className="person-card">
+              <p><strong>ID:</strong> {person._id}</p>
+              <p><strong>Ad:</strong> {person.name}</p>
+              <p><strong>Soyad:</strong> {person.surname}</p>
+              <p><strong>E-posta:</strong> {person.email}</p>
+            </div>
+          ))}
+        </div>
+
+        <div className="logout-container">
+          <button className="logout-button" onClick={handleLogout}>
+            Oturumu Kapat
+          </button>
+        </div>
       </div>
     </div>
   );
