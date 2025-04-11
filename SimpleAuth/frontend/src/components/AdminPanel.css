@@ -1,0 +1,95 @@
+.panel-wrapper {
+  display: flex;
+  height: 100vh;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.panel-left,
+.panel-center,
+.panel-right {
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.panel-left {
+  width: 20%;
+  background-color: #f4f4f4;
+  border-right: 1px solid #ddd;
+}
+
+.panel-left h2 {
+  font-size: 18px;
+  margin-bottom: 15px;
+  color: #333;
+}
+
+.panel-left ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.panel-left li {
+  padding: 10px 15px;
+  margin-bottom: 8px;
+  background-color: #ffffff;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.panel-left li:hover {
+  background-color: #e2e6ea;
+}
+
+.panel-center {
+  width: 55%;
+  background-color: #ffffff;
+  border-left: 1px solid #ddd;
+  border-right: 1px solid #ddd;
+}
+
+.panel-center h2 {
+  font-size: 22px;
+  margin-bottom: 20px;
+}
+
+.panel-right {
+  width: 25%;
+  background-color: #f9f9f9;
+}
+
+.panel-right h2 {
+  font-size: 20px;
+  margin-bottom: 15px;
+  color: #4a3f7a;
+  border-bottom: 1px solid #ccc;
+  padding-bottom: 5px;
+}
+
+/* ✅ Personel Kart Tasarımı */
+.person-card {
+  background-color: #f4f0fa; /* açık mor ton */
+  border: 1px solid #d1c4e9;
+  padding: 12px 15px;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 2px 5px rgba(128, 90, 213, 0.05);
+}
+
+.person-card:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 10px rgba(128, 90, 213, 0.15);
+  background-color: #ace3ff;
+}
+
+.person-card p {
+  margin: 6px 0;
+  font-size: 14px;
+  color: #333;
+}
+
+.person-card strong {
+  color: #5b3f7a;
+}

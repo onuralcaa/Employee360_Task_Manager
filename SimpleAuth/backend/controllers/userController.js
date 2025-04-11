@@ -2,35 +2,26 @@ const User = require("../models/userModel");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
-// 🖍 Kullanıcı Kaydı
+// ✅ Kayıt
 const register = async (req, res) => {
   try {
     const { name, surname, username, number, email, birthdate, password, role } = req.body;
 
-    // Kullanıcı adı, numara ve email kontrolü
-    const existingUser = await User.findOne({ username });
-    if (existingUser) {
-      return res.status(400).json({ message: "Bu kullanıcı adı zaten kayıtlı!" });
-    }
+    if (isNaN(number)) return res.status(400).json({ message: "Numara sadece sayısal olabilir." });
 
-    const existingNumber = await User.findOne({ number });
-    if (existingNumber) {
-      return res.status(400).json({ message: "Bu numara zaten kayıtlı!" });
-    }
+    // Benzersizlik kontrolleri
+    const exists = await Promise.all([
+      User.findOne({ username }),
+      User.findOne({ number }),
+      User.findOne({ email })
+    ]);
 
-    const existingEmail = await User.findOne({ email });
-    if (existingEmail) {
-      return res.status(400).json({ message: "Bu e-posta zaten kayıtlı!" });
-    }
+    if (exists[0]) return res.status(400).json({ message: "Bu kullanıcı adı zaten kayıtlı!" });
+    if (exists[1]) return res.status(400).json({ message: "Bu numara zaten kayıtlı!" });
+    if (exists[2]) return res.status(400).json({ message: "Bu e-posta zaten kayıtlı!" });
 
-    if (isNaN(number)) {
-      return res.status(400).json({ message: "Numara sadece sayısal olabilir." });
-    }
-
-    // Şifre hashleme
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Kullanıcı oluştur
     const newUser = new User({
       name,
       surname,
@@ -50,23 +41,18 @@ const register = async (req, res) => {
   }
 };
 
+// ✅ Giriş
 const login = async (req, res) => {
   try {
     const { username, password, role: requestedRole } = req.body;
 
     const user = await User.findOne({ username });
-    if (!user) {
-      return res.status(404).json({ message: "Kullanıcı bulunamadı!" });
-    }
-
-    if (user.role !== requestedRole) {
+    if (!user) return res.status(404).json({ message: "Kullanıcı bulunamadı!" });
+    if (user.role !== requestedRole)
       return res.status(403).json({ message: `Bu bilgiler ile ${requestedRole === "admin" ? "Yönetici" : "Personel"} girişi yapılamaz.` });
-    }
 
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return res.status(400).json({ message: "Geçersiz şifre!" });
-    }
+    if (!isMatch) return res.status(400).json({ message: "Geçersiz şifre!" });
 
     const tokenPayload = {
       id: user._id,
@@ -99,7 +85,7 @@ const login = async (req, res) => {
   }
 };
 
-// 🔧 Kullanıcı Bilgilerini Güncelle
+// ✅ Kullanıcı güncelleme
 const updateUser = async (req, res) => {
   try {
     const { id } = req.params;
@@ -111,9 +97,7 @@ const updateUser = async (req, res) => {
       { new: true }
     );
 
-    if (!updated) {
-      return res.status(404).json({ message: "Kullanıcı bulunamadı" });
-    }
+    if (!updated) return res.status(404).json({ message: "Kullanıcı bulunamadı" });
 
     res.status(200).json({ message: "Bilgiler başarıyla güncellendi", updated });
 
@@ -122,6 +106,7 @@ const updateUser = async (req, res) => {
   }
 };
 
+// ✅ Belirli kullanıcıyı ID ile getir
 const getUserById = async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
@@ -133,10 +118,27 @@ const getUserById = async (req, res) => {
   }
 };
 
+// ✅ Tüm personelleri getir (admin için)
+const getAllPersonnel = async (req, res) => {
+  try {
+    const allUsers = await User.find({}, "name surname email _id role");
+    //console.log("📋 Tüm kullanıcılar:", allUsers);
+
+    // role "personel" olanları filtrele (fazladan boşluklara karşı)
+    const filtered = allUsers.filter(user => user.role.trim().toLowerCase() === "personel");
+
+    res.status(200).json(filtered);
+  } catch (error) {
+    console.error("❌ Personel listesi alınamadı:", error);
+    res.status(500).json({ message: "Personel listesi alınamadı", error });
+  }
+};
+
 
 module.exports = {
   register,
   login,
   updateUser,
-   getUserById,
+  getUserById,
+  getAllPersonnel
 };
