@@ -7,12 +7,10 @@ function UserPanel() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // 🧠 useMemo ile state sabitleniyor
   const userData = useMemo(() => location.state || {}, [location.state]);
 
   useEffect(() => {
     console.log("Gelen kullanıcı bilgisi:", userData);
-    console.log("Güncelleme için ID:", userData.id);
   }, [userData]);
 
   const [activeTab, setActiveTab] = useState("gorevler");
@@ -40,9 +38,7 @@ function UserPanel() {
 
   const handleLogout = () => {
     const confirmed = window.confirm("Oturumu kapatmak istediğinize emin misiniz?");
-    if (confirmed) {
-      navigate("/login");
-    }
+    if (confirmed) navigate("/login");
   };
 
   const handleChange = (e) => {
@@ -51,27 +47,22 @@ function UserPanel() {
 
   const handleUpdate = async (e) => {
     e.preventDefault();
-
-    const confirmed = window.confirm("Bilgileri güncellemek istediğinize emin misiniz?");
-    if (!confirmed) return;
+    if (!window.confirm("Bilgileri güncellemek istediğinize emin misiniz?")) return;
 
     try {
-      console.log("Gönderilen ID:", userData.id);
-      console.log("Gönderilen veri:", formData);
       await updateUser(userData.id, formData);
       alert("Bilgiler başarıyla güncellendi!");
       setShowEdit(false);
       window.location.reload();
     } catch (error) {
-      console.error("Güncelleme hatası:", error);
       alert("Güncelleme sırasında hata oluştu.");
     }
   };
 
   return (
-    <div className="panel-wrapper">
+    <div className="user-panel-wrapper">
       {/* Sol Menü */}
-      <div className="panel-left">
+      <div className="user-panel-left">
         <h2>📁 MENÜ</h2>
         <ul>
           <li onClick={() => setActiveTab("gorevler")}>Görevler</li>
@@ -80,13 +71,13 @@ function UserPanel() {
       </div>
 
       {/* Orta İçerik */}
-      <div className="panel-center">
+      <div className="user-panel-center">
         <h2>📄 GÖREV TAKİBİ</h2>
         {renderContent()}
       </div>
 
-      {/* Sağ Bilgi Paneli */}
-      <div className="panel-right">
+      {/* Sağ Panel */}
+      <div className="user-panel-right">
         <h2>👤 PERSONEL BİLGİLERİ</h2>
         <p><strong>Ad:</strong> {userData.name || "-"}</p>
         <p><strong>Soyad:</strong> {userData.surname || "-"}</p>
@@ -96,14 +87,14 @@ function UserPanel() {
         <p><strong>Doğum Tarihi:</strong> {userData.birthdate ? new Date(userData.birthdate).toLocaleDateString("tr-TR") : "-"}</p>
         <p><strong>Rol:</strong> {userData.role || "-"}</p>
 
-        <button className="account-button" onClick={() => setShowEdit(true)}>Hesap Ayarları</button>
-        <button onClick={handleLogout} className="logout-button">Oturumu Kapat</button>
+        <button className="user-account-button" onClick={() => setShowEdit(true)}>Hesap Ayarları</button>
+        <button className="user-logout-button" onClick={handleLogout}>Oturumu Kapat</button>
       </div>
 
       {/* Güncelleme Formu */}
       {showEdit && (
-        <div className="popup-backdrop">
-          <div className="popup-form">
+        <div className="user-popup-backdrop">
+          <div className="user-popup-form">
             <h3>Hesap Bilgilerini Güncelle</h3>
             <form onSubmit={handleUpdate}>
               <input type="text" name="name" placeholder="Ad" value={formData.name} onChange={handleChange} />
@@ -112,7 +103,7 @@ function UserPanel() {
               <input type="text" name="phone" placeholder="Telefon" value={formData.phone} onChange={handleChange} />
               <input type="email" name="email" placeholder="E-posta" value={formData.email} onChange={handleChange} />
               <input type="date" name="birthdate" value={formData.birthdate} onChange={handleChange} />
-              <div className="popup-buttons">
+              <div className="user-popup-buttons">
                 <button type="submit">Güncelle</button>
                 <button type="button" onClick={() => setShowEdit(false)}>İptal</button>
               </div>
