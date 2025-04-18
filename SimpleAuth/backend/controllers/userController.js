@@ -44,15 +44,15 @@ const register = async (req, res) => {
 // ✅ Giriş
 const login = async (req, res) => {
   try {
-    const { username, password, role: requestedRole } = req.body;
+    const { username, password } = req.body;
 
     const user = await User.findOne({ username });
-    if (!user) return res.status(404).json({ message: "Kullanıcı bulunamadı!" });
-    if (user.role !== requestedRole)
-      return res.status(403).json({ message: `Bu bilgiler ile ${requestedRole === "admin" ? "Yönetici" : "Personel"} girişi yapılamaz.` });
+    if (!user)
+      return res.status(404).json({ message: "Kullanıcı bulunamadı!" });
 
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(400).json({ message: "Geçersiz şifre!" });
+    if (!isMatch)
+      return res.status(400).json({ message: "Geçersiz şifre!" });
 
     const tokenPayload = {
       id: user._id,
@@ -62,10 +62,12 @@ const login = async (req, res) => {
       number: user.number,
       email: user.email,
       birthdate: user.birthdate,
-      role: user.role
+      role: user.role,
     };
 
-    const token = jwt.sign(tokenPayload, process.env.JWT_SECRET, { expiresIn: "1h" });
+    const token = jwt.sign(tokenPayload, process.env.JWT_SECRET, {
+      expiresIn: "1h",
+    });
 
     res.status(200).json({
       message: `${user.role === "admin" ? "Yönetici" : "Personel"} girişi başarılı.`,
@@ -77,13 +79,13 @@ const login = async (req, res) => {
       username: user.username,
       phone: user.number,
       email: user.email,
-      birthdate: user.birthdate
+      birthdate: user.birthdate,
     });
-
   } catch (error) {
     res.status(500).json({ message: "Sunucu hatası", error });
   }
 };
+
 
 // ✅ Kullanıcı güncelleme
 const updateUser = async (req, res) => {
