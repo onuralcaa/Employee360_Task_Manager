@@ -94,3 +94,24 @@
 .register-button:hover {
   color: #e63e3e;
 }
+
+.forgot-link {
+  margin-top: 10px;
+  font-size: 14px;
+  color: #555;
+  text-align: center;
+}
+
+.forgot-button {
+  color: #4f70ec;
+  font-weight: 500;
+  cursor: pointer;
+  display: inline-block;
+  margin-top: 5px;
+  transition: color 0.3s ease;
+}
+
+.forgot-button:hover {
+  color: #304cc9;
+  text-decoration: underline;
+}

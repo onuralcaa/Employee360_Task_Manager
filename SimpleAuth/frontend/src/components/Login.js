@@ -71,6 +71,13 @@ function Login() {
             Kayıt Ol
           </span>
         </p>
+
+       <p className="forgot-link">
+  <span onClick={() => navigate("/forgot-password")} className="forgot-button">
+    Şifremi Unuttum
+  </span>
+</p>
+
       </form>
 
       <ToastContainer position="top-center" />

@@ -1,6 +1,9 @@
 const User = require("../models/userModel");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const crypto = require("crypto");
+const sendEmail = require("../utils/sendEmail");
+
 
 // ✅ Kayıt
 const register = async (req, res) => {
@@ -86,6 +89,67 @@ const login = async (req, res) => {
   }
 };
 
+const forgotPassword = async (req, res) => {
+  const { email } = req.body;
+  try {
+    const user = await User.findOne({ email });
+    if (!user) return res.status(404).json({ message: "Bu e-posta adresi sistemde kayıtlı değil." });
+
+    const resetToken = crypto.randomBytes(32).toString("hex");
+    const resetTokenHash = crypto.createHash("sha256").update(resetToken).digest("hex");
+
+    user.resetPasswordToken = resetTokenHash;
+    user.resetPasswordExpire = Date.now() + 10 * 60 * 1000; // 10 dk geçerli
+    await user.save();
+
+    const resetUrl = `http://localhost:3000/reset-password/${resetToken}`;
+    const message = `
+      <h3>Şifre Sıfırlama</h3>
+      <p>Şifrenizi sıfırlamak için aşağıdaki bağlantıya tıklayın:</p>
+      <a href="${resetUrl}" target="_blank">${resetUrl}</a>
+      <p><i>Bu bağlantı 10 dakika içinde geçerliliğini yitirecektir.</i></p>
+    `;
+
+    await sendEmail({
+      to: user.email,
+      subject: "Şifre Sıfırlama Bağlantısı",
+      html: message,
+    });
+
+    res.status(200).json({ message: "Şifre sıfırlama bağlantısı e-posta adresinize gönderildi." });
+  } catch (error) {
+    res.status(500).json({ message: "Şifre sıfırlama e-postası gönderilemedi.", error });
+  }
+};
+
+const resetPassword = async (req, res) => {
+  const { token } = req.params;
+  const { password } = req.body;
+
+  const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
+
+  try {
+    const user = await User.findOne({
+      resetPasswordToken: hashedToken,
+      resetPasswordExpire: { $gt: Date.now() }
+    });
+
+    if (!user) return res.status(400).json({ message: "Token geçersiz veya süresi dolmuş." });
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    user.password = hashedPassword;
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpire = undefined;
+
+    await user.save();
+
+    res.status(200).json({ message: "Şifreniz başarıyla güncellendi." });
+  } catch (error) {
+    res.status(500).json({ message: "Şifre sıfırlama işlemi başarısız oldu.", error });
+  }
+};
+
 
 // ✅ Kullanıcı güncelleme
 const updateUser = async (req, res) => {
@@ -142,5 +206,7 @@ module.exports = {
   login,
   updateUser,
   getUserById,
-  getAllPersonnel
+  getAllPersonnel,
+  forgotPassword,     // ✅ yeni eklenen
+  resetPassword       // ✅ yeni eklenen
 };
