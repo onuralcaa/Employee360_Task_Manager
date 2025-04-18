@@ -35,7 +35,8 @@ cd SimpleAuth
  Run the following command to install all necessary packages:
  (This installs all required dependencies: Express (server), Mongoose (MongoDB), CORS, JWT, bcrypt, etc.)
  --------------------------------------
- npm install express mongoose dotenv cors body-parser bcrypt jsonwebtoken
+ npm install express mongoose dotenv cors body-parser bcrypt jsonwebtoken nodemailer crypto 
+
 
 
 Configure Environment Variables:
