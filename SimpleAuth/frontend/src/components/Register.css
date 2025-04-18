@@ -2,7 +2,9 @@
 .register-container {
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;
+  gap: 40px;
+  padding: 40px;
   height: 100vh;
   background-color: #f4f4f4;
 }
@@ -14,7 +16,7 @@
   border-radius: 10px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   text-align: center;
-  width: 350px;
+  width: 380px;
 }
 
 /* Başlık */
@@ -31,7 +33,7 @@
   border: 1px solid #ddd;
   border-radius: 5px;
   font-size: 16px;
-  box-sizing: border-box; /* 📌 Padding genişliği değiştirmesin */
+  box-sizing: border-box;
 }
 
 /* Şifre ve ikonun olduğu container */
@@ -45,7 +47,7 @@
 /* Şifre inputu */
 .password-container input {
   flex: 1;
-  padding-right: 40px; /* 📌 Göz ikonuna yer bırak */
+  padding-right: 40px;
 }
 
 /* Göz ikonunun stili */
@@ -83,7 +85,6 @@
   text-align: center;
 }
 
-/* Giriş Yap Butonu */
 .login-button {
   color: #ff4d4d;
   font-weight: bold;
@@ -93,4 +94,30 @@
 
 .login-button:hover {
   color: #e63e3e;
+}
+
+/* ✅ Sağ taraftaki bilgi kutusu */
+.register-info-box {
+  background-color: #ffffff;
+  padding: 20px 25px;
+  border-radius: 10px;
+  width: 300px;
+  font-size: 14px;
+  color: #333;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.08);
+}
+
+.register-info-box h4 {
+  margin-bottom: 12px;
+  color: #c0392b;
+  font-size: 16px;
+}
+
+.register-info-box ul {
+  padding-left: 18px;
+}
+
+.register-info-box li {
+  margin-bottom: 8px;
+  line-height: 1.5;
 }

@@ -1,6 +1,9 @@
 const User = require("../models/userModel");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const crypto = require("crypto");
+const sendEmail = require("../utils/sendEmail");
+
 
 // ✅ Kayıt
 const register = async (req, res) => {
@@ -44,15 +47,15 @@ const register = async (req, res) => {
 // ✅ Giriş
 const login = async (req, res) => {
   try {
-    const { username, password, role: requestedRole } = req.body;
+    const { username, password } = req.body;
 
     const user = await User.findOne({ username });
-    if (!user) return res.status(404).json({ message: "Kullanıcı bulunamadı!" });
-    if (user.role !== requestedRole)
-      return res.status(403).json({ message: `Bu bilgiler ile ${requestedRole === "admin" ? "Yönetici" : "Personel"} girişi yapılamaz.` });
+    if (!user)
+      return res.status(404).json({ message: "Kullanıcı bulunamadı!" });
 
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(400).json({ message: "Geçersiz şifre!" });
+    if (!isMatch)
+      return res.status(400).json({ message: "Geçersiz şifre!" });
 
     const tokenPayload = {
       id: user._id,
@@ -62,10 +65,12 @@ const login = async (req, res) => {
       number: user.number,
       email: user.email,
       birthdate: user.birthdate,
-      role: user.role
+      role: user.role,
     };
 
-    const token = jwt.sign(tokenPayload, process.env.JWT_SECRET, { expiresIn: "1h" });
+    const token = jwt.sign(tokenPayload, process.env.JWT_SECRET, {
+      expiresIn: "1h",
+    });
 
     res.status(200).json({
       message: `${user.role === "admin" ? "Yönetici" : "Personel"} girişi başarılı.`,
@@ -77,13 +82,74 @@ const login = async (req, res) => {
       username: user.username,
       phone: user.number,
       email: user.email,
-      birthdate: user.birthdate
+      birthdate: user.birthdate,
     });
-
   } catch (error) {
     res.status(500).json({ message: "Sunucu hatası", error });
   }
 };
+
+const forgotPassword = async (req, res) => {
+  const { email } = req.body;
+  try {
+    const user = await User.findOne({ email });
+    if (!user) return res.status(404).json({ message: "Bu e-posta adresi sistemde kayıtlı değil." });
+
+    const resetToken = crypto.randomBytes(32).toString("hex");
+    const resetTokenHash = crypto.createHash("sha256").update(resetToken).digest("hex");
+
+    user.resetPasswordToken = resetTokenHash;
+    user.resetPasswordExpire = Date.now() + 10 * 60 * 1000; // 10 dk geçerli
+    await user.save();
+
+    const resetUrl = `http://localhost:3000/reset-password/${resetToken}`;
+    const message = `
+      <h3>Şifre Sıfırlama</h3>
+      <p>Şifrenizi sıfırlamak için aşağıdaki bağlantıya tıklayın:</p>
+      <a href="${resetUrl}" target="_blank">${resetUrl}</a>
+      <p><i>Bu bağlantı 10 dakika içinde geçerliliğini yitirecektir.</i></p>
+    `;
+
+    await sendEmail({
+      to: user.email,
+      subject: "Şifre Sıfırlama Bağlantısı",
+      html: message,
+    });
+
+    res.status(200).json({ message: "Şifre sıfırlama bağlantısı e-posta adresinize gönderildi." });
+  } catch (error) {
+    res.status(500).json({ message: "Şifre sıfırlama e-postası gönderilemedi.", error });
+  }
+};
+
+const resetPassword = async (req, res) => {
+  const { token } = req.params;
+  const { password } = req.body;
+
+  const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
+
+  try {
+    const user = await User.findOne({
+      resetPasswordToken: hashedToken,
+      resetPasswordExpire: { $gt: Date.now() }
+    });
+
+    if (!user) return res.status(400).json({ message: "Token geçersiz veya süresi dolmuş." });
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    user.password = hashedPassword;
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpire = undefined;
+
+    await user.save();
+
+    res.status(200).json({ message: "Şifreniz başarıyla güncellendi." });
+  } catch (error) {
+    res.status(500).json({ message: "Şifre sıfırlama işlemi başarısız oldu.", error });
+  }
+};
+
 
 // ✅ Kullanıcı güncelleme
 const updateUser = async (req, res) => {
@@ -140,5 +206,7 @@ module.exports = {
   login,
   updateUser,
   getUserById,
-  getAllPersonnel
+  getAllPersonnel,
+  forgotPassword,     // ✅ yeni eklenen
+  resetPassword       // ✅ yeni eklenen
 };

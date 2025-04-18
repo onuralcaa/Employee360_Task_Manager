@@ -7,7 +7,7 @@ import "react-toastify/dist/ReactToastify.css";
 import "./Login.css";
 
 function Login() {
-  const [user, setUser] = useState({ username: "", password: "", role: "personel" });
+  const [user, setUser] = useState({ username: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
@@ -18,14 +18,6 @@ function Login() {
     try {
       const response = await login(user);
       toast.success(`✅ ${response.data.message}`, { autoClose: 2000 });
-
-      // 👇 DEBUG: Gelen veriyi konsola yaz
-      console.log("🟢 Giriş başarılı, gelen data:", response.data);
-
-      // id kontrolü
-      if (!response.data.id) {
-        throw new Error("ID bilgisi eksik! Backend'den dönmedi.");
-      }
 
       const userState = {
         id: response.data.id,
@@ -56,14 +48,6 @@ function Login() {
       <form onSubmit={handleSubmit} className="login-box">
         <h1>Personel360</h1>
 
-        <div className="role-selection">
-          <input type="radio" name="role" id="personel" value="personel" checked={user.role === "personel"} onChange={handleChange} />
-          <label htmlFor="personel">Personel</label>
-
-          <input type="radio" name="role" id="admin" value="admin" checked={user.role === "admin"} onChange={handleChange} />
-          <label htmlFor="admin">Yönetici</label>
-        </div>
-
         <input name="username" placeholder="Kullanıcı Adı" onChange={handleChange} required />
 
         <div className="password-container">
@@ -81,14 +65,19 @@ function Login() {
 
         <button type="submit">Giriş Yap</button>
 
-        {user.role === "personel" && (
-          <p className="register-link">
-            Hesabınız yok mu?{" "}
-            <span onClick={() => navigate("/register")} className="register-button">
-              Kayıt Ol
-            </span>
-          </p>
-        )}
+        <p className="register-link">
+          Hesabınız yok mu?{" "}
+          <span onClick={() => navigate("/register")} className="register-button">
+            Kayıt Ol
+          </span>
+        </p>
+
+       <p className="forgot-link">
+  <span onClick={() => navigate("/forgot-password")} className="forgot-button">
+    Şifremi Unuttum
+  </span>
+</p>
+
       </form>
 
       <ToastContainer position="top-center" />

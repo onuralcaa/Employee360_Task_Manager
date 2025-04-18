@@ -18,26 +18,26 @@
 }
 
 /* Başlık */
-.login-box h2 {
+.login-box h1 {
   margin-bottom: 20px;
-  font-size: 24px;
+  font-size: 26px;
 }
 
 /* Form içindeki tüm inputların eşit olması */
 .login-box input {
-  width: 100%; /* 📌 Tüm inputları eşit genişlikte yap */
+  width: 100%;
   padding: 10px;
   margin: 10px 0;
   border: 1px solid #ddd;
   border-radius: 5px;
   font-size: 16px;
-  box-sizing: border-box; /* 📌 Padding genişliği değiştirmesin */
+  box-sizing: border-box;
 }
 
 /* Şifre ve ikonun olduğu container */
 .password-container {
   position: relative;
-  width: 100%; /* 📌 Tüm inputlarla aynı genişlikte olsun */
+  width: 100%;
   display: flex;
   align-items: center;
 }
@@ -45,7 +45,7 @@
 /* Şifre inputu */
 .password-container input {
   flex: 1;
-  padding-right: 40px; /* 📌 Göz ikonuna yer bırak */
+  padding-right: 40px;
 }
 
 /* Göz ikonunun stili */
@@ -95,35 +95,23 @@
   color: #e63e3e;
 }
 
-.role-selection {
-  display: flex;
-  justify-content: center;
-  gap: 25px; /* Butonlar arasında boşluk */
-  margin-bottom: 15px;
+.forgot-link {
+  margin-top: 10px;
+  font-size: 14px;
+  color: #555;
+  text-align: center;
 }
 
-.role-selection label {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 20px;
-  border: 2px solid #ddd;
-  border-radius: 8px;
+.forgot-button {
+  color: #4f70ec;
+  font-weight: 500;
   cursor: pointer;
-  font-weight: bold;
-  transition: all 0.3s ease;
+  display: inline-block;
+  margin-top: 5px;
+  transition: color 0.3s ease;
 }
 
-.role-selection input {
-  display: none; /* Varsayılan radyo butonlarını gizle */
-}
-
-.role-selection label:hover {
-  background-color: #f0f0f0;
-}
-
-.role-selection input:checked + label {
-  background-color: #ff4b5c;
-  color: white;
-  border-color: #ff4b5c;
+.forgot-button:hover {
+  color: #304cc9;
+  text-decoration: underline;
 }

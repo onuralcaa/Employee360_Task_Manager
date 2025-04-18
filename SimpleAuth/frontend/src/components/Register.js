@@ -27,80 +27,111 @@ function Register() {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    if (isNaN(user.number)) {
-      toast.error("❌ Numara sadece sayısal olabilir!");
-      return;
-    }
+  if (isNaN(user.number)) {
+    toast.error("❌ Numara sadece sayısal olabilir!");
+    return;
+  }
 
-    if (user.password !== confirmPassword) {
-      toast.error("❌ Şifreler uyuşmuyor!");
-      return;
-    }
+  if (user.username.length < 5) {
+    toast.error("❌ Kullanıcı adı en az 5 karakter olmalıdır!");
+    return;
+  }
 
-    try {
-      await register(user);
-      toast.success("✅ Kayıt başarılı!", { autoClose: 2000 });
-      setTimeout(() => navigate("/login"), 2000);
-    } catch (error) {
-      toast.error("❌ Kayıt başarısız! Lütfen bilgilerinizi kontrol edin.");
-    }
-  };
+  const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$/;
+  if (!passwordRegex.test(user.password)) {
+    toast.error("❌ Şifre en az 6 karakter, 1 harf ve 1 rakam içermelidir!");
+    return;
+  }
+
+  if (user.password !== confirmPassword) {
+    toast.error("❌ Şifreler uyuşmuyor!");
+    return;
+  }
+
+  const selectedYear = new Date(user.birthdate).getFullYear();
+  const currentYear = new Date().getFullYear();
+  if (selectedYear > currentYear) {
+    toast.error("❌ Doğum yılı geçerli bir yıl olmalıdır!");
+    return;
+  }
+
+  try {
+    await register(user);
+    toast.success("✅ Kayıt başarılı!", { autoClose: 2000 });
+    setTimeout(() => navigate("/login"), 2000);
+  } catch (error) {
+    toast.error("❌ Kayıt başarısız! Lütfen bilgilerinizi kontrol edin.");
+  }
+};
+
 
   return (
-    <div className="register-container">
-      <form onSubmit={handleSubmit} className="register-box">
-        <h2>Kayıt Ol</h2>
+  <div className="register-container">
+    {/* Sol taraftaki kayıt formu */}
+    <form onSubmit={handleSubmit} className="register-box">
+      <h2>Kayıt Ol</h2>
 
-        <input name="name" placeholder="Ad" onChange={handleChange} required />
-        <input name="surname" placeholder="Soyad" onChange={handleChange} required />
-        <input name="username" placeholder="Kullanıcı Adı" onChange={handleChange} required />
-        <input name="number" type="text" placeholder="Numara" onChange={handleChange} required />
-        <input name="email" type="email" placeholder="E-posta" onChange={handleChange} required />
-        <input name="birthdate" type="date" onChange={handleChange} required />
+      <input name="name" placeholder="Ad" onChange={handleChange} required />
+      <input name="surname" placeholder="Soyad" onChange={handleChange} required />
+      <input name="username" placeholder="Kullanıcı Adı" onChange={handleChange} required />
+      <input name="number" type="text" placeholder="Numara" onChange={handleChange} required />
+      <input name="email" type="email" placeholder="E-posta" onChange={handleChange} required />
+      <input name="birthdate" type="date" onChange={handleChange} required />
 
-        <div className="password-container">
-          <input
-            name="password"
-            type={showPassword ? "text" : "password"}
-            placeholder="Şifre"
-            onChange={handleChange}
-            required
-          />
-          <span className="toggle-password" onClick={() => setShowPassword(!showPassword)}>
-            {showPassword ? <FaEyeSlash /> : <FaEye />}
-          </span>
-        </div>
+      <div className="password-container">
+        <input
+          name="password"
+          type={showPassword ? "text" : "password"}
+          placeholder="Şifre"
+          onChange={handleChange}
+          required
+        />
+        <span className="toggle-password" onClick={() => setShowPassword(!showPassword)}>
+          {showPassword ? <FaEyeSlash /> : <FaEye />}
+        </span>
+      </div>
 
-        {/* 📌 Şifre Doğrulama Alanı */}
-        <div className="password-container">
-          <input
-            name="confirmPassword"
-            type={showPassword ? "text" : "password"}
-            placeholder="Şifre Tekrar"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            required
-          />
-          <span className="toggle-password" onClick={() => setShowPassword(!showPassword)}>
-            {showPassword ? <FaEyeSlash /> : <FaEye />}
-          </span>
-        </div>
+      <div className="password-container">
+        <input
+          name="confirmPassword"
+          type={showPassword ? "text" : "password"}
+          placeholder="Şifre Tekrar"
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
+          required
+        />
+        <span className="toggle-password" onClick={() => setShowPassword(!showPassword)}>
+          {showPassword ? <FaEyeSlash /> : <FaEye />}
+        </span>
+      </div>
 
-        <button type="submit">Kayıt Ol</button>
+      <button type="submit">Kayıt Ol</button>
 
-        <p className="login-link">
-          Zaten hesabınız var mı?{" "}
-          <span onClick={() => navigate("/login")} className="login-button">
-            Giriş Yap
-          </span>
-        </p>
-      </form>
+      <p className="login-link">
+        Zaten hesabınız var mı?{" "}
+        <span onClick={() => navigate("/login")} className="login-button">
+          Giriş Yap
+        </span>
+      </p>
+    </form>
 
-      <ToastContainer position="top-center" />
+    {/* Sağdaki bilgi bloğu */}
+    <div className="register-info-box">
+      <h4>Kayıt Kuralları</h4>
+      <ul>
+        <li>Kullanıcı adı en az 5 karakter olmalıdır.</li>
+        <li>Şifre en az 6 karakter, 1 harf ve 1 rakam içermelidir.</li>
+        <li>Doğum yılı mevcut yıldan büyük olamaz.</li>
+        <li>Numara sadece sayılardan oluşmalıdır.</li>
+      </ul>
     </div>
-  );
+
+    <ToastContainer position="top-center" />
+  </div>
+);
+
 }
 
 export default Register;
