@@ -121,3 +121,26 @@
   margin-bottom: 8px;
   line-height: 1.5;
 }
+
+/* Takım seçimi (select kutusu) */
+.team-select {
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 16px;
+  background-color: #fff;
+  box-sizing: border-box;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D'http%3A//www.w3.org/2000/svg'%20viewBox%3D'0%200%204%205'%3E%3Cpath%20fill%3D'%23666'%20d%3D'M2%200L0%202h4L2%200zm0%205l2-2H0l2%202z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 10px;
+}
+
+.team-select:focus {
+  outline: none;
+  border-color: #4d79ff;
+  box-shadow: 0 0 0 2px rgba(77, 121, 255, 0.2);
+}

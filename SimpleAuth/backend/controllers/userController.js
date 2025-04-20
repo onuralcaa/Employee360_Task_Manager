@@ -8,7 +8,7 @@ const sendEmail = require("../utils/sendEmail");
 // ✅ Kayıt
 const register = async (req, res) => {
   try {
-    const { name, surname, username, number, email, birthdate, password, role } = req.body;
+      const { name, surname, username, number, email, birthdate, password, role, team } = req.body;
 
     if (isNaN(number)) return res.status(400).json({ message: "Numara sadece sayısal olabilir." });
 
@@ -33,7 +33,8 @@ const register = async (req, res) => {
       email,
       birthdate,
       password: hashedPassword,
-      role: role || "personel"
+      role: role || "personel",
+      team // ✅ takım bilgisi artık user'a ekleniyor
     });
 
     await newUser.save();
@@ -66,7 +67,9 @@ const login = async (req, res) => {
       email: user.email,
       birthdate: user.birthdate,
       role: user.role,
+      team: user.team, // ✅ eklendi
     };
+
 
     const token = jwt.sign(tokenPayload, process.env.JWT_SECRET, {
       expiresIn: "1h",
@@ -83,7 +86,9 @@ const login = async (req, res) => {
       phone: user.number,
       email: user.email,
       birthdate: user.birthdate,
+      team: user.team // ✅ eklendi
     });
+
   } catch (error) {
     res.status(500).json({ message: "Sunucu hatası", error });
   }
@@ -200,6 +205,16 @@ const getAllPersonnel = async (req, res) => {
   }
 };
 
+// ✅ Takım ID'sine göre kullanıcıları getir
+const getUsersByTeamId = async (req, res) => {
+  try {
+    const teamUsers = await User.find({ team: req.params.teamId }); // ← projection kaldırıldı
+    res.status(200).json(teamUsers);
+  } catch (error) {
+    res.status(500).json({ message: "Takım kullanıcıları alınamadı", error });
+  }
+};
+
 
 module.exports = {
   register,
@@ -207,6 +222,7 @@ module.exports = {
   updateUser,
   getUserById,
   getAllPersonnel,
-  forgotPassword,     // ✅ yeni eklenen
-  resetPassword       // ✅ yeni eklenen
+  forgotPassword,
+  resetPassword,
+  getUsersByTeamId // ✅ eklendi
 };

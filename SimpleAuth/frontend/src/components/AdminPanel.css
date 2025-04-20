@@ -43,7 +43,7 @@
 }
 
 .panel-center {
-  width: 55%;
+  width: 50%;
   background-color: #ffffff;
   border-left: 1px solid #ddd;
   border-right: 1px solid #ddd;
@@ -54,28 +54,52 @@
   margin-bottom: 20px;
 }
 
+/* ✅ Sağ Panel Düzenlemeleri */
 .panel-right {
-  width: 25%;
-  background-color: #f9f9f9;
+  width: 30%;
+  background-color: #fafafa;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  border-left: 1px solid #ddd;
 }
 
 .panel-right h2 {
   font-size: 20px;
-  margin-bottom: 15px;
+  margin-bottom: 20px;
   color: #4a3f7a;
-  border-bottom: 1px solid #ccc;
+  border-bottom: 2px solid #ccc;
   padding-bottom: 5px;
+}
+
+.user-detail {
+  background-color: #f4f0fa;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 15px 20px;
+  margin-bottom: 15px;
+  font-size: 15px;
+}
+
+.user-detail p {
+  margin: 10px 0;
+  color: #333;
+}
+
+.user-detail strong {
+  color: #5b3f7a;
 }
 
 /* ✅ Personel Kart Tasarımı */
 .person-card {
-  background-color: #f4f0fa; /* açık mor ton */
+  background-color: #f4f0fa;
   border: 1px solid #d1c4e9;
   padding: 5px 15px;
   border-radius: 8px;
   margin-bottom: 10px;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   box-shadow: 0 4px 5px rgba(128, 90, 213, 0.05);
+  cursor: pointer;
 }
 
 .person-card:hover {
@@ -94,22 +118,7 @@
   color: #5b3f7a;
 }
 
-/* Sağ paneli dikey kaydırılabilir hale getir */
-.panel-right {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  height: 100%;
-}
-
-/* Personel listesi scroll alanı */
-.personnel-scroll {
-  flex-grow: 1;
-  overflow-y: auto;
-  max-height: calc(100vh - 180px); /* başlık ve buton için boşluk */
-  padding-right: 6px;
-}
-
+/* Oturumu Kapat Butonu */
 .logout-container {
   margin-top: 20px;
   padding-top: 10px;
@@ -127,6 +136,7 @@
   font-weight: bold;
   transition: background-color 0.2s ease;
 }
+
 .logout-button:hover {
   background-color: #d32f2f;
 }

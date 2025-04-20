@@ -6,6 +6,8 @@ import UserPanel from "./components/UserPanel";
 import AdminPanel from "./components/AdminPanel";
 import ForgotPassword from "./components/ForgotPassword";
 import ResetPassword from "./components/ResetPassword";
+import TeamPanel from "./components/TeamPanel";
+
 
 
 function App() {
@@ -20,6 +22,8 @@ function App() {
         <Route path="/admin-panel" element={<AdminPanel />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password/:token" element={<ResetPassword />} />
+        <Route path="/team-panel" element={<TeamPanel />} />
+
 
       </Routes>
     </BrowserRouter>

@@ -8,19 +8,23 @@ const {
   updateUser,
   getUserById,
   getAllPersonnel,
-  forgotPassword,   // ✅ yeni eklendi
-  resetPassword     // ✅ yeni eklendi
+  forgotPassword,
+  resetPassword,
+  getUsersByTeamId // ✅ yeni eklendi
 } = controller;
 
 // Kullanıcı işlemleri
-router.post("/register", register);        // Kullanıcı kaydı
-router.post("/login", login);              // Kullanıcı girişi
-router.put("/:id", updateUser);            // Kullanıcı güncelle
-router.get("/", getAllPersonnel);          // Tüm personelleri getir
-router.get("/:id", getUserById);           // Belirli kullanıcıyı getir
+router.post("/register", register);
+router.post("/login", login);
+router.put("/:id", updateUser);
+router.get("/", getAllPersonnel);
+router.get("/:id", getUserById);
+
+// Takıma göre kullanıcıları getir
+router.get("/by-team/:teamId", getUsersByTeamId); // ✅ yeni route
 
 // Şifre sıfırlama işlemleri
-router.post("/forgot-password", forgotPassword);       // ✅ Şifremi unuttum - e-posta gönderir
-router.post("/reset-password/:token", resetPassword);  // ✅ Token ile yeni şifre belirleme
+router.post("/forgot-password", forgotPassword);
+router.post("/reset-password/:token", resetPassword);
 
 module.exports = router;

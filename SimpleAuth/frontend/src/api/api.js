@@ -7,3 +7,4 @@ export const login = (user) => axios.post(`${API_URL}/login`, user);
 export const updateUser = (id, updatedData) => axios.put(`${API_URL}/${id}`, updatedData);
 export const getUser = (id) => axios.get(`${API_URL}/${id}`);
 export const getAllPersonnel = () => axios.get(`${API_URL}`);
+export const getAllTeams = () => axios.get("http://localhost:5000/api/teams");
