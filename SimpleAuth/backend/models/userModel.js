@@ -9,10 +9,8 @@ const userSchema = new mongoose.Schema({
     unique: true,
     minlength: [4, "Kullanıcı adı en az 4 karakter olmalıdır."],
     validate: {
-      validator: function (v) {
-        return /^[a-zA-Z0-9]+$/.test(v);
-      },
-      message: props => `${props.value} geçersiz kullanıcı adı!`
+      validator: (v) => /^[a-zA-Z0-9]+$/.test(v),
+      message: (props) => `${props.value} geçersiz kullanıcı adı!`
     }
   },
   number: { type: Number, required: true, unique: true },
@@ -23,21 +21,21 @@ const userSchema = new mongoose.Schema({
     required: true,
     minlength: [6, "Şifre en az 6 karakter olmalıdır."],
     validate: {
-      validator: function (v) {
-        return /[a-zA-Z]/.test(v) && /[0-9]/.test(v);
-      },
+      validator: (v) => /[a-zA-Z]/.test(v) && /[0-9]/.test(v),
       message: () => "Şifre en az bir harf ve bir rakam içermelidir."
     }
   },
   role: {
     type: String,
-    enum: ["admin", "personel"],
+    enum: ["admin", "team_leader", "personel"],
     default: "personel"
   },
-  // ✅ Şifre sıfırlama için gerekli alanlar
+  team: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Team"
+  },
   resetPasswordToken: String,
   resetPasswordExpire: Date
 });
-
 
 module.exports = mongoose.model("User", userSchema);

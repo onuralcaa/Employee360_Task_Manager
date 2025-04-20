@@ -12,36 +12,48 @@ function Login() {
   const navigate = useNavigate();
 
   const handleChange = (e) => setUser({ ...user, [e.target.name]: e.target.value });
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  try {
+    const response = await login(user);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      const response = await login(user);
-      toast.success(`✅ ${response.data.message}`, { autoClose: 2000 });
+    const role = response.data.role;
+    const roleText =
+      role === "admin"
+        ? "Yönetici"
+        : role === "team_leader"
+        ? "Takım lideri"
+        : "Personel";
 
-      const userState = {
-        id: response.data.id,
-        role: response.data.role,
-        name: response.data.name,
-        surname: response.data.surname,
-        username: response.data.username,
-        phone: response.data.phone,
-        email: response.data.email,
-        birthdate: response.data.birthdate,
-      };
+    toast.success(`✅ ${roleText} girişi başarılı.`, { autoClose: 2000 });
 
-      setTimeout(() => {
-        if (response.data.role === "personel") {
-          navigate("/user-panel", { replace: true, state: userState });
-        } else {
-          navigate("/dashboard", { replace: true, state: userState });
-        }
-      }, 2000);
-    } catch (error) {
-      const errMsg = error.response?.data?.message || error.message || "❌ Giriş başarısız! Lütfen bilgilerinizi kontrol edin.";
-      toast.error(errMsg);
-    }
-  };
+    const userState = {
+      id: response.data.id,
+      role: response.data.role,
+      name: response.data.name,
+      surname: response.data.surname,
+      username: response.data.username,
+      phone: response.data.phone,
+      email: response.data.email,
+      birthdate: response.data.birthdate,
+      team: response.data.team,
+    };
+
+    setTimeout(() => {
+      if (response.data.role === "admin") {
+        navigate("/dashboard", { replace: true, state: userState });
+      } else if (response.data.role === "team_leader") {
+        navigate("/team-panel", { replace: true, state: userState });
+      } else {
+        navigate("/user-panel", { replace: true, state: userState });
+      }
+    }, 2000);
+  } catch (error) {
+    const errMsg = error.response?.data?.message || error.message || "❌ Giriş başarısız! Lütfen bilgilerinizi kontrol edin.";
+    toast.error(errMsg);
+  }
+};
+
 
   return (
     <div className="login-container">
@@ -72,12 +84,11 @@ function Login() {
           </span>
         </p>
 
-       <p className="forgot-link">
-  <span onClick={() => navigate("/forgot-password")} className="forgot-button">
-    Şifremi Unuttum
-  </span>
-</p>
-
+        <p className="forgot-link">
+          <span onClick={() => navigate("/forgot-password")} className="forgot-button">
+            Şifremi Unuttum
+          </span>
+        </p>
       </form>
 
       <ToastContainer position="top-center" />

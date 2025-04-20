@@ -1,0 +1,114 @@
+/* Genel Panel Yapısı */
+.team-lead-panel-wrapper {
+  display: flex;
+  height: 100vh;
+  background-color: #f7f7f7;
+  font-family: "Segoe UI", sans-serif;
+}
+
+/* Sol Menü */
+.team-lead-panel-left {
+  width: 18%;
+  background-color: #fff;
+  padding: 20px;
+  border-right: 1px solid #ddd;
+}
+
+.team-lead-panel-left h2 {
+  font-size: 16px;
+  margin-bottom: 10px;
+  color: #333;
+}
+
+.team-lead-panel-left ul {
+  list-style: none;
+  padding: 0;
+}
+
+.team-lead-panel-left li {
+  padding: 10px;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background 0.2s;
+}
+
+.team-lead-panel-left li:hover {
+  background-color: #eaeaea;
+}
+
+/* Orta İçerik */
+.team-lead-panel-center {
+  flex: 1;
+  padding: 30px;
+  overflow-y: auto;
+}
+
+.team-lead-panel-center h2 {
+  font-size: 20px;
+  color: #b00;
+  margin-bottom: 20px;
+}
+
+.team-lead-panel-center h3 {
+  font-size: 18px;
+  margin-bottom: 15px;
+  color: #333;
+}
+
+/* Sağ Bilgi Paneli */
+.team-lead-panel-right {
+  width: 22%;
+  background-color: #fff;
+  padding: 25px;
+  border-left: 1px solid #ddd;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.team-lead-info-box {
+  margin-bottom: auto;
+}
+
+.team-lead-info-box p {
+  margin: 8px 0;
+  font-size: 14px;
+}
+
+.team-lead-info-box strong {
+  color: #444;
+}
+
+/* Çıkış Butonu */
+.team-lead-logout-container {
+  margin-top: 30px;
+}
+
+.team-lead-logout-button {
+  width: 100%;
+  padding: 10px;
+  background-color: #d9534f;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.team-lead-logout-button:hover {
+  background-color: #c9302c;
+}
+
+/* Üye kartları */
+.team-lead-person-card {
+  background-color: #f6f0ff;
+  padding: 15px;
+  border-radius: 10px;
+  margin-bottom: 15px;
+  border: 1px solid #e2d8ff;
+}
+
+.team-lead-person-card p {
+  margin: 5px 0;
+}
