@@ -12,10 +12,15 @@ function Login() {
   const navigate = useNavigate();
 
   const handleChange = (e) => setUser({ ...user, [e.target.name]: e.target.value });
+
 const handleSubmit = async (e) => {
   e.preventDefault();
   try {
     const response = await login(user);
+
+    // ✅ Token kaydediliyor!
+    localStorage.setItem("token", response.data.token);
+    localStorage.setItem("userId", response.data.id);
 
     const role = response.data.role;
     const roleText =
@@ -53,6 +58,7 @@ const handleSubmit = async (e) => {
     toast.error(errMsg);
   }
 };
+
 
 
   return (

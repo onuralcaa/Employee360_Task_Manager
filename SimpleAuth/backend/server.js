@@ -7,6 +7,8 @@ const teamRoutes = require("./routes/teamRoutes");
 const User = require("./models/userModel");
 const Team = require("./models/teamModel");
 const bcrypt = require("bcryptjs");
+const messageRoutes = require("./routes/messageRoutes");
+
 require("dotenv").config();
 
 const app = express();
@@ -16,6 +18,8 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use("/api/users", userRoutes);
 app.use("/api/teams", teamRoutes);
+app.use("/api/messages", messageRoutes);
+
 
 // 🚀 Takımları Otomatik Oluştur
 const createDefaultTeams = async () => {

@@ -1,0 +1,110 @@
+.msg-wrapper {
+  padding: 20px;
+  background-color: #ffffff;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.05);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.msg-wrapper h3 {
+  margin-bottom: 16px;
+  color: #4a3f7a;
+}
+
+.msg-send-box {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.msg-send-box select{
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
+  width: 100%;
+  resize: none;
+}
+
+
+.msg-send-box textarea {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
+  width: 97.5%;
+  resize: none;
+}
+
+.msg-send-box button {
+  align-self: flex-end;
+  padding: 15px 60px;
+  background-color: #4a90e2;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+}
+
+.msg-send-box button:hover {
+  background-color: #357ab8;
+}
+
+.msg-list {
+  max-height: 350px;
+  overflow-y: auto;
+  border-top: 1px solid #ccc;
+  padding-top: 10px;
+}
+
+.msg-list h4 {
+  margin-bottom: 10px;
+  color: #333;
+}
+
+.msg-item {
+  background-color: #f4f0fa;
+  padding: 10px;
+  border-radius: 6px;
+  margin-bottom: 10px;
+  border: 1px solid #e0d7f3;
+  box-shadow: 0 2px 4px rgba(128, 90, 213, 0.1);
+}
+
+.msg-item p {
+  margin: 4px 0;
+  font-size: 14px;
+}
+
+.msg-item small {
+  color: #777;
+  font-size: 12px;
+}
+
+/* Gönderilen mesajlar (kullanıcı tarafından gönderilenler) */
+.msg-item.sent {
+  background-color: #d1f7c4; /* Açık yeşil */
+  text-align: right;
+}
+
+/* Gelen mesajlar (başkasından gelenler) */
+.msg-item.received {
+  background-color: #f0f0f5; /* Açık mor-gri */
+  text-align: left;
+}
+
+/* Mesaj balonlarının içeriği */
+.msg-item p {
+  margin: 4px 0;
+  font-size: 14px;
+}
+
+/* Zaman bilgisi */
+.msg-item small {
+  color: #777;
+  font-size: 12px;
+}

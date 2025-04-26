@@ -2,6 +2,8 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
 import "./UserPanel.css";
 import { updateUser } from "../api/api";
+import PersonnelMessages from "./PersonnelMessages";
+
 
 function UserPanel() {
   const location = useLocation();
@@ -25,16 +27,17 @@ function UserPanel() {
     birthdate: userData.birthdate ? userData.birthdate.slice(0, 10) : "",
   });
 
-  const renderContent = () => {
-    switch (activeTab) {
-      case "gorevler":
-        return <p>Burada görev listesi olacak.</p>;
-      case "mesajlar":
-        return <p>Burada mesajlar olacak.</p>;
-      default:
-        return <p>İçerik seçiniz.</p>;
-    }
-  };
+const renderContent = () => {
+  switch (activeTab) {
+    case "gorevler":
+      return <p>Burada görev listesi olacak.</p>;
+    case "mesajlar":
+      return <PersonnelMessages user={userData} />;  // ✅ BURAYI DEĞİŞTİRİYORUZ!
+    default:
+      return <p>İçerik seçiniz.</p>;
+  }
+};
+
 
   const handleLogout = () => {
     const confirmed = window.confirm("Oturumu kapatmak istediğinize emin misiniz?");
