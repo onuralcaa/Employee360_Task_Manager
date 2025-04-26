@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
-import "./TeamPanel.css"; // ✅ Yeni dosya
+import Messages from "./Messages"; // ✅ Mesaj panelini import et
+import "./TeamPanel.css";
 
 function TeamPanel() {
   const { state } = useLocation();
@@ -10,7 +11,6 @@ function TeamPanel() {
   const [teamName, setTeamName] = useState("");
   const [teamMembers, setTeamMembers] = useState([]);
 
-  // Takım adını çek
   useEffect(() => {
     if (state?.team) {
       axios
@@ -20,7 +20,6 @@ function TeamPanel() {
     }
   }, [state?.team]);
 
-  // Takım üyelerini çek
   useEffect(() => {
     if (state?.team) {
       axios
@@ -53,6 +52,11 @@ function TeamPanel() {
       );
     }
 
+    if (activeTab === "mesajlar") {
+      return <Messages user={state} />; // ✅ doğru props gönderimi
+    }
+
+
     return <p>Bir menü seçin.</p>;
   };
 
@@ -63,6 +67,7 @@ function TeamPanel() {
         <h2>📁 MENÜ</h2>
         <ul>
           <li onClick={() => setActiveTab("uyeler")}>Takım Üyeleri</li>
+          <li onClick={() => setActiveTab("mesajlar")}>Mesajlar</li> {/* ✅ eklendi */}
         </ul>
       </div>
 

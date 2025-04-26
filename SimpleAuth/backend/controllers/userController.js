@@ -189,21 +189,30 @@ const getUserById = async (req, res) => {
   }
 };
 
-// ✅ Tüm personelleri getir (admin için)
+// ✅ Tüm kullanıcıları getir (admin için)
 const getAllPersonnel = async (req, res) => {
   try {
-    const allUsers = await User.find({}, "name surname email _id role");
-    //console.log("📋 Tüm kullanıcılar:", allUsers);
-
-    // role "personel" olanları filtrele (fazladan boşluklara karşı)
-    const filtered = allUsers.filter(user => user.role.trim().toLowerCase() === "personel");
-
-    res.status(200).json(filtered);
+    const allUsers = await User.find({}, "name surname email _id role username team birthdate number");
+    res.status(200).json(allUsers);
   } catch (error) {
-    console.error("❌ Personel listesi alınamadı:", error);
-    res.status(500).json({ message: "Personel listesi alınamadı", error });
+    console.error("❌ Kullanıcı listesi alınamadı:", error);
+    res.status(500).json({ message: "Kullanıcı listesi alınamadı", error });
   }
 };
+
+const getAllUsers = async (req, res) => {
+  try {
+    console.log("🚀 getAllUsers çalıştı!"); // ✅ Bu log gelmeli
+    console.log("🟠 Gelen kullanıcı bilgisi (req.user):", req.user); // ✅ Token decode oldu mu?
+
+    const users = await User.find({}, "name surname username email role team");
+    res.status(200).json(users);
+  } catch (err) {
+    console.error("❌ Kullanıcılar alınamadı:", err);
+    res.status(500).json({ message: "Kullanıcılar alınamadı", error: err });
+  }
+};
+
 
 // ✅ Takım ID'sine göre kullanıcıları getir
 const getUsersByTeamId = async (req, res) => {
@@ -224,5 +233,6 @@ module.exports = {
   getAllPersonnel,
   forgotPassword,
   resetPassword,
-  getUsersByTeamId // ✅ eklendi
+  getUsersByTeamId, // ✅ eklendi
+  getAllUsers
 };

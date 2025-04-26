@@ -1,7 +1,5 @@
 const express = require("express");
 const router = express.Router();
-const controller = require("../controllers/userController.js");
-
 const {
   register,
   login,
@@ -10,21 +8,29 @@ const {
   getAllPersonnel,
   forgotPassword,
   resetPassword,
-  getUsersByTeamId // ✅ yeni eklendi
-} = controller;
+  getAllUsers,
+  getUsersByTeamId
+} = require("../controllers/userController");
+
+const verifyToken = require("../middleware/authMiddleware"); // ✅ burası eklendi!
 
 // Kullanıcı işlemleri
 router.post("/register", register);
 router.post("/login", login);
 router.put("/:id", updateUser);
-router.get("/", getAllPersonnel);
-router.get("/:id", getUserById);
+
+// 🟢 ÖNCE spesifik "/all" gelsin!
+router.get("/all", verifyToken, getAllUsers);
 
 // Takıma göre kullanıcıları getir
-router.get("/by-team/:teamId", getUsersByTeamId); // ✅ yeni route
+router.get("/by-team/:teamId", getUsersByTeamId);
+
+// 🔥 SONDA "/:id" olsun ki "all" veya "by-team" ile çakışmasın!
+router.get("/:id", getUserById);
 
 // Şifre sıfırlama işlemleri
 router.post("/forgot-password", forgotPassword);
 router.post("/reset-password/:token", resetPassword);
+
 
 module.exports = router;

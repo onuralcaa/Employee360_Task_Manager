@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "./AdminPanel.css";
+import Messages from "./Messages";
 
 function AdminPanel() {
   const [activeTab, setActiveTab] = useState("personel");
@@ -10,7 +11,15 @@ function AdminPanel() {
   const [selectedTeamName, setSelectedTeamName] = useState("");
   const [teamMembers, setTeamMembers] = useState([]);
   const [selectedMember, setSelectedMember] = useState(null);
+  const [currentUserId, setCurrentUserId] = useState(null);
+
   const navigate = useNavigate();
+
+  // Giriş yapan kullanıcının ID'sini localStorage'dan çek (örnek)
+  useEffect(() => {
+    const storedId = localStorage.getItem("userId");
+    if (storedId) setCurrentUserId(storedId);
+  }, []);
 
   // Takımları getir
   useEffect(() => {
@@ -27,11 +36,10 @@ function AdminPanel() {
       axios.get(`http://localhost:5000/api/users/by-team/${selectedTeamId}`)
         .then((res) => {
           setTeamMembers(res.data);
-          setSelectedMember(null); // önceki seçimi sıfırla
+          setSelectedMember(null);
         })
         .catch((err) => console.error("Takım personelleri alınamadı:", err));
 
-      // Seçilen takımın adını bul
       const selectedTeam = teams.find((t) => t._id === selectedTeamId);
       setSelectedTeamName(selectedTeam?.name || "");
     }
@@ -39,17 +47,18 @@ function AdminPanel() {
 
   const handleLogout = () => {
     if (window.confirm("Oturumu kapatmak istediğinize emin misiniz?")) {
+      localStorage.clear();
       navigate("/login");
     }
   };
 
   const renderContent = () => {
-    if (activeTab === "personel") {
-      return <p>Personel yönetimi burada olacak.</p>;
-    }
+    if (activeTab === "personel") return <p>Personel yönetimi burada olacak.</p>;
+    if (activeTab === "raporlar") return <p>Raporlar burada olacak.</p>;
 
-    if (activeTab === "raporlar") {
-      return <p>Raporlar burada olacak.</p>;
+    
+    if (activeTab === "mesajlar") {
+      return <Messages user={{ id: currentUserId, role: "admin" }} />; // ✅ BU ŞEKİLDE OLMALI!
     }
 
     if (activeTab === "takimlar") {
@@ -100,6 +109,7 @@ function AdminPanel() {
           <li onClick={() => setActiveTab("personel")}>Personel</li>
           <li onClick={() => setActiveTab("raporlar")}>Raporlar</li>
           <li onClick={() => setActiveTab("takimlar")}>Takımlar</li>
+          <li onClick={() => setActiveTab("mesajlar")}>Mesajlar</li>
         </ul>
         <div className="logout-container" style={{ marginTop: "auto" }}>
           <button className="logout-button" onClick={handleLogout}>
@@ -114,22 +124,21 @@ function AdminPanel() {
         {renderContent()}
       </div>
 
-     {/* Sağ Panel: Personel Detay */}
-{selectedMember && (
-  <div className="panel-right">
-    <h2>📄 Personel Detay</h2>
-    <div className="person-detail-card">
-      <p><strong>Ad:</strong> {selectedMember.name || "-"}</p>
-      <p><strong>Soyad:</strong> {selectedMember.surname || "-"}</p>
-      <p><strong>Kullanıcı Adı:</strong> {selectedMember.username || "-"}</p>
-      <p><strong>Numara:</strong> {selectedMember.number || "-"}</p>
-      <p><strong>E-posta:</strong> {selectedMember.email || "-"}</p>
-      <p><strong>Doğum Tarihi:</strong> {selectedMember.birthdate?.substring(0, 10) || "-"}</p>
-      <p><strong>Rol:</strong> {selectedMember.role || "-"}</p>
-    </div>
-  </div>
-)}
-
+      {/* Sağ Panel: Seçili Kişi Detay */}
+      {selectedMember && (
+        <div className="panel-right">
+          <h2>📄 Personel Detay</h2>
+          <div className="person-detail-card">
+            <p><strong>Ad:</strong> {selectedMember.name || "-"}</p>
+            <p><strong>Soyad:</strong> {selectedMember.surname || "-"}</p>
+            <p><strong>Kullanıcı Adı:</strong> {selectedMember.username || "-"}</p>
+            <p><strong>Numara:</strong> {selectedMember.number || "-"}</p>
+            <p><strong>E-posta:</strong> {selectedMember.email || "-"}</p>
+            <p><strong>Doğum Tarihi:</strong> {selectedMember.birthdate?.substring(0, 10) || "-"}</p>
+            <p><strong>Rol:</strong> {selectedMember.role || "-"}</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
