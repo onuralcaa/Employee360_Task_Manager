@@ -8,6 +8,7 @@ const User = require("./models/userModel");
 const Team = require("./models/teamModel");
 const bcrypt = require("bcryptjs");
 const messageRoutes = require("./routes/messageRoutes");
+const fileRoutes = require("./routes/fileRoutes");
 
 require("dotenv").config();
 
@@ -19,6 +20,8 @@ app.use(bodyParser.json());
 app.use("/api/users", userRoutes);
 app.use("/api/teams", teamRoutes);
 app.use("/api/messages", messageRoutes);
+app.use("/api/files", fileRoutes);
+app.use("/uploads", express.static("uploads")); // Dosyaları dışarıdan erişilebilir yapar
 
 
 // 🚀 Takımları Otomatik Oluştur

@@ -140,3 +140,24 @@
 .logout-button:hover {
   background-color: #d32f2f;
 }
+
+.collapse-button {
+  background-color: #e74c3c;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-left: auto;
+}
+
+.collapse-button:hover {
+  background-color: #c0392b;
+}
+
+.panel-right-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
