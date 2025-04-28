@@ -17,10 +17,10 @@ const taskSchema = new mongoose.Schema({
   timestamps: true
 });
 
-// Add validation for status transitions
+// Durum geçişleri için doğrulama ekle
 taskSchema.pre('save', async function(next) {
   if (this.isModified('status')) {
-    // Skip validation for new documents
+    // Yeni belgeler için doğrulamayı atla
     if (this.isNew) {
       return next();
     }
@@ -34,18 +34,17 @@ taskSchema.pre('save', async function(next) {
       'rejected': []
     };
 
-    const oldStatus = this._previousStatus;
+    const oldStatus = this._previousStatus || this.status;
     const newStatus = this.status;
 
-    // Validate status transition
-    if (!oldStatus || !allowedTransitions[oldStatus]?.includes(newStatus)) {
-      throw new Error(`Invalid status transition from ${oldStatus || 'undefined'} to ${newStatus}`);
+    if (!allowedTransitions[oldStatus]?.includes(newStatus)) {
+      throw new Error(`${oldStatus} durumundan ${newStatus} durumuna geçiş geçersiz`);
     }
 
-    // Validate admin actions
+    // Sadece admin doğrulayabilir veya reddedebilir
     if ((newStatus === 'verified' || newStatus === 'rejected') && 
         (!this._modifiedBy || this._userRole !== 'admin')) {
-      throw new Error(`Only admins can ${newStatus} tasks`);
+      throw new Error(`Görevleri sadece yöneticiler ${newStatus} durumuna getirebilir`);
     }
   }
   next();

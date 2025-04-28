@@ -23,10 +23,10 @@ const milestoneSchema = new mongoose.Schema({
   _userRole: String
 });
 
-// Add validation for status transitions
+// Durum değişikliklerini doğrula
 milestoneSchema.pre('save', async function(next) {
   if (this.isModified('status')) {
-    // Skip validation for new documents
+    // Yeni belgeler için doğrulamayı atla
     if (this.isNew) {
       return next();
     }
@@ -35,13 +35,13 @@ milestoneSchema.pre('save', async function(next) {
     const newStatus = this.status;
 
     if (!oldStatus || !allowedTransitions[oldStatus]?.includes(newStatus)) {
-      throw new Error(`Invalid status transition from ${oldStatus || 'undefined'} to ${newStatus}`);
+      throw new Error(`${oldStatus || 'tanımsız'} durumundan ${newStatus} durumuna geçiş geçersiz`);
     }
 
-    // Validate admin actions
+    // Admin işlemlerini doğrula
     if ((newStatus === 'verified' || newStatus === 'rejected') && 
         (!this._modifiedBy || this._userRole !== 'admin')) {
-      throw new Error(`Only admins can ${newStatus} milestones`);
+      throw new Error(`Sadece yöneticiler milestoneları ${newStatus} yapabilir`);
     }
   }
   next();
