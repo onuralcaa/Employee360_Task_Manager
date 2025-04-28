@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import FileShare from "./FileShare"; // Dosya paylaşımı bileşeni
 import Messages from "./Messages"; // Mesajlaşma bileşeni
+import TaskList from './TaskList';
 import "./AdminPanel.css";
 
 function AdminPanel() {
@@ -72,6 +73,10 @@ const handleCollapseRightPanel = () => {
       return <Messages user={{ id: currentUserId, role: "admin" }} />;
     }
 
+    if (activeTab === "gorevler") {
+      return <TaskList user={{ id: currentUserId, role: "admin" }} />;
+    }
+
     if (activeTab === "takimlar") {
       return (
         <div>
@@ -117,7 +122,8 @@ const handleCollapseRightPanel = () => {
     <div className="panel-left">
       <h2>📁 MENÜ</h2>
       <ul>
-        <li onClick={() => handleMenuClick("takimlar")}>Takımlar</li>
+        <li onClick={() => handleMenuClick("takimlar")}>Takımlar ve Personeller</li>
+        <li onClick={() => handleMenuClick("gorevler")}>Görevler</li>
         <li onClick={() => handleMenuClick("mesajlar")}>Mesaj Gönder</li>
         <li onClick={() => handleMenuClick("dosyaPaylasimi")}>Dosya Paylaşımı</li>
         <li onClick={() => handleMenuClick("personel")}>Personel</li>

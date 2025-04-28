@@ -3,7 +3,8 @@ import { useEffect, useMemo, useState } from "react";
 import "./UserPanel.css";
 import { updateUser } from "../api/api";
 import PersonnelMessages from "./PersonnelMessages";
-
+import TaskList from './TaskList';
+import TaskForm from './TaskForm';
 
 function UserPanel() {
   const location = useLocation();
@@ -30,7 +31,12 @@ function UserPanel() {
 const renderContent = () => {
   switch (activeTab) {
     case "gorevler":
-      return <p>Burada görev listesi olacak.</p>;
+      return (
+        <div>
+          <TaskForm user={userData} onTaskCreated={() => setActiveTab("gorevler")} />
+          <TaskList user={userData} />
+        </div>
+      );
     case "mesajlar":
       return <PersonnelMessages user={userData} />;  // ✅ BURAYI DEĞİŞTİRİYORUZ!
     default:
