@@ -202,8 +202,8 @@ const getAllPersonnel = async (req, res) => {
 
 const getAllUsers = async (req, res) => {
   try {
-    console.log("🚀 getAllUsers çalıştı!"); // ✅ Bu log gelmeli
-    console.log("🟠 Gelen kullanıcı bilgisi (req.user):", req.user); // ✅ Token decode oldu mu?
+    //console.log("🚀 getAllUsers çalıştı!"); // ✅ Bu log gelmeli
+    //console.log("🟠 Gelen kullanıcı bilgisi (req.user):", req.user); // ✅ Token decode oldu mu?
 
     const users = await User.find({}, "name surname username email role team");
     res.status(200).json(users);

@@ -1,27 +1,45 @@
 import axios from "axios";
 
-const API_URL = "http://localhost:5000/api/users";
+const api = axios.create({
+  baseURL: "http://localhost:5000/api",
+});
 
-export const register = (user) => axios.post(`${API_URL}/register`, user);
-export const login = (user) => axios.post(`${API_URL}/login`, user);
-export const updateUser = (id, updatedData) => axios.put(`${API_URL}/${id}`, updatedData);
-export const getUser = (id) => axios.get(`${API_URL}/${id}`);
-export const getAllPersonnel = () => axios.get(`${API_URL}`);
-export const getAllTeams = () => axios.get("http://localhost:5000/api/teams");
-export const getAllUsers = () => {
-  const token = localStorage.getItem("token"); // veya senin token'ı tuttuğun yer
-  return axios.get("http://localhost:5000/api/users/all", {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-};
+// 📌 Token'ı her istek öncesinde güncel şekilde header'a ekle
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
 
-// ✅ Mesaj gönder
-export const sendMessage = (messageData) =>
-  axios.post("http://localhost:5000/api/messages", messageData);
+// 📌 Token süresi dolmuşsa logout yap ve giriş ekranına yönlendir
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.data?.message?.includes("jwt expired")) {
+      localStorage.removeItem("token");
+      window.location.href = "/login"; 
+    }
+    return Promise.reject(error);
+  }
+);
 
-// ✅ Kullanıcıya gelen ve gönderilen tüm mesajları getir (GÜNCELLENDİ!)
-export const getMessagesByUserId = (userId) =>
-  axios.get(`http://localhost:5000/api/messages/user/${userId}`);
+// 🌿 Aşağıdaki exportlar aynı kalıyor
+const API_URL = "/users";
 
+export const register = (user) => api.post(`${API_URL}/register`, user);
+export const login = (user) => api.post(`${API_URL}/login`, user);
+export const updateUser = (id, updatedData) => api.put(`${API_URL}/${id}`, updatedData);
+export const getUser = (id) => api.get(`${API_URL}/${id}`);
+export const getAllPersonnel = () => api.get(`${API_URL}`);
+export const getAllTeams = () => api.get("/teams");
+export const getAllUsers = () => api.get("/users/all");
+
+export const sendMessage = (messageData) => api.post("/messages", messageData);
+export const getMessagesByUserId = (userId) => api.get(`/messages/user/${userId}`);
+
+export default api;

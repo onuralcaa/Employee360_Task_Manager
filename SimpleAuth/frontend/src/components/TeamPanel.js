@@ -3,13 +3,17 @@ import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import Messages from "./Messages"; // ✅ Mesaj panelini import et
 import "./TeamPanel.css";
+import FileShareTeamLead from "./FileShare";
 
 function TeamPanel() {
-  const { state } = useLocation();
+  const { state } = useLocation(); // state üzerinden gelen bilgiler
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("uyeler");
   const [teamName, setTeamName] = useState("");
   const [teamMembers, setTeamMembers] = useState([]);
+  
+  // userData'yı state'den al
+  const userData = state;
 
   useEffect(() => {
     if (state?.team) {
@@ -53,9 +57,12 @@ function TeamPanel() {
     }
 
     if (activeTab === "mesajlar") {
-      return <Messages user={state} />; // ✅ doğru props gönderimi
+      return <Messages user={userData} />; // ✅ doğru props gönderimi
     }
 
+    if (activeTab === "dosyaPaylasimi") {
+      return <FileShareTeamLead user={userData} />; // ✅ Dosya paylaşımı
+    }
 
     return <p>Bir menü seçin.</p>;
   };
@@ -68,6 +75,7 @@ function TeamPanel() {
         <ul>
           <li onClick={() => setActiveTab("uyeler")}>Takım Üyeleri</li>
           <li onClick={() => setActiveTab("mesajlar")}>Mesajlar</li> {/* ✅ eklendi */}
+          <li onClick={() => setActiveTab("dosyaPaylasimi")}>Dosya Paylaşımı</li> {/* ✅ Dosya Paylaşımı */}
         </ul>
       </div>
 
@@ -81,7 +89,7 @@ function TeamPanel() {
       <div className="team-lead-panel-right">
         <div className="team-lead-info-box">
           <h2>👤 BİLGİLERİNİZ</h2>
-          <p><strong>Ad Soyad:</strong> {state?.name} {state?.surname}</p>
+          <p><strong>Ad Soyad:</strong> {userData?.name} {userData?.surname}</p>
           <p><strong>Takım:</strong> {teamName || "Yükleniyor..."}</p>
         </div>
 

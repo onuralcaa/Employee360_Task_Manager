@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import FileShare from "./FileShare"; // Dosya paylaşımı bileşeni
+import Messages from "./Messages"; // Mesajlaşma bileşeni
 import "./AdminPanel.css";
-import Messages from "./Messages";
 
 function AdminPanel() {
   const [activeTab, setActiveTab] = useState("personel");
@@ -12,10 +13,8 @@ function AdminPanel() {
   const [teamMembers, setTeamMembers] = useState([]);
   const [selectedMember, setSelectedMember] = useState(null);
   const [currentUserId, setCurrentUserId] = useState(null);
-
   const navigate = useNavigate();
 
-  // Giriş yapan kullanıcının ID'sini localStorage'dan çek (örnek)
   useEffect(() => {
     const storedId = localStorage.getItem("userId");
     if (storedId) setCurrentUserId(storedId);
@@ -30,7 +29,7 @@ function AdminPanel() {
     }
   }, [activeTab]);
 
-  // Seçilen takımın personellerini getir
+  // Takım personellerini getir
   useEffect(() => {
     if (selectedTeamId) {
       axios.get(`http://localhost:5000/api/users/by-team/${selectedTeamId}`)
@@ -52,13 +51,25 @@ function AdminPanel() {
     }
   };
 
+  const handleMenuClick = (menuItem) => {
+  setActiveTab(menuItem);
+  setSelectedMember(null); // 💥 Menü değişince sağ panel kapanır
+};
+
+const handleCollapseRightPanel = () => {
+  setSelectedMember(null); // 💥 Daralt butonuna basınca sağ panel kapanır
+};
+
   const renderContent = () => {
     if (activeTab === "personel") return <p>Personel yönetimi burada olacak.</p>;
     if (activeTab === "raporlar") return <p>Raporlar burada olacak.</p>;
 
-    
+    if (activeTab === "dosyaPaylasimi") {
+      return <FileShare user={{ id: currentUserId, role: "admin" }} />;
+    }
+
     if (activeTab === "mesajlar") {
-      return <Messages user={{ id: currentUserId, role: "admin" }} />; // ✅ BU ŞEKİLDE OLMALI!
+      return <Messages user={{ id: currentUserId, role: "admin" }} />;
     }
 
     if (activeTab === "takimlar") {
@@ -101,46 +112,55 @@ function AdminPanel() {
   };
 
   return (
-    <div className="panel-wrapper">
-      {/* Sol Menü */}
-      <div className="panel-left">
-        <h2>📁 MENÜ</h2>
-        <ul>
-          <li onClick={() => setActiveTab("personel")}>Personel</li>
-          <li onClick={() => setActiveTab("raporlar")}>Raporlar</li>
-          <li onClick={() => setActiveTab("takimlar")}>Takımlar</li>
-          <li onClick={() => setActiveTab("mesajlar")}>Mesajlar</li>
-        </ul>
-        <div className="logout-container" style={{ marginTop: "auto" }}>
-          <button className="logout-button" onClick={handleLogout}>
-            Oturumu Kapat
+  <div className="panel-wrapper">
+    {/* Sol Menü */}
+    <div className="panel-left">
+      <h2>📁 MENÜ</h2>
+      <ul>
+        <li onClick={() => handleMenuClick("takimlar")}>Takımlar</li>
+        <li onClick={() => handleMenuClick("mesajlar")}>Mesaj Gönder</li>
+        <li onClick={() => handleMenuClick("dosyaPaylasimi")}>Dosya Paylaşımı</li>
+        <li onClick={() => handleMenuClick("personel")}>Personel</li>
+        <li onClick={() => handleMenuClick("raporlar")}>Raporlar</li>
+      </ul>
+      <div className="logout-container" style={{ marginTop: "auto" }}>
+        <button className="logout-button" onClick={handleLogout}>
+          Oturumu Kapat
+        </button>
+      </div>
+    </div>
+
+    {/* Orta İçerik */}
+    <div className="panel-center">
+      <h2>📊 YÖNETİCİ PANELİ</h2>
+      {renderContent()}
+    </div>
+
+    {/* Sağ Panel: Seçili Kişi Detay */}
+    {selectedMember && (
+      <div className="panel-right">
+        <div className="panel-right-header">
+          <h2>📄 Personel Detay</h2>
+          <button
+            className="collapse-button"
+            onClick={handleCollapseRightPanel}
+          >
+            Kapat
           </button>
         </div>
-      </div>
-
-      {/* Orta İçerik */}
-      <div className="panel-center">
-        <h2>📊 YÖNETİCİ PANELİ</h2>
-        {renderContent()}
-      </div>
-
-      {/* Sağ Panel: Seçili Kişi Detay */}
-      {selectedMember && (
-        <div className="panel-right">
-          <h2>📄 Personel Detay</h2>
-          <div className="person-detail-card">
-            <p><strong>Ad:</strong> {selectedMember.name || "-"}</p>
-            <p><strong>Soyad:</strong> {selectedMember.surname || "-"}</p>
-            <p><strong>Kullanıcı Adı:</strong> {selectedMember.username || "-"}</p>
-            <p><strong>Numara:</strong> {selectedMember.number || "-"}</p>
-            <p><strong>E-posta:</strong> {selectedMember.email || "-"}</p>
-            <p><strong>Doğum Tarihi:</strong> {selectedMember.birthdate?.substring(0, 10) || "-"}</p>
-            <p><strong>Rol:</strong> {selectedMember.role || "-"}</p>
-          </div>
+        <div className="person-detail-card">
+          <p><strong>Ad:</strong> {selectedMember.name || "-"}</p>
+          <p><strong>Soyad:</strong> {selectedMember.surname || "-"}</p>
+          <p><strong>Kullanıcı Adı:</strong> {selectedMember.username || "-"}</p>
+          <p><strong>Numara:</strong> {selectedMember.number || "-"}</p>
+          <p><strong>E-posta:</strong> {selectedMember.email || "-"}</p>
+          <p><strong>Doğum Tarihi:</strong> {selectedMember.birthdate?.substring(0, 10) || "-"}</p>
+          <p><strong>Rol:</strong> {selectedMember.role || "-"}</p>
         </div>
-      )}
-    </div>
-  );
+      </div>
+    )}
+  </div>
+);
 }
 
 export default AdminPanel;
