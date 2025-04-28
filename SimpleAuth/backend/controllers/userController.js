@@ -58,8 +58,9 @@ const login = async (req, res) => {
       return res.status(400).json({ message: "Geçersiz şifre!" });
 
     if (!user.isActive) {
-  return res.status(403).json({ message: "Hesabınız devre dışı bırakılmıştır. Lütfen yönetici ile iletişime geçin." });
-}
+      return res.status(403).json({ message: "Hesabınız devre dışı bırakılmıştır. Lütfen yönetici ile iletişime geçin." });
+    }
+
     const tokenPayload = {
       id: user._id,
       name: user.name,
@@ -69,13 +70,16 @@ const login = async (req, res) => {
       email: user.email,
       birthdate: user.birthdate,
       role: user.role,
-      team: user.team, // ✅ eklendi
+      team: user.team,
     };
-
 
     const token = jwt.sign(tokenPayload, process.env.JWT_SECRET, {
       expiresIn: "1h",
     });
+
+    // 🟢 Burada lastLogin güncelleniyor:
+    user.lastLogin = new Date();
+    await user.save();
 
     res.status(200).json({
       message: `${user.role === "admin" ? "Yönetici" : "Personel"} girişi başarılı.`,
@@ -88,13 +92,15 @@ const login = async (req, res) => {
       phone: user.number,
       email: user.email,
       birthdate: user.birthdate,
-      team: user.team // ✅ eklendi
+      team: user.team,
     });
 
   } catch (error) {
     res.status(500).json({ message: "Sunucu hatası", error });
   }
 };
+
+
 
 const forgotPassword = async (req, res) => {
   const { email } = req.body;
@@ -181,7 +187,7 @@ const updateUser = async (req, res) => {
 // ✅ Belirli kullanıcıyı ID ile getir
 const getUserById = async (req, res) => {
   try {
-    const user = await User.findById(req.params.id);
+    const user = await User.findById(req.params.id).select("-password -resetPasswordToken -resetPasswordExpire");
     if (!user) return res.status(404).json({ message: "Kullanıcı bulunamadı" });
 
     res.status(200).json(user);
@@ -189,6 +195,7 @@ const getUserById = async (req, res) => {
     res.status(500).json({ message: "Kullanıcı getirme hatası", error });
   }
 };
+
 
 // ✅ Tüm kullanıcıları getir (admin için)
 const getAllPersonnel = async (req, res) => {

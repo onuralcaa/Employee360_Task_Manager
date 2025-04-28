@@ -68,14 +68,14 @@ const renderContent = () => {
       <div className="user-panel-left">
         <h2>📁 MENÜ</h2>
         <ul>
-          <li onClick={() => setActiveTab("gorevler")}>Görevler</li>
           <li onClick={() => setActiveTab("mesajlar")}>Mesajlar</li>
+          <li onClick={() => setActiveTab("gorevler")}>Görevler</li>
         </ul>
       </div>
 
       {/* Orta İçerik */}
       <div className="user-panel-center">
-        <h2>📄 GÖREV TAKİBİ</h2>
+        <h2>📄 PERSONEL PANELİ</h2>
         {renderContent()}
       </div>
 
