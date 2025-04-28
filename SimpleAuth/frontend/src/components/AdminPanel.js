@@ -4,6 +4,8 @@ import axios from "axios";
 import FileShare from "./FileShare"; // Dosya paylaşımı bileşeni
 import Messages from "./Messages"; // Mesajlaşma bileşeni
 import "./AdminPanel.css";
+import { toggleUserStatus } from "../api/api"; // ✅ Aktif/Deaktif için
+
 
 function AdminPanel() {
   const [activeTab, setActiveTab] = useState("personel");
@@ -78,6 +80,24 @@ const handleDeleteMember = async () => {
     }
   }
 };
+
+const handleToggleStatus = async () => {
+  if (window.confirm(`Bu personeli ${selectedMember.isActive ? "devre dışı bırakmak" : "aktifleştirmek"} istediğinize emin misiniz?`)) {
+    try {
+      await toggleUserStatus(selectedMember._id);
+      alert(`Personel ${selectedMember.isActive ? "devre dışı bırakıldı" : "aktifleştirildi"}.`);
+      // Sağ paneli güncelle
+      axios.get(`http://localhost:5000/api/users/by-team/${selectedTeamId}`)
+        .then((res) => setTeamMembers(res.data))
+        .catch((err) => console.error("Takım personelleri alınamadı:", err));
+      setSelectedMember(null); // Sağ paneli kapat
+    } catch (error) {
+      console.error("Durum değiştirilirken hata:", error);
+      alert("Durum değiştirilirken bir hata oluştu.");
+    }
+  }
+};
+
 
 
   const renderContent = () => {
@@ -156,18 +176,24 @@ const handleDeleteMember = async () => {
 
     {/* Sağ Panel: Seçili Kişi Detay */}
     {selectedMember && (
-      <div className="panel-right">
-       <div className="panel-right-header">
-  <h2>📄 Personel Detay</h2>
-  <div>
-    <button className="collapse-button" onClick={handleCollapseRightPanel}>
-      Kapat
-    </button>
-    <button className="delete-button" onClick={handleDeleteMember}>
-      Personeli Sil
-    </button>
-  </div>
-</div>
+  <div className="panel-right">
+    <div className="panel-right-header">
+      <h2>📄 Personel Detay</h2>
+      <div>
+        <button className="collapse-button" onClick={handleCollapseRightPanel}>
+          Kapat
+        </button>
+        <button className="delete-button" onClick={handleDeleteMember}>
+          Personeli Sil
+        </button>
+        <button
+          className="status-toggle-button"
+          onClick={handleToggleStatus}
+        >
+          {selectedMember.isActive ? "Devre Dışı Bırak" : "Aktif Et"}
+        </button>
+      </div>
+    </div>
 
         <div className="person-detail-card">
           <p><strong>Ad:</strong> {selectedMember.name || "-"}</p>
