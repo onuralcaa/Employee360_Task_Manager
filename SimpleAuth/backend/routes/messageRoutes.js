@@ -1,10 +1,12 @@
 const express = require("express");
 const router = express.Router();
 const {
+  submitMilestone,
+  verifyMilestone,
   sendMessage,
   getMessagesBetweenUsers,
   getMessagesByUserId   // ✅ EKLENDİ
-} = require("../controllers/messageController");
+} = require("../controllers/messageController", "../controllers/milestoneController");
 
 // ✅ Mesaj gönder
 router.post("/", sendMessage);
