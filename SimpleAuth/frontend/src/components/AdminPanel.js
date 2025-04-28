@@ -60,8 +60,27 @@ const handleCollapseRightPanel = () => {
   setSelectedMember(null); // 💥 Daralt butonuna basınca sağ panel kapanır
 };
 
+const handleDeleteMember = async () => {
+  if (window.confirm("Bu personeli silmek istediğinize emin misiniz?")) {
+    try {
+      await axios.delete(`http://localhost:5000/api/users/${selectedMember._id}`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      });
+      alert("Personel başarıyla silindi.");
+      setSelectedMember(null); // Sağ paneli kapat
+      // Takım üyelerini güncelle:
+      axios.get(`http://localhost:5000/api/users/by-team/${selectedTeamId}`)
+        .then((res) => setTeamMembers(res.data))
+        .catch((err) => console.error("Takım personelleri alınamadı:", err));
+    } catch (error) {
+      console.error("Personel silinirken hata:", error);
+      alert("Personel silinirken bir hata oluştu.");
+    }
+  }
+};
+
+
   const renderContent = () => {
-    if (activeTab === "personel") return <p>Personel yönetimi burada olacak.</p>;
     if (activeTab === "raporlar") return <p>Raporlar burada olacak.</p>;
 
     if (activeTab === "dosyaPaylasimi") {
@@ -75,7 +94,7 @@ const handleCollapseRightPanel = () => {
     if (activeTab === "takimlar") {
       return (
         <div>
-          <h3>📋 Takımlar</h3>
+          <h3>📋 Takımlar ve Personeller</h3>
           {teams.map((team) => (
             <div
               key={team._id}
@@ -117,10 +136,9 @@ const handleCollapseRightPanel = () => {
     <div className="panel-left">
       <h2>📁 MENÜ</h2>
       <ul>
-        <li onClick={() => handleMenuClick("takimlar")}>Takımlar</li>
+        <li onClick={() => handleMenuClick("takimlar")}>Takımlar ve Personeller</li>
         <li onClick={() => handleMenuClick("mesajlar")}>Mesaj Gönder</li>
         <li onClick={() => handleMenuClick("dosyaPaylasimi")}>Dosya Paylaşımı</li>
-        <li onClick={() => handleMenuClick("personel")}>Personel</li>
         <li onClick={() => handleMenuClick("raporlar")}>Raporlar</li>
       </ul>
       <div className="logout-container" style={{ marginTop: "auto" }}>
@@ -139,15 +157,18 @@ const handleCollapseRightPanel = () => {
     {/* Sağ Panel: Seçili Kişi Detay */}
     {selectedMember && (
       <div className="panel-right">
-        <div className="panel-right-header">
-          <h2>📄 Personel Detay</h2>
-          <button
-            className="collapse-button"
-            onClick={handleCollapseRightPanel}
-          >
-            Kapat
-          </button>
-        </div>
+       <div className="panel-right-header">
+  <h2>📄 Personel Detay</h2>
+  <div>
+    <button className="collapse-button" onClick={handleCollapseRightPanel}>
+      Kapat
+    </button>
+    <button className="delete-button" onClick={handleDeleteMember}>
+      Personeli Sil
+    </button>
+  </div>
+</div>
+
         <div className="person-detail-card">
           <p><strong>Ad:</strong> {selectedMember.name || "-"}</p>
           <p><strong>Soyad:</strong> {selectedMember.surname || "-"}</p>

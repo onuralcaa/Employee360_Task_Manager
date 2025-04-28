@@ -141,23 +141,42 @@
   background-color: #d32f2f;
 }
 
-.collapse-button {
-  background-color: #e74c3c;
-  color: white;
-  border: none;
-  padding: 12px 24px;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-  margin-left: auto;
-}
-
-.collapse-button:hover {
-  background-color: #c0392b;
-}
-
+/* Sağ panel butonları */
 .panel-right-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-bottom: 15px;
 }
+
+.collapse-button,
+.delete-button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.1s ease;
+}
+
+.collapse-button {
+  background-color: #6c757d;
+  color: white;
+  margin-right: 8px;
+}
+
+.collapse-button:hover {
+  background-color: #5a6268;
+  transform: scale(1.05);
+}
+
+.delete-button {
+  background-color: #dc3545;
+  color: white;
+}
+
+.delete-button:hover {
+  background-color: #c82333;
+  transform: scale(1.05);
+}
+
