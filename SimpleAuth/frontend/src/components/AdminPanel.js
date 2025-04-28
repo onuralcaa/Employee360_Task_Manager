@@ -98,6 +98,12 @@ const handleToggleStatus = async () => {
   }
 };
 
+const handleSelectMember = async (memberId) => {
+  const response = await axios.get(`http://localhost:5000/api/users/${memberId}`, {
+    headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+  });
+  setSelectedMember(response.data);
+};
 
 
   const renderContent = () => {
@@ -119,7 +125,7 @@ const handleToggleStatus = async () => {
             <div
               key={team._id}
               onClick={() => setSelectedTeamId(team._id)}
-              className="person-card"
+              className={`person-card ${selectedTeamId === team._id ? "selected-team" : ""}`}
               style={{ cursor: "pointer" }}
             >
               <p><strong>Takım Adı:</strong> {team.name}</p>
@@ -132,8 +138,8 @@ const handleToggleStatus = async () => {
               {teamMembers.map((member) => (
                 <div
                   key={member._id}
-                  className="person-card"
-                  onClick={() => setSelectedMember(member)}
+                  className={`person-card ${selectedMember?._id === member._id ? "selected-member" : ""}`}
+                  onClick={() => handleSelectMember(member._id)} // 🟢 Burayı değiştirdik!
                   style={{ cursor: "pointer" }}
                 >
                   <p><strong>Ad:</strong> {member.name}</p>
@@ -178,7 +184,7 @@ const handleToggleStatus = async () => {
     {selectedMember && (
   <div className="panel-right">
     <div className="panel-right-header">
-      <h2>📄 Personel Detay</h2>
+      <h2>📄 Personel Detay</h2> 
       <div>
         <button className="collapse-button" onClick={handleCollapseRightPanel}>
           Kapat
@@ -187,10 +193,10 @@ const handleToggleStatus = async () => {
           Personeli Sil
         </button>
         <button
-          className="status-toggle-button"
+          className={`status-toggle-button ${selectedMember.isActive ? "active" : ""}`}
           onClick={handleToggleStatus}
         >
-          {selectedMember.isActive ? "Devre Dışı Bırak" : "Aktif Et"}
+          {selectedMember.isActive ? "Devre Dışı Bırak" : "Aktifleştir"}
         </button>
       </div>
     </div>
@@ -203,6 +209,9 @@ const handleToggleStatus = async () => {
           <p><strong>E-posta:</strong> {selectedMember.email || "-"}</p>
           <p><strong>Doğum Tarihi:</strong> {selectedMember.birthdate?.substring(0, 10) || "-"}</p>
           <p><strong>Rol:</strong> {selectedMember.role || "-"}</p>
+          <p><strong>Durum:</strong> {selectedMember.isActive ? "Aktif" : "Devre Dışı"}</p>
+          <p><strong>Kayıt Tarihi:</strong> {new Date(selectedMember.createdAt).toLocaleString() || "-"}</p>
+          <p><strong>Son Giriş:</strong> {selectedMember.lastLogin ? new Date(selectedMember.lastLogin).toLocaleString() : "-"}</p> 
         </div>
       </div>
     )}
