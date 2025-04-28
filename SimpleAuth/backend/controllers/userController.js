@@ -224,6 +224,33 @@ const getUsersByTeamId = async (req, res) => {
   }
 };
 
+// ✅ Kullanıcıyı sil
+const deleteUser = async (req, res) => {
+  try {
+    // Token'dan gelen kullanıcı bilgisi (middleware'den geliyor)
+    const requestingUser = req.user;
+
+    // Yetki kontrolü: sadece admin silebilir
+    if (requestingUser.role !== "admin") {
+      return res.status(403).json({ message: "Bu işlemi yapmaya yetkiniz yok!" });
+    }
+
+    const { id } = req.params;
+    const userToDelete = await User.findById(id);
+
+    if (!userToDelete) {
+      return res.status(404).json({ message: "Silinecek kullanıcı bulunamadı." });
+    }
+
+    await User.findByIdAndDelete(id);
+    res.status(200).json({ message: "Kullanıcı başarıyla silindi." });
+  } catch (error) {
+    console.error("❌ Kullanıcı silme hatası:", error);
+    res.status(500).json({ message: "Kullanıcı silinirken sunucu hatası oluştu.", error });
+  }
+};
+
+
 
 module.exports = {
   register,
@@ -234,5 +261,6 @@ module.exports = {
   forgotPassword,
   resetPassword,
   getUsersByTeamId, // ✅ eklendi
-  getAllUsers
+  getAllUsers,
+  deleteUser
 };
