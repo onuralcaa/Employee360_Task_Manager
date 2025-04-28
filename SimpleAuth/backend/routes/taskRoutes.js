@@ -1,18 +1,12 @@
 const express = require('express');
 const router = express.Router();
-const { updateTaskStatus, verifyTasks, assignTask } = require('../controllers/taskController');
-const verifyToken = require('../middleware/authMiddleware');
+const verifyToken = require("../middleware/authMiddleware");
+const taskController = require('../controllers/taskController');
 
-// personel kendi task'ini günceller
-router.patch("/:id/status", verifyToken, updateTaskStatus);
-
-//Takım lideri task'leri onaylar
-router.patch("/:id/verify", verifyToken, verifyTasks);
-
-router.post("/:id/assign", verifyToken, assignTask);
-
-router.delete("/:id", verifyToken, (req, res) => {
-    res.status(200).json({ message: "Task deleted successfully" });
-});
+// Define routes
+router.get('/', verifyToken, taskController.getAllTasks);
+router.post('/', verifyToken, taskController.assignTask);
+router.patch('/:id/status', verifyToken, taskController.updateTaskStatus);
+router.patch('/:id/verify', verifyToken, taskController.verifyTask);
 
 module.exports = router;

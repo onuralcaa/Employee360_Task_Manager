@@ -17,6 +17,10 @@ connectDB();
 
 app.use(cors());
 app.use(bodyParser.json());
+
+const taskRoutes = require("./routes/taskRoutes");
+app.use("/api/tasks", taskRoutes);
+
 app.use("/api/users", userRoutes);
 app.use("/api/teams", teamRoutes);
 app.use("/api/messages", messageRoutes);
@@ -153,11 +157,8 @@ const createTeamLeaders = async () => {
   await createTeamLeaders();
 })();
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`🚀 Server ${PORT} portunda çalışıyor!`));
-
-const taskRoutes = require("./routes/taskRoutes");
-app.use("/api/tasks", taskRoutes); // Task routes'u ekle
-
 const milestoneRoutes = require("./routes/milestoneRoutes");
 app.use("/api/milestones", milestoneRoutes); // Milestone routes'u ekle
+
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`🚀 Server ${PORT} portunda çalışıyor!`));
