@@ -42,4 +42,8 @@ export const getAllUsers = () => api.get("/users/all");
 export const sendMessage = (messageData) => api.post("/messages", messageData);
 export const getMessagesByUserId = (userId) => api.get(`/messages/user/${userId}`);
 
+
+// ✅ Personel aktif/deaktif durumu değiştirme (yeni ekledik!)
+export const toggleUserStatus = (id) => api.patch(`/users/status/${id}`);
+
 export default api;

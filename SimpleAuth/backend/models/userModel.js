@@ -35,7 +35,13 @@ const userSchema = new mongoose.Schema({
     ref: "Team"
   },
   resetPasswordToken: String,
-  resetPasswordExpire: Date
+  resetPasswordExpire: Date,
+
+  // ✅ Doğru şekilde buraya eklendi:
+  isActive: {
+    type: Boolean,
+    default: true
+  }
 });
 
 module.exports = mongoose.model("User", userSchema);

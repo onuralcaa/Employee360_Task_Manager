@@ -180,3 +180,27 @@
   transform: scale(1.05);
 }
 
+.status-toggle-button {
+  padding: 8px 14px;
+  background-color: #6c757d; /* Gri ton, devre dışı */
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-weight: bold;
+  margin-left: 10px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.status-toggle-button:hover {
+  background-color: #5a6268;
+}
+
+.status-toggle-button.active {
+  background-color: #28a745; /* Aktifken yeşil */
+}
+
+.status-toggle-button.active:hover {
+  background-color: #218838;
+}
+

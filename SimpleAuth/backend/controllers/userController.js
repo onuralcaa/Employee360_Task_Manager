@@ -4,7 +4,6 @@ const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const sendEmail = require("../utils/sendEmail");
 
-
 // ✅ Kayıt
 const register = async (req, res) => {
   try {
@@ -58,6 +57,9 @@ const login = async (req, res) => {
     if (!isMatch)
       return res.status(400).json({ message: "Geçersiz şifre!" });
 
+    if (!user.isActive) {
+  return res.status(403).json({ message: "Hesabınız devre dışı bırakılmıştır. Lütfen yönetici ile iletişime geçin." });
+}
     const tokenPayload = {
       id: user._id,
       name: user.name,
@@ -155,7 +157,6 @@ const resetPassword = async (req, res) => {
   }
 };
 
-
 // ✅ Kullanıcı güncelleme
 const updateUser = async (req, res) => {
   try {
@@ -192,13 +193,14 @@ const getUserById = async (req, res) => {
 // ✅ Tüm kullanıcıları getir (admin için)
 const getAllPersonnel = async (req, res) => {
   try {
-    const allUsers = await User.find({}, "name surname email _id role username team birthdate number");
+    const allUsers = await User.find({}, "name surname email _id role username team birthdate number isActive");
     res.status(200).json(allUsers);
   } catch (error) {
     console.error("❌ Kullanıcı listesi alınamadı:", error);
     res.status(500).json({ message: "Kullanıcı listesi alınamadı", error });
   }
 };
+
 
 const getAllUsers = async (req, res) => {
   try {
@@ -212,7 +214,6 @@ const getAllUsers = async (req, res) => {
     res.status(500).json({ message: "Kullanıcılar alınamadı", error: err });
   }
 };
-
 
 // ✅ Takım ID'sine göre kullanıcıları getir
 const getUsersByTeamId = async (req, res) => {
@@ -250,6 +251,31 @@ const deleteUser = async (req, res) => {
   }
 };
 
+// ✅ Kullanıcının aktiflik durumunu değiştir (sadece admin yetkisi)
+const toggleUserActiveStatus = async (req, res) => {
+  try {
+    const requestingUser = req.user;
+
+    if (requestingUser.role !== "admin") {
+      return res.status(403).json({ message: "Bu işlemi yapmaya yetkiniz yok!" });
+    }
+
+    const { id } = req.params;
+    const user = await User.findById(id);
+    if (!user) return res.status(404).json({ message: "Kullanıcı bulunamadı." });
+
+    user.isActive = !user.isActive; // Aktif/deaktif durumunu tersine çevir
+    await user.save();
+
+    res.status(200).json({
+      message: `Kullanıcı ${user.isActive ? "aktif" : "deaktif"} hale getirildi.`,
+      isActive: user.isActive
+    });
+  } catch (error) {
+    console.error("Durum değiştirme hatası:", error);
+    res.status(500).json({ message: "Durum değiştirilirken hata oluştu.", error });
+  }
+};
 
 
 module.exports = {
@@ -262,5 +288,6 @@ module.exports = {
   resetPassword,
   getUsersByTeamId, // ✅ eklendi
   getAllUsers,
+  toggleUserActiveStatus,
   deleteUser
 };
