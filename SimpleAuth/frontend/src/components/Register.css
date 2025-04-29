@@ -2,46 +2,53 @@
 .register-container {
   display: flex;
   justify-content: center;
-  align-items: flex-start;
-  gap: 40px;
-  padding: 40px;
-  height: 100vh;
-  background-color: #f4f4f4;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #f5f5f5;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  padding: 20px;
 }
 
 /* Form kutusu */
 .register-box {
-  background: white;
+  width: 400px;
   padding: 30px;
-  border-radius: 10px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  text-align: center;
-  width: 380px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
 }
 
 /* Başlık */
 .register-box h2 {
-  margin-bottom: 20px;
-  font-size: 24px;
+  text-align: center;
+  margin-bottom: 25px;
+  color: #333;
 }
 
 /* Form içindeki input alanları */
-.register-box input {
+.register-box input,
+.register-box select {
   width: 100%;
-  padding: 10px;
-  margin: 10px 0;
+  padding: 12px;
+  margin-bottom: 15px;
   border: 1px solid #ddd;
-  border-radius: 5px;
-  font-size: 16px;
+  border-radius: 4px;
+  font-size: 15px;
   box-sizing: border-box;
+}
+
+.register-box input:focus,
+.register-box select:focus {
+  outline: none;
+  border-color: #4a90e2;
+  box-shadow: 0 0 5px rgba(74, 144, 226, 0.3);
 }
 
 /* Şifre ve ikonun olduğu container */
 .password-container {
   position: relative;
   width: 100%;
-  display: flex;
-  align-items: center;
+  margin-bottom: 15px;
 }
 
 /* Şifre inputu */
@@ -53,94 +60,111 @@
 /* Göz ikonunun stili */
 .toggle-password {
   position: absolute;
-  right: 10px;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
   cursor: pointer;
-  font-size: 18px;
-  color: gray;
+  color: #666;
 }
 
 /* Kayıt butonu */
 .register-box button {
   width: 100%;
-  padding: 10px;
-  background-color: #ff4d4d;
-  border: none;
+  padding: 12px;
+  background-color: #4a90e2;
   color: white;
-  font-size: 18px;
-  border-radius: 5px;
+  border: none;
+  border-radius: 4px;
   cursor: pointer;
-  transition: 0.3s;
+  font-size: 16px;
+  font-weight: 500;
+  transition: background-color 0.3s;
   margin-top: 10px;
 }
 
 .register-box button:hover {
-  background-color: #e63e3e;
+  background-color: #3a80d2;
+}
+
+/* Hata mesajı */
+.error-message {
+  background-color: #f8d7da;
+  color: #721c24;
+  padding: 10px;
+  border-radius: 4px;
+  margin-bottom: 15px;
+  text-align: center;
 }
 
 /* Giriş Yap Linki */
 .login-link {
-  margin-top: 15px;
-  font-size: 14px;
-  color: #555;
   text-align: center;
+  margin-top: 20px;
+  font-size: 14px;
+  color: #666;
 }
 
 .login-button {
-  color: #ff4d4d;
-  font-weight: bold;
+  color: #4a90e2;
   cursor: pointer;
-  transition: color 0.3s;
+  font-weight: 500;
 }
 
 .login-button:hover {
-  color: #e63e3e;
+  text-decoration: underline;
 }
 
 /* ✅ Sağ taraftaki bilgi kutusu */
 .register-info-box {
-  background-color: #ffffff;
-  padding: 20px 25px;
-  border-radius: 10px;
-  width: 300px;
-  font-size: 14px;
-  color: #333;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.08);
+  width: 350px;
+  margin-left: 30px;
+  background-color: #fff;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
 }
 
 .register-info-box h4 {
-  margin-bottom: 12px;
-  color: #c0392b;
-  font-size: 16px;
+  margin-top: 0;
+  color: #333;
+  font-size: 18px;
+  margin-bottom: 15px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 10px;
 }
 
 .register-info-box ul {
-  padding-left: 18px;
+  padding-left: 20px;
+  margin: 0;
 }
 
 .register-info-box li {
-  margin-bottom: 8px;
-  line-height: 1.5;
+  margin-bottom: 10px;
+  color: #555;
+  font-size: 14px;
 }
 
 /* Takım seçimi (select kutusu) */
 .team-select {
   width: 100%;
-  padding: 10px;
-  margin: 10px 0;
+  padding: 12px;
+  margin-bottom: 15px;
   border: 1px solid #ddd;
-  border-radius: 5px;
-  font-size: 16px;
-  background-color: #fff;
-  box-sizing: border-box;
-  appearance: none;
-  background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D'http%3A//www.w3.org/2000/svg'%20viewBox%3D'0%200%204%205'%3E%3Cpath%20fill%3D'%23666'%20d%3D'M2%200L0%202h4L2%200zm0%205l2-2H0l2%202z'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 10px center;
-  background-size: 10px;
+  border-radius: 4px;
+  font-size: 15px;
+  background-color: white;
 }
 
-.team-select:focus {
-  outline: none;
-  border-color: #4d79ff;
-  box-shadow: 0 0 0 2px rgba(77, 121, 255, 0.2);
+@media (max-width: 880px) {
+  .register-container {
+    flex-direction: column;
+    padding: 15px;
+  }
+  
+  .register-box,
+  .register-info-box {
+    width: 100%;
+    max-width: 400px;
+    margin: 0 0 20px 0;
+  }
 }

@@ -1,189 +1,445 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { FaCheck, FaPause, FaPlay, FaTimes, FaHourglass } from 'react-icons/fa';
-import './TaskList.css';
+import React, { useState, useEffect } from "react";
+import { getTasks, getTasksByUserId, updateTask, getMilestones, getMilestonesByUserId, updateMilestone } from "../api/api";
+import "./TaskList.css";
 
-function TaskList({ user }) {
+function TaskList({ 
+  user, 
+  onSelectMilestone, 
+  onAddMilestone, 
+  isAdmin = false, 
+  isTeamLeader = false, 
+  isMilestoneView = false 
+}) {
   const [tasks, setTasks] = useState([]);
+  const [milestones, setMilestones] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [activeTab, setActiveTab] = useState('all');
+  const [filter, setFilter] = useState("all");
 
   useEffect(() => {
-    fetchTasks();
-  }, []);
-
-  const fetchTasks = async () => {
-    try {
-      setLoading(true);
-      const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:5000/api/tasks', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      setTasks(response.data);
-      setLoading(false);
-    } catch (err) {
-      console.error('Görevler alınırken hata oluştu:', err);
-      setError('Görevler yüklenirken bir hata oluştu. Lütfen daha sonra tekrar deneyin.');
-      setLoading(false);
-    }
-  };
-
-  const handleStatusChange = async (taskId, newStatus) => {
-    try {
-      const token = localStorage.getItem('token');
-      await axios.patch(
-        `http://localhost:5000/api/tasks/${taskId}/status`,
-        { status: newStatus },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      fetchTasks(); // Listeyi güncelle
-    } catch (error) {
-      console.error('Görev durumu güncellenirken hata:', error);
-      alert('Görev durumu güncellenirken bir hata oluştu.');
-    }
-  };
-
-  const getStatusIcon = (status) => {
-    switch (status) {
-      case 'todo': return <span className="status-icon todo">Yapılacak</span>;
-      case 'in-progress': return <span className="status-icon in-progress">Devam Ediyor</span>;
-      case 'on-hold': return <span className="status-icon on-hold">Beklemede</span>;
-      case 'done': return <span className="status-icon done">Tamamlandı</span>;
-      case 'verified': return <span className="status-icon verified">Onaylandı</span>;
-      case 'rejected': return <span className="status-icon rejected">Reddedildi</span>;
-      default: return <span className="status-icon">Bilinmiyor</span>;
-    }
-  };
-
-  const getStatusActions = (task) => {
-    const actions = [];
-    
-    // İzin verilen durum geçişleri
-    const allowedTransitions = {
-      'todo': ['in-progress', 'on-hold'],
-      'in-progress': ['done', 'on-hold'],
-      'on-hold': ['in-progress', 'todo'],
-      'done': ['verified', 'rejected'],
-      'verified': [],
-      'rejected': []
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        let response;
+        
+        if (isMilestoneView) {
+          // Fetch milestones
+          if (isAdmin) {
+            // Admin can see all milestones
+            response = await getMilestones();
+          } else {
+            // Regular users and team leaders only see their assigned milestones
+            const userId = user.id || user._id;
+            response = await getMilestonesByUserId(userId);
+          }
+          
+          if (!response || !response.data) {
+            throw new Error("Failed to fetch milestones");
+          }
+          
+          setMilestones(response.data);
+          
+        } else {
+          // Fetch tasks
+          if (isAdmin) {
+            // Admin can see all tasks
+            response = await getTasks();
+          } else {
+            // Regular users only see their assigned tasks
+            const userId = user.id || user._id;
+            response = await getTasksByUserId(userId);
+          }
+          
+          if (!response || !response.data) {
+            throw new Error("Failed to fetch tasks");
+          }
+          
+          setTasks(response.data);
+        }
+        
+        setError(null);
+      } catch (err) {
+        console.error(`Error fetching ${isMilestoneView ? 'milestones' : 'tasks'}:`, err);
+        setError(`Failed to load ${isMilestoneView ? 'milestones' : 'tasks'}. Please try again later.`);
+      } finally {
+        setLoading(false);
+      }
     };
 
-    // Kullanıcının rolüne göre gösterilecek işlemler
-    const userRole = user?.role;
-    const transitions = allowedTransitions[task.status] || [];
-    
-    transitions.forEach(status => {
-      // Doğrulama ve reddetme işlemleri sadece admin'e gösterilsin
-      if ((status === 'verified' || status === 'rejected') && userRole !== 'admin') {
-        return;
-      }
+    if (user && (user.id || user._id)) {
+      fetchData();
+    }
+  }, [user, isAdmin, isMilestoneView, isTeamLeader]);
 
-      let icon;
-      let label;
+  const handleStatusChange = async (itemId, newStatus) => {
+    try {
+      let response;
       
-      switch (status) {
-        case 'in-progress':
-          icon = <FaPlay />;
-          label = 'Başlat';
-          break;
-        case 'on-hold':
-          icon = <FaPause />;
-          label = 'Beklet';
-          break;
-        case 'done':
-          icon = <FaCheck />;
-          label = 'Tamamla';
-          break;
-        case 'todo':
-          icon = <FaHourglass />;
-          label = 'Yapılacak';
-          break;
-        case 'verified':
-          icon = <FaCheck className="verified-icon" />;
-          label = 'Onayla';
-          break;
-        case 'rejected':
-          icon = <FaTimes className="rejected-icon" />;
-          label = 'Reddet';
-          break;
-        default:
-          return null;
+      if (isMilestoneView) {
+        response = await updateMilestone(itemId, { status: newStatus });
+        
+        if (!response || !response.data) {
+          throw new Error("Failed to update milestone status");
+        }
+        
+        // Update the local state with the updated milestone
+        setMilestones(milestones.map(milestone => 
+          milestone._id === itemId 
+            ? { ...milestone, status: newStatus } 
+            : milestone
+        ));
+      } else {
+        response = await updateTask(itemId, { status: newStatus });
+        
+        if (!response || !response.data) {
+          throw new Error("Failed to update task status");
+        }
+        
+        // Update the local state with the updated task
+        setTasks(tasks.map(task => 
+          task._id === itemId 
+            ? { ...task, status: newStatus } 
+            : task
+        ));
       }
-      
-      actions.push(
-        <button 
-          key={status} 
-          className={`action-button ${status}`}
-          onClick={() => handleStatusChange(task._id, status)}
-          title={label}
-        >
-          {icon} {label}
-        </button>
-      );
-    });
-    
-    return actions.length ? <div className="task-actions">{actions}</div> : null;
+    } catch (err) {
+      console.error(`Error updating ${isMilestoneView ? 'milestone' : 'task'} status:`, err);
+      setError(`Failed to update ${isMilestoneView ? 'milestone' : 'task'} status. Please try again.`);
+    }
+  };
+  
+  const getFilteredItems = () => {
+    const items = isMilestoneView ? milestones : tasks;
+    if (filter === "all") return items;
+    return items.filter(item => item.status === filter);
   };
 
-  const filterTasks = () => {
-    if (activeTab === 'all') return tasks;
-    if (activeTab === 'mine') return tasks.filter(task => task.assignedTo?._id === user?._id);
-    if (activeTab === 'created') return tasks.filter(task => task.createdBy?._id === user?._id);
-    return tasks;
+  const getStatusClass = (status) => {
+    switch (status) {
+      case "todo": return "status-pending";
+      case "in-progress": return "status-progress";
+      case "on-hold": return "status-onhold";
+      case "done": 
+      case "submitted": return "status-completed";
+      case "verified": return "status-verified";
+      case "rejected": return "status-rejected";
+      default: return "";
+    }
   };
+
+  const getStatusText = (status) => {
+    switch (status) {
+      case "todo": return "Beklemede";
+      case "in-progress": return "Devam Ediyor";
+      case "on-hold": return "Bekletiliyor";
+      case "done": return "Tamamlandı";
+      case "submitted": return "Gönderildi";
+      case "verified": return "Onaylandı";
+      case "rejected": return "Reddedildi";
+      default: return status;
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="loading-container">
+        <div className="spinner"></div>
+        <p>{isMilestoneView ? "Kilometre Taşları" : "Görevler"} yükleniyor...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return <div className="error-message">{error}</div>;
+  }
 
   return (
     <div className="task-list-container">
       <div className="task-list-header">
-        <h3>Görev Listesi</h3>
-        <div className="task-tabs">
-          <button 
-            className={activeTab === 'all' ? 'active' : ''} 
-            onClick={() => setActiveTab('all')}
-          >
-            Tüm Görevler
+        <h3>{isMilestoneView ? "🎯 Kilometre Taşları" : "📋 Görevler"}</h3>
+        {(isAdmin || isTeamLeader) && isMilestoneView && (
+          <button className="add-milestone-btn" onClick={onAddMilestone}>
+            + Yeni Kilometre Taşı Ekle
           </button>
-          <button 
-            className={activeTab === 'mine' ? 'active' : ''} 
-            onClick={() => setActiveTab('mine')}
-          >
-            Bana Atananlar
+        )}
+        {(isAdmin || isTeamLeader) && !isMilestoneView && (
+          <button className="add-milestone-btn" onClick={onAddMilestone}>
+            + Yeni Görev Ekle
           </button>
-          <button 
-            className={activeTab === 'created' ? 'active' : ''} 
-            onClick={() => setActiveTab('created')}
-          >
-            Oluşturduklarım
-          </button>
-        </div>
+        )}
       </div>
 
-      {loading ? (
-        <div className="task-loading">Görevler yükleniyor...</div>
-      ) : error ? (
-        <div className="task-error">{error}</div>
+      <div className="filter-container">
+        <button 
+          className={`filter-btn ${filter === "all" ? "active" : ""}`}
+          onClick={() => setFilter("all")}
+        >
+          Tümü
+        </button>
+        <button 
+          className={`filter-btn ${filter === "todo" ? "active" : ""}`}
+          onClick={() => setFilter("todo")}
+        >
+          Beklemede
+        </button>
+        <button 
+          className={`filter-btn ${filter === "in-progress" ? "active" : ""}`}
+          onClick={() => setFilter("in-progress")}
+        >
+          Devam Ediyor
+        </button>
+        {isMilestoneView ? (
+          <button 
+            className={`filter-btn ${filter === "submitted" ? "active" : ""}`}
+            onClick={() => setFilter("submitted")}
+          >
+            Gönderildi
+          </button>
+        ) : (
+          <button 
+            className={`filter-btn ${filter === "done" ? "active" : ""}`}
+            onClick={() => setFilter("done")}
+          >
+            Tamamlandı
+          </button>
+        )}
+        <button 
+          className={`filter-btn ${filter === "on-hold" ? "active" : ""}`}
+          onClick={() => setFilter("on-hold")}
+        >
+          Bekletiliyor
+        </button>
+        <button 
+          className={`filter-btn ${filter === "verified" ? "active" : ""}`}
+          onClick={() => setFilter("verified")}
+        >
+          Onaylandı
+        </button>
+        <button 
+          className={`filter-btn ${filter === "rejected" ? "active" : ""}`}
+          onClick={() => setFilter("rejected")}
+        >
+          Reddedildi
+        </button>
+      </div>
+
+      {getFilteredItems().length === 0 ? (
+        <p className="no-tasks">
+          {isMilestoneView ? "Kilometre taşı bulunamadı." : "Görev bulunamadı."}
+        </p>
       ) : (
-        <div className="tasks">
-          {filterTasks().length === 0 ? (
-            <div className="no-tasks">Gösterilecek görev bulunamadı.</div>
-          ) : (
-            filterTasks().map(task => (
-              <div key={task._id} className={`task-item status-${task.status}`}>
-                <div className="task-header">
-                  <h4>{task.title}</h4>
-                  {getStatusIcon(task.status)}
+        <div className="milestone-cards">
+          {getFilteredItems().map((item) => (
+            <div 
+              key={item._id} 
+              className={isMilestoneView ? "milestone-card" : "task-card"}
+              onClick={() => onSelectMilestone && onSelectMilestone(item)}
+            >
+              <h4>{item.title}</h4>
+              <p className="description">{item.description}</p>
+              
+              <div className={isMilestoneView ? "milestone-details" : "task-details"}>
+                <div>
+                  <p><strong>Takım:</strong> {item.team?.name || "-"}</p>
+                  <p><strong>Atanan:</strong> {item.assignedTo?.name 
+                    ? `${item.assignedTo.name} ${item.assignedTo.surname || ""}`
+                    : "Atanmamış"}</p>
                 </div>
-                <p className="task-description">{task.description}</p>
-                <div className="task-info">
-                  <p><strong>Atanan:</strong> {task.assignedTo?.name || 'Atanmamış'}</p>
-                  <p><strong>Takım:</strong> {task.team?.name || '-'}</p>
-                  <p><strong>Oluşturan:</strong> {task.createdBy?.name || '-'}</p>
+                
+                <div>
+                  <p className={`status ${getStatusClass(item.status)}`}>
+                    <strong>Durum:</strong> {getStatusText(item.status)}
+                  </p>
+                  {item.createdAt && (
+                    <p><strong>Oluşturulma:</strong> {new Date(item.createdAt).toLocaleDateString()}</p>
+                  )}
                 </div>
-                {getStatusActions(task)}
               </div>
-            ))
-          )}
+              
+              {/* Task actions for regular users */}
+              {!isMilestoneView && !isAdmin && (
+                <div className="task-actions">
+                  {item.status === "todo" && (
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleStatusChange(item._id, "in-progress");
+                      }}
+                      className="action-btn start-btn"
+                    >
+                      Başlat
+                    </button>
+                  )}
+                  
+                  {item.status === "in-progress" && (
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleStatusChange(item._id, "done");
+                      }}
+                      className="action-btn complete-btn"
+                    >
+                      Tamamla
+                    </button>
+                  )}
+                  
+                  {(item.status === "in-progress" || item.status === "todo") && (
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleStatusChange(item._id, "on-hold");
+                      }}
+                      className="action-btn hold-btn"
+                    >
+                      Beklet
+                    </button>
+                  )}
+                  
+                  {item.status === "on-hold" && (
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleStatusChange(item._id, "in-progress");
+                      }}
+                      className="action-btn resume-btn"
+                    >
+                      Devam Et
+                    </button>
+                  )}
+                </div>
+              )}
+              
+              {/* Task actions for team leaders */}
+              {!isMilestoneView && isTeamLeader && !isAdmin && (
+                <div className="task-actions">
+                  {item.status === "todo" && (
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleStatusChange(item._id, "in-progress");
+                      }}
+                      className="action-btn start-btn"
+                    >
+                      Başlat
+                    </button>
+                  )}
+                  
+                  {item.status === "in-progress" && (
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleStatusChange(item._id, "done");
+                      }}
+                      className="action-btn complete-btn"
+                    >
+                      Tamamla
+                    </button>
+                  )}
+                  
+                  {(item.status === "in-progress" || item.status === "todo") && (
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleStatusChange(item._id, "on-hold");
+                      }}
+                      className="action-btn hold-btn"
+                    >
+                      Beklet
+                    </button>
+                  )}
+                  
+                  {item.status === "on-hold" && (
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleStatusChange(item._id, "in-progress");
+                      }}
+                      className="action-btn resume-btn"
+                    >
+                      Devam Et
+                    </button>
+                  )}
+                </div>
+              )}
+              
+              {/* Milestone actions for team leaders */}
+              {isMilestoneView && isTeamLeader && (
+                <div className="milestone-actions">
+                  {item.status === "todo" && (
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleStatusChange(item._id, "in-progress");
+                      }}
+                      className="action-btn start-btn"
+                    >
+                      Başlat
+                    </button>
+                  )}
+                  
+                  {item.status === "in-progress" && (
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleStatusChange(item._id, "submitted");
+                      }}
+                      className="action-btn complete-btn"
+                    >
+                      Gönder
+                    </button>
+                  )}
+                  
+                  {(item.status === "in-progress" || item.status === "todo") && (
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleStatusChange(item._id, "on-hold");
+                      }}
+                      className="action-btn hold-btn"
+                    >
+                      Beklet
+                    </button>
+                  )}
+                  
+                  {item.status === "on-hold" && (
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleStatusChange(item._id, "in-progress");
+                      }}
+                      className="action-btn resume-btn"
+                    >
+                      Devam Et
+                    </button>
+                  )}
+                </div>
+              )}
+              
+              {/* Admin milestone verification actions */}
+              {(isAdmin && isMilestoneView && item.status === "submitted") && (
+                <div className="milestone-actions">
+                  <button 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleStatusChange(item._id, "verified");
+                    }}
+                    className="action-btn verify-btn"
+                  >
+                    Onayla
+                  </button>
+                  <button 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleStatusChange(item._id, "rejected");
+                    }}
+                    className="action-btn reject-btn"
+                  >
+                    Reddet
+                  </button>
+                </div>
+              )}
+            </div>
+          ))}
         </div>
       )}
     </div>

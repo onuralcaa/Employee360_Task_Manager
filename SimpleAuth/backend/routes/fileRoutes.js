@@ -4,8 +4,9 @@ const upload = require("../multerConfig");
 const {
   uploadFile,
   getRecipientsList,
-  getFilesForRecipient,   // ✅ Eklendi!
-  getFilesSentBySender    // ✅ Eklendi!
+  getFilesForRecipient,
+  getFilesSentBySender,
+  downloadFile
 } = require("../controllers/fileController");
 const verifyToken = require("../middleware/authMiddleware");
 
@@ -21,9 +22,12 @@ router.post(
 );
 
 // 📥 Kullanıcının aldığı dosyalar (gelen dosyalar)
-router.get("/received", verifyToken, getFilesForRecipient); // ✅ EKLENDİ!
+router.get("/received", verifyToken, getFilesForRecipient);
 
 // 📤 Kullanıcının gönderdiği dosyalar
-router.get("/sent", verifyToken, getFilesSentBySender);     // ✅ EKLENDİ!
+router.get("/sent", verifyToken, getFilesSentBySender);
+
+// 📥 Dosya indirme route'u
+router.get("/download/:fileId", verifyToken, downloadFile);
 
 module.exports = router;

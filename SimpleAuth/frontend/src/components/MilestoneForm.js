@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import './TaskForm.css';
+import './MilestoneForm.css';
 
-function TaskForm({ user, onTaskCreated }) {
+function MilestoneForm({ user, onMilestoneCreated }) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [assignedTo, setAssignedTo] = useState('');
@@ -44,7 +44,7 @@ function TaskForm({ user, onTaskCreated }) {
       
       const token = localStorage.getItem('token');
       await axios.post(
-        'http://localhost:5000/api/tasks',
+        'http://localhost:5000/api/milestones',
         { 
           title,
           description,
@@ -59,43 +59,43 @@ function TaskForm({ user, onTaskCreated }) {
       setDescription('');
       setAssignedTo('');
       
-      // Görev listesini yenile
-      if (onTaskCreated) onTaskCreated();
+      // Kilometre taşı listesini yenile
+      if (onMilestoneCreated) onMilestoneCreated();
       
       setLoading(false);
     } catch (err) {
-      console.error('Görev oluşturulurken hata:', err);
-      setError('Görev oluşturulurken bir hata oluştu. Lütfen tekrar deneyin.');
+      console.error('Kilometre taşı oluşturulurken hata:', err);
+      setError('Kilometre taşı oluşturulurken bir hata oluştu. Lütfen tekrar deneyin.');
       setLoading(false);
     }
   };
 
-  // Sadece takım liderleri görev oluşturabilir, admin değil
+  // Sadece takım liderleri kilometre taşı oluşturabilir, admin değil
   if (user?.role !== 'team_leader') {
     return null;
   }
 
   return (
-    <div className="task-form-container">
-      <h3>Yeni Görev Oluştur</h3>
-      <form onSubmit={handleSubmit} className="task-form">
+    <div className="milestone-form-container">
+      <h3>Yeni Kilometre Taşı Oluştur</h3>
+      <form onSubmit={handleSubmit} className="milestone-form">
         <div className="form-group">
-          <label>Görev Başlığı</label>
+          <label>Kilometre Taşı Başlığı</label>
           <input
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             required
-            placeholder="Görevin başlığını girin"
+            placeholder="Kilometre taşının başlığını girin"
           />
         </div>
         
         <div className="form-group">
-          <label>Görev Açıklaması</label>
+          <label>Kilometre Taşı Açıklaması</label>
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            placeholder="Görevin detaylarını girin"
+            placeholder="Kilometre taşının detaylarını girin"
             rows={3}
           />
         </div>
@@ -119,11 +119,11 @@ function TaskForm({ user, onTaskCreated }) {
         {error && <div className="error-message">{error}</div>}
         
         <button type="submit" className="submit-button" disabled={loading}>
-          {loading ? 'Oluşturuluyor...' : 'Görev Oluştur'}
+          {loading ? 'Oluşturuluyor...' : 'Kilometre Taşı Oluştur'}
         </button>
       </form>
     </div>
   );
 }
 
-export default TaskForm;
+export default MilestoneForm;

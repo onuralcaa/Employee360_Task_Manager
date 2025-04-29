@@ -6,11 +6,30 @@
   font-family: "Segoe UI", sans-serif;
 }
 
+.panel-wrapper {
+  display: flex;
+  height: 100vh;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
 /* Sol Menü */
 .team-lead-panel-left {
   width: 18%;
   background-color: #fff;
   padding: 20px;
+  border-right: 1px solid #ddd;
+}
+
+.panel-left,
+.panel-center,
+.panel-right {
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.panel-left {
+  width: 20%;
+  background-color: #f4f4f4;
   border-right: 1px solid #ddd;
 }
 
@@ -20,8 +39,19 @@
   color: #333;
 }
 
+.panel-left h2 {
+  font-size: 18px;
+  margin-bottom: 15px;
+  color: #333;
+}
+
 .team-lead-panel-left ul {
   list-style: none;
+  padding: 0;
+}
+
+.panel-left ul {
+  list-style-type: none;
   padding: 0;
 }
 
@@ -30,16 +60,46 @@
   cursor: pointer;
   border-radius: 5px;
   transition: background 0.2s;
+  color: #333; /* Adding explicit text color for menu items */
+}
+
+.panel-left li {
+  padding: 10px 15px;
+  margin-bottom: 8px;
+  background-color: #ffffff;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  color: #333; /* Adding explicit text color for menu items */
 }
 
 .team-lead-panel-left li:hover {
   background-color: #eaeaea;
 }
 
+.panel-left li:hover {
+  background-color: #e2e6ea;
+}
+
+.panel-left li.active {
+  background-color: #4a90e2;
+  color: white;
+  border-color: #3a80d2;
+}
+
 /* Orta İçerik */
 .team-lead-panel-center {
   flex: 1;
   padding: 30px;
+  overflow-y: auto;
+}
+
+.team-lead-panel-center {
+  width: 55%;
+  background-color: #ffffff;
+  border-left: 1px solid #ddd;
+  border-right: 1px solid #ddd;
   overflow-y: auto;
 }
 

@@ -10,7 +10,7 @@ const allowedTransitions = {
 };
 
 const milestoneSchema = new mongoose.Schema({
-  title: String,
+  title: { type: String, required: true },
   description: String,
   assignedTo: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   team: { type: mongoose.Schema.Types.ObjectId, ref: 'Team', required: true },
@@ -19,32 +19,46 @@ const milestoneSchema = new mongoose.Schema({
     enum: ['todo', 'in-progress', 'on-hold', 'submitted', 'verified', 'rejected'],
     default: 'todo'
   },
+  createdAt: { type: Date, default: Date.now },
   _modifiedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   _userRole: String
 });
 
-// Durum değişikliklerini doğrula
-milestoneSchema.pre('save', async function(next) {
-  if (this.isModified('status')) {
-    // Yeni belgeler için doğrulamayı atla
-    if (this.isNew) {
-      return next();
-    }
-
-    const oldStatus = this._previousStatus;
-    const newStatus = this.status;
-
-    if (!oldStatus || !allowedTransitions[oldStatus]?.includes(newStatus)) {
-      throw new Error(`${oldStatus || 'tanımsız'} durumundan ${newStatus} durumuna geçiş geçersiz`);
-    }
-
-    // Admin işlemlerini doğrula
-    if ((newStatus === 'verified' || newStatus === 'rejected') && 
-        (!this._modifiedBy || this._userRole !== 'admin')) {
-      throw new Error(`Sadece yöneticiler milestoneları ${newStatus} yapabilir`);
-    }
-  }
-  next();
+// Status transition validation
+milestoneSchema.pre('save', function(next) {
+  // Only run validation if status is modified
+  if (!this.isModified('status')) return next();
+  
+  const allowedTransitions = {
+    'todo': ['in-progress', 'on-hold'],
+    'in-progress': ['submitted', 'on-hold'],
+    'on-hold': ['in-progress', 'todo'],
+    'submitted': ['verified', 'rejected'],
+    'verified': [],
+    'rejected': []
+  };
+  
+  if (this.isNew) return next(); // New milestone, no transition validation needed
+  
+  // Get original document to check previous status
+  this.constructor.findById(this._id)
+    .then(oldDoc => {
+      if (!oldDoc) return next();
+      
+      const oldStatus = oldDoc.status;
+      const newStatus = this.status;
+      
+      // Check if transition is allowed
+      if (oldStatus === newStatus || allowedTransitions[oldStatus].includes(newStatus)) {
+        return next();
+      }
+      
+      const err = new Error(`Invalid status transition from ${oldStatus} to ${newStatus}`);
+      return next(err);
+    })
+    .catch(next);
 });
 
-module.exports = mongoose.model('Milestone', milestoneSchema);
+const Milestone = mongoose.model("Milestone", milestoneSchema);
+
+module.exports = Milestone;

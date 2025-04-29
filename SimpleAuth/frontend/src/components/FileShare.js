@@ -1,184 +1,256 @@
 import { useState, useEffect } from "react";
-import api from "../api/api"; // Axios yerine api import edildi
-import { FaDownload } from "react-icons/fa";
-import { FaEye } from "react-icons/fa";
+import { uploadFile, getReceivedFiles, getSentFiles, downloadFile, deleteFile } from "../api/api";
 import "./FileShare.css";
 
 function FileShare({ user }) {
-  const [receiverId, setReceiverId] = useState("");
-  const [file, setFile] = useState(null);
+  const [files, setFiles] = useState([]);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
   const [error, setError] = useState("");
-  const [recipients, setRecipients] = useState([]);
-  const [sentFiles, setSentFiles] = useState([]);
-  const [receivedFiles, setReceivedFiles] = useState([]);
+  const [activeTab, setActiveTab] = useState("received"); // "received" or "sent"
 
   useEffect(() => {
-    if (user?.id) {
-      fetchRecipients();
-      fetchSentFiles();
-      fetchReceivedFiles();
-    }
-  }, [user]);
+    fetchFiles();
+  }, [activeTab]);
 
-  const fetchRecipients = async () => {
+  // Dosyaları getir
+  const fetchFiles = async () => {
     try {
-      const response = await api.get("/files/recipients");
-      setRecipients(response.data);
-    } catch (error) {
-      console.error("Alıcılar alınırken hata oluştu:", error);
-      setError("Alıcılar alınırken bir hata oluştu.");
+      setLoading(true);
+      let res;
+      
+      if (activeTab === "received") {
+        res = await getReceivedFiles();
+      } else {
+        res = await getSentFiles();
+      }
+      
+      setFiles(res.data);
+      setError("");
+    } catch (err) {
+      console.error("Dosyalar yüklenemedi:", err);
+      setError("Dosyalar yüklenemedi. Lütfen daha sonra tekrar deneyin.");
+    } finally {
+      setLoading(false);
     }
   };
 
-  const fetchReceivedFiles = async () => {
-    try {
-      const response = await api.get("/files/received");
-      setReceivedFiles(response.data);
-    } catch (error) {
-      console.error("Alınan dosyalar çekilirken hata:", error);
-    }
-  };
-
-  const fetchSentFiles = async () => {
-    try {
-      const response = await api.get("/files/sent");
-      setSentFiles(response.data);
-    } catch (error) {
-      console.error("Gönderilen dosyalar çekilirken hata:", error);
-    }
-  };
-
+  // Dosya seçme
   const handleFileChange = (e) => {
-    setFile(e.target.files[0]);
+    setSelectedFile(e.target.files[0]);
+    setMessage("");
     setError("");
   };
 
-  const handleSendFile = async () => {
-    if (!file) {
+  // Dosya yükleme
+  const handleUpload = async (e) => {
+    e.preventDefault();
+    
+    if (!selectedFile) {
       setError("Lütfen bir dosya seçin!");
       return;
     }
-    if (!receiverId) {
-      setError("Lütfen bir alıcı seçin!");
+    
+    // Dosya boyutu kontrolü (20MB)
+    if (selectedFile.size > 20 * 1024 * 1024) {
+      setError("Dosya boyutu çok büyük! Maksimum 20MB yükleyebilirsiniz.");
       return;
     }
-
+    
+    // Dosya türü kontrolü
+    const allowedTypes = [
+      "image/jpeg", 
+      "image/png", 
+      "application/pdf", 
+      "application/msword", 
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "application/vnd.ms-excel",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "text/plain"
+    ];
+    
+    if (!allowedTypes.includes(selectedFile.type)) {
+      setError("Dosya türü desteklenmiyor! Sadece resim, PDF, Word, Excel ve text dosyalarını yükleyebilirsiniz.");
+      return;
+    }
+    
     const formData = new FormData();
-    formData.append("file", file);
-    formData.append("recipient", receiverId);
-
+    formData.append("file", selectedFile);
+    formData.append("uploadedBy", user.id || user._id);
+    
     try {
-      await api.post("/files/upload", formData, {
-        headers: { "Content-Type": "multipart/form-data" }, // Token zaten api.js'de otomatik ekleniyor!
-      });
-      alert("Dosya başarıyla gönderildi!");
-      setFile(null);
-      setReceiverId("");
-      fetchSentFiles(); // Listeyi güncelle
-    } catch (error) {
-      console.error("Dosya gönderme hatası:", error);
-      setError("Dosya gönderilirken bir hata oluştu.");
+      setLoading(true);
+      await uploadFile(formData);
+      setMessage("Dosya başarıyla yüklendi!");
+      setSelectedFile(null);
+      document.getElementById("file-input").value = "";
+      // After upload, switch to sent tab to show the uploaded file
+      setActiveTab("sent");
+      fetchFiles();
+    } catch (err) {
+      console.error("Dosya yükleme hatası:", err);
+      setError("Dosya yüklenemedi. Lütfen daha sonra tekrar deneyin.");
+    } finally {
+      setLoading(false);
     }
   };
 
-  const formatDate = (dateString) => {
-    if (!dateString) return "-"; // Boşsa tire koy
-    const date = new Date(dateString);
-    return isNaN(date.getTime()) ? "-" : date.toLocaleString("tr-TR"); // Geçersizse tire koy
+  // Dosyayı indir
+  const handleDownload = async (file) => {
+    try {
+      const response = await downloadFile(file._id);
+      
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", file.originalname);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (err) {
+      console.error("Dosya indirme hatası:", err);
+      setError("Dosya indirilemedi. Lütfen daha sonra tekrar deneyin.");
+    }
   };
 
+  // Dosyayı sil (sadece admin veya yükleyen kişi)
+  const handleDelete = async (fileId) => {
+    if (!window.confirm("Bu dosyayı silmek istediğinize emin misiniz?")) return;
+    
+    try {
+      await deleteFile(fileId);
+      setMessage("Dosya başarıyla silindi!");
+      fetchFiles();
+    } catch (err) {
+      console.error("Dosya silme hatası:", err);
+      setError("Dosya silinemedi. Lütfen daha sonra tekrar deneyin.");
+    }
+  };
 
+  // Dosya boyutunu formatla
+  const formatFileSize = (bytes) => {
+    if (bytes < 1024) return bytes + " B";
+    else if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + " KB";
+    else return (bytes / (1024 * 1024)).toFixed(2) + " MB";
+  };
+
+  // Tarih formatla
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleString("tr-TR");
+  };
 
   return (
     <div className="file-share-container">
-      <h3>📂 Dosya Paylaşımı</h3>
-      <div>
-        <label>Alıcı (Takım Lideri):</label>
-        <select onChange={(e) => setReceiverId(e.target.value)} value={receiverId}>
-          <option value="">Alıcı Seç</option>
-          {recipients.map((recipient) => (
-            <option key={recipient._id} value={recipient._id}>
-              {recipient.name} {recipient.surname} ({recipient.role})
-            </option>
-          ))}
-        </select>
+      <h3>📁 Dosya Paylaşımı</h3>
+      
+      {/* Yükleme Formu */}
+      <div className="file-upload-section">
+        <h4>Yeni Dosya Yükle</h4>
+        <form onSubmit={handleUpload} className="file-upload-form">
+          <div className="file-input-container">
+            <input
+              type="file"
+              id="file-input"
+              onChange={handleFileChange}
+              className="file-input"
+            />
+            <label htmlFor="file-input" className="file-input-label">
+              {selectedFile ? selectedFile.name : "Dosya Seç"}
+            </label>
+          </div>
+          
+          <button 
+            type="submit" 
+            className="upload-button"
+            disabled={loading}
+          >
+            {loading ? "Yükleniyor..." : "Yükle"}
+          </button>
+        </form>
+        
+        {message && <div className="success-message">{message}</div>}
+        {error && <div className="error-message">{error}</div>}
       </div>
-
-      <div>
-        <label>Gönderilecek Dosya:</label>
-        <input type="file" onChange={handleFileChange} required />
-        <p>Desteklenen formatlar: PDF, DOC, DOCX, JPG, JPEG, PNG | Maksimum boyut: 5 MB</p>
-      </div>
-
-      <button onClick={handleSendFile}>Dosyayı Gönder</button>
-      {error && <p className="error-message">{error}</p>}
-
-      <div className="file-lists">
-        <h4>📤 Gönderilen Dosyalar</h4>
-        <table className="file-table">
-          <thead>
-            <tr>
-              <th>Alıcı</th>
-              <th>Rol</th>
-              <th>Dosya Adı</th>
-              <th>Tarih</th>
-              <th>İndir</th>
-            </tr>
-          </thead>
-          <tbody>
-            {sentFiles.map((file) => (
-              <tr key={file._id}>
-                <td>{file.recipient?.name} {file.recipient?.surname}</td>
-                <td>{file.recipient?.role}</td>
-                <td>{file.originalName}</td>
-                <td>{formatDate(file.uploadDate || file.createdAt)}</td>
-                <td>
-                  <a
-                    href={`http://localhost:5000/uploads/${file.filename}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="download-icon"
-                  >
-                    <FaEye />
-                  </a>
-                </td>
+      
+      {/* Dosya Listesi */}
+      <div className="files-list-section">
+        <div className="files-tabs">
+          <button 
+            className={`tab-button ${activeTab === "received" ? "active" : ""}`}
+            onClick={() => setActiveTab("received")}
+          >
+            Alınan Dosyalar
+          </button>
+          <button 
+            className={`tab-button ${activeTab === "sent" ? "active" : ""}`}
+            onClick={() => setActiveTab("sent")}
+          >
+            Gönderilen Dosyalar
+          </button>
+        </div>
+        
+        <h4>{activeTab === "received" ? "Alınan Dosyalar" : "Gönderilen Dosyalar"}</h4>
+        
+        {loading && <p className="loading-message">Dosyalar yükleniyor...</p>}
+        
+        {!loading && files.length === 0 && (
+          <p className="no-files">
+            {activeTab === "received" 
+              ? "Henüz dosya alınmamış." 
+              : "Henüz dosya gönderilmemiş."}
+          </p>
+        )}
+        
+        {!loading && files.length > 0 && (
+          <table className="files-table">
+            <thead>
+              <tr>
+                <th>Dosya Adı</th>
+                <th>Boyut</th>
+                <th>{activeTab === "received" ? "Gönderen" : "Alıcı"}</th>
+                <th>Tarih</th>
+                <th>İşlemler</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-
-        <h4>📥 Alınan Dosyalar</h4>
-        <table className="file-table">
-          <thead>
-            <tr>
-              <th>Gönderen</th>
-              <th>Rol</th>
-              <th>Dosya Adı</th>
-              <th>Tarih</th>
-              <th>İndir</th>
-            </tr>
-          </thead>
-          <tbody>
-            {receivedFiles.map((file) => (
-              <tr key={file._id}>
-                <td>{file.sender?.name} {file.sender?.surname}</td>
-                <td>{file.sender?.role}</td>
-                <td>{file.originalName}</td>
-                <td>{formatDate(file.uploadDate || file.createdAt)}</td>
-                <td>
-                  <a
-                    href={`http://localhost:5000/uploads/${file.filename}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="download-icon"
-                  >
-                    <FaDownload />
-                  </a>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {files.map((file) => (
+                <tr key={file._id}>
+                  <td>{file.originalname}</td>
+                  <td>{formatFileSize(file.size)}</td>
+                  <td>
+                    {activeTab === "received"
+                      ? (file.uploadedBy?.name 
+                          ? `${file.uploadedBy.name} ${file.uploadedBy.surname}` 
+                          : "Bilinmiyor")
+                      : (file.recipient?.name
+                          ? `${file.recipient.name} ${file.recipient.surname}`
+                          : "Bilinmiyor")
+                    }
+                  </td>
+                  <td>{formatDate(file.createdAt)}</td>
+                  <td className="file-actions">
+                    <button 
+                      onClick={() => handleDownload(file)} 
+                      className="download-button"
+                    >
+                      İndir
+                    </button>
+                    
+                    {(user.role === "admin" || user.id === file.uploadedBy?._id || user._id === file.uploadedBy?._id) && (
+                      <button 
+                        onClick={() => handleDelete(file._id)} 
+                        className="delete-button"
+                      >
+                        Sil
+                      </button>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
     </div>
   );

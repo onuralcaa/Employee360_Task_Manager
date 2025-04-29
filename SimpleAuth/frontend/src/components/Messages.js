@@ -1,122 +1,192 @@
-import { useEffect, useState } from "react";
-import {
-  getMessagesByUserId,
-  sendMessage,
-  getAllUsers,
-} from "../api/api";
+import React, { useEffect, useState } from "react";
+import { getAllUsers, sendMessage, getMessagesByUserId } from "../api/api";
 import "./Messages.css";
 
-function Messages({ user }) { // ✅ user prop'u alındı
-  const state = user; // ✅ state yerine gelen props
-
-
-
+function Messages({ user }) {
+  const [message, setMessage] = useState("");
+  const [recipient, setRecipient] = useState("");
+  const [recipients, setRecipients] = useState([]);
   const [messages, setMessages] = useState([]);
-  const [allUsers, setAllUsers] = useState([]);
-  const [receiverId, setReceiverId] = useState("");
-  const [text, setText] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
-useEffect(() => {
-  console.log("👤 Aktif kullanıcı:", state);
-  console.log("📋 Tüm kullanıcılar:", allUsers);
+  // Fetch users
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const response = await getAllUsers();
+        
+        // Filter out the current user from the list
+        const filteredUsers = response.data.filter(u => 
+          (user.id && u._id !== user.id) || (user._id && u._id !== user._id)
+        );
+        
+        setRecipients(filteredUsers);
+        
+        // Select the first user by default if one exists and no recipient is selected
+        if (filteredUsers.length > 0 && !recipient) {
+          setRecipient(filteredUsers[0]._id);
+        }
+      } catch (err) {
+        console.error("Kullanıcılar yüklenirken hata:", err);
+        setError("Kullanıcılar yüklenemedi. Lütfen daha sonra tekrar deneyin.");
+      }
+    };
 
-  if (!state?.id) return;
+    fetchUsers();
+  }, [user, recipient]);
 
-  getMessagesByUserId(state.id)
-    .then((res) => setMessages(res.data))
-    .catch((err) => console.error("Mesajlar alınamadı", err));
+  // Fetch messages
+  useEffect(() => {
+    const fetchMessages = async () => {
+      try {
+        setLoading(true);
+        const userId = user.id || user._id;
+        if (!userId) return;
 
-  getAllUsers()
-    .then((res) => {
-      console.log("✅ Backend'den gelen kullanıcı listesi:", res.data);
-      setAllUsers(res.data);
-    })
-    .catch((err) => console.error("Kullanıcılar alınamadı", err));
+        const response = await getMessagesByUserId(userId);
+        
+        setMessages(response.data);
+        setError("");
+      } catch (err) {
+        console.error("Mesajlar yüklenirken hata:", err);
+        setError("Mesajlar yüklenemedi. Lütfen daha sonra tekrar deneyin.");
+      } finally {
+        setLoading(false);
+      }
+    };
 
-}, [state?.id]); // ❗️ KAPATILMASI GEREKEN PARANTEZ BURASI
+    fetchMessages();
+  }, [user]);
 
-
-
-  const handleSend = async () => {
-    if (!receiverId || !text.trim()) return;
-
+  // Send message
+  const handleSendMessage = async (e) => {
+    e.preventDefault();
+    
+    if (!message.trim()) {
+      setError("Lütfen bir mesaj yazın.");
+      return;
+    }
+    
+    if (!recipient) {
+      setError("Lütfen bir alıcı seçin.");
+      return;
+    }
+    
     try {
-      const newMessage = {
-        sender: state.id,
-        recipient: receiverId,
-        content: text.trim(),
-      };
-      await sendMessage(newMessage);
-      setText("");
-      setReceiverId("");
-      const res = await getMessagesByUserId(state.id);
-      setMessages(res.data);
-    } catch (error) {
-      console.error("Mesaj gönderme hatası:", error);
+      setLoading(true);
+      
+      await sendMessage({
+        content: message,
+        recipient: recipient,
+      });
+      
+      setMessage("");
+      setSuccess("Mesaj başarıyla gönderildi!");
+      
+      // Refresh messages
+      const userId = user.id || user._id;
+      const response = await getMessagesByUserId(userId);
+      
+      setMessages(response.data);
+      setError("");
+      
+      // Clear success message after 3 seconds
+      setTimeout(() => {
+        setSuccess("");
+      }, 3000);
+    } catch (err) {
+      console.error("Mesaj gönderilirken hata:", err);
+      setError("Mesaj gönderilemedi. Lütfen daha sonra tekrar deneyin.");
+    } finally {
+      setLoading(false);
     }
   };
 
-  const filteredRecipients = allUsers.filter((user) => {
-    if (user._id === state.id) return false;
+  // Tarihi formatla
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleString("tr-TR");
+  };
 
-    if (state.role === "admin") return true;
+  // Kullanıcı adını getir
+  const getUserName = (userId) => {
+    const user = recipients.find((u) => u._id === userId);
+    if (!user) return "Bilinmeyen Kullanıcı";
+    return `${user.name || ""} ${user.surname || ""}`.trim() || user.username || "Bilinmeyen Kullanıcı";
+  };
 
-    if (state.role === "team_leader") {
-      return (
-        user.role === "admin" ||
-        user.role === "team_leader" ||
-        user.team === state.team
-      );
-    }
-
-    if (state.role === "personel") {
-      return (
-        user.team === state.team &&
-        (user.role === "personel" || user.role === "team_leader")
-      );
-    }
-
-    return false;
-  });
+  // Mesajı gönderen sen misin?
+  const isSentByMe = (senderId) => {
+    return (user.id && senderId === user.id) || (user._id && senderId === user._id);
+  };
 
   return (
     <div className="msg-wrapper">
-      <h3>📨 Mesajlaşma Paneli</h3>
-
+      <h3>📨 Mesajlar</h3>
+      
       <div className="msg-send-box">
-        <select
-          value={receiverId}
-          onChange={(e) => setReceiverId(e.target.value)}
+        <select 
+          value={recipient} 
+          onChange={(e) => setRecipient(e.target.value)}
         >
-          <option value="">Alıcı Seç</option>
-          {filteredRecipients.map((user) => (
+          <option value="">Alıcı Seçin</option>
+          {recipients.map((user) => (
             <option key={user._id} value={user._id}>
-              {user.name} {user.surname} ({user.role})
+              {user.name} {user.surname} - {user.role === "admin" ? "Yönetici" : user.role === "team_leader" ? "Takım Lideri" : "Personel"}
             </option>
           ))}
         </select>
-
+        
         <textarea
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
           placeholder="Mesajınızı yazın..."
-          value={text}
-          onChange={(e) => setText(e.target.value)}
         />
-
-        <button onClick={handleSend}>Gönder</button>
+        
+        <button onClick={handleSendMessage} disabled={loading}>
+          {loading ? "Gönderiliyor..." : "Gönder"}
+        </button>
+        
+        {error && <div className="error-message">{error}</div>}
+        {success && <div className="success-message">{success}</div>}
       </div>
-
+      
       <div className="msg-list">
-        <h4>📬 Mesajlar</h4>
-        {messages.map((msg) => (
-          <div key={msg._id} className="msg-item">
-            <p>
-              <strong>{msg.sender?.name || "?"}</strong> ➡{" "}
-              <strong>{msg.recipient?.name || "?"}</strong>
-            </p>
-            <p>{msg.content}</p>
-            <small>{new Date(msg.timestamp).toLocaleString()}</small>
+        <h4>Son Mesajlar</h4>
+        
+        {loading && <p className="loading-message">Mesajlar yükleniyor...</p>}
+        
+        {!loading && messages.length === 0 && (
+          <p className="no-messages">Henüz mesaj yok.</p>
+        )}
+        
+        {!loading && messages.length > 0 && (
+          <div>
+            {messages.map((msg) => (
+              <div 
+                key={msg._id} 
+                className={`msg-item ${isSentByMe(msg.sender?._id) ? "sent" : "received"}`}
+              >
+                <p>
+                  <strong>
+                    {isSentByMe(msg.sender?._id) 
+                      ? "Siz" 
+                      : msg.sender?.name 
+                        ? `${msg.sender.name} ${msg.sender.surname}` 
+                        : "Bilinmeyen Gönderici"}
+                  </strong>
+                  {isSentByMe(msg.sender?._id) 
+                    ? ` → ${msg.recipient?.name ? `${msg.recipient.name} ${msg.recipient.surname}` : "Bilinmeyen Alıcı"}`
+                    : ""}
+                </p>
+                <p>{msg.content}</p>
+                <small>{formatDate(msg.createdAt)}</small>
+              </div>
+            ))}
           </div>
-        ))}
+        )}
       </div>
     </div>
   );

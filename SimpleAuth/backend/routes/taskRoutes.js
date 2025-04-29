@@ -3,10 +3,10 @@ const router = express.Router();
 const verifyToken = require("../middleware/authMiddleware");
 const taskController = require('../controllers/taskController');
 
-// Rotaları tanımla
+// Define routes
 router.get('/', verifyToken, taskController.getAllTasks);
-router.post('/', verifyToken, taskController.assignTask);
-router.patch('/:id/status', verifyToken, taskController.updateTaskStatus);
-router.patch('/:id/verify', verifyToken, taskController.verifyTask);
+router.get('/user/:userId', verifyToken, taskController.getTasksByUserId);
+router.post('/', verifyToken, taskController.createTask);
+router.patch('/:id', verifyToken, taskController.updateTaskStatus);
 
 module.exports = router;
