@@ -69,13 +69,16 @@ const login = async (req, res) => {
       email: user.email,
       birthdate: user.birthdate,
       role: user.role,
-      team: user.team, // ✅ eklendi
+      team: user.team,
     };
-
 
     const token = jwt.sign(tokenPayload, process.env.JWT_SECRET, {
       expiresIn: "1h",
     });
+
+    // 🟢 Burada lastLogin güncelleniyor:
+    user.lastLogin = new Date();
+    await user.save();
 
     res.status(200).json({
       message: `${user.role === "admin" ? "Yönetici" : "Personel"} girişi başarılı.`,
@@ -88,7 +91,7 @@ const login = async (req, res) => {
       phone: user.number,
       email: user.email,
       birthdate: user.birthdate,
-      team: user.team // ✅ eklendi
+      team: user.team
     });
 
   } catch (error) {
@@ -181,7 +184,7 @@ const updateUser = async (req, res) => {
 // ✅ Belirli kullanıcıyı ID ile getir
 const getUserById = async (req, res) => {
   try {
-    const user = await User.findById(req.params.id);
+    const user = await User.findById(req.params.id).select("-password -resetPasswordToken -resetPasswordExpire");
     if (!user) return res.status(404).json({ message: "Kullanıcı bulunamadı" });
 
     res.status(200).json(user);

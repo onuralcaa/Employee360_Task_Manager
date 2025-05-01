@@ -246,10 +246,10 @@
 
 .status-toggle-button {
   padding: 8px 14px;
-  background-color: #6c757d; /* Gri ton, devre dışı */
+  background-color: #28a745; /* devre dışı iken yeşil */
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 8px;
   font-weight: bold;
   margin-left: 10px;
   cursor: pointer;
@@ -257,15 +257,29 @@
 }
 
 .status-toggle-button:hover {
-  background-color: #5a6268;
+  background-color: #38a765;
+  transform: scale(1.05);
 }
 
 .status-toggle-button.active {
-  background-color: #28a745; /* Aktifken yeşil */
+  background-color: #dc3545;
 }
 
 .status-toggle-button.active:hover {
-  background-color: #218838;
+  background-color: #c82333;
+  transform: scale(1.05);
+}
+
+/* Seçili personel kartı için (daha açık mor tonları) */
+.selected-member {
+  background-color: #e4d9f7 !important; /* Yumuşak açık lila */
+  border: 2px solid #b39ddb; /* Hafif mor bir çerçeve */
+}
+
+/* Seçili takım kartı için (daha açık mor tonları) */
+.selected-team {
+  background-color: #e0d7f5 !important; /* Açık pastel mor */
+  border: 2px solid #b39ddb; /* Aynı hafif mor çerçeve */
 }
 
 .form-group {

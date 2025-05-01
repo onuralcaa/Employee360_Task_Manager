@@ -299,7 +299,7 @@ function AdminPanel() {
               <div
                 key={team._id}
                 onClick={() => setSelectedTeamId(team._id)}
-                className={`person-card ${selectedTeamId === team._id ? 'selected' : ''}`}
+                className={`person-card ${selectedTeamId === team._id ? 'selected-team' : ''}`}
               >
                 <p><strong>Takım Adı:</strong> {team.name}</p>
               </div>
@@ -315,8 +315,8 @@ function AdminPanel() {
                 teamMembers.map((member) => (
                   <div
                     key={member._id}
-                    className={`person-card ${selectedMember?._id === member._id ? 'selected' : ''}`}
-                    onClick={() => setSelectedMember(member)}
+                    className={`person-card ${selectedMember?._id === member._id ? 'selected-member' : ''}`}
+                    onClick={() => handleSelectMember(member._id)}
                   >
                     <p><strong>Ad:</strong> {member.name}</p>
                     <p><strong>Soyad:</strong> {member.surname}</p>
@@ -409,7 +409,7 @@ function AdminPanel() {
                 Personeli Sil
               </button>
               <button
-                className="status-toggle-button"
+                className={`status-toggle-button ${selectedMember.isActive ? "active" : ""}`}
                 onClick={handleToggleStatus}
                 style={{ 
                   backgroundColor: selectedMember.isActive ? "#f0ad4e" : "#5cb85c", 
@@ -417,7 +417,7 @@ function AdminPanel() {
                   marginLeft: "5px"
                 }}
               >
-                {selectedMember.isActive ? "Devre Dışı Bırak" : "Aktif Et"}
+                {selectedMember.isActive ? "Devre Dışı Bırak" : "Aktifleştir"}
               </button>
             </div>
           </div>
@@ -431,8 +431,9 @@ function AdminPanel() {
             <p><strong>Doğum Tarihi:</strong> {selectedMember.birthdate?.substring(0, 10) || "-"}</p>
             <p><strong>Rol:</strong> {selectedMember.role === "admin" ? "Yönetici" : 
                                      selectedMember.role === "team_leader" ? "Takım Lideri" : "Personel"}</p>
-            
-            {/* Remove the duplicate delete button from here since it's now in the header */}
+            <p><strong>Durum:</strong> {selectedMember.isActive ? "Aktif" : "Devre Dışı"}</p>
+          <p><strong>Kayıt Tarihi:</strong> {new Date(selectedMember.createdAt).toLocaleString() || "-"}</p>
+          <p><strong>Son Giriş:</strong> {selectedMember.lastLogin ? new Date(selectedMember.lastLogin).toLocaleString() : "-"}</p>  
           </div>
         </div>
       )}

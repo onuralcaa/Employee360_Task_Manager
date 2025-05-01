@@ -37,11 +37,15 @@ const userSchema = new mongoose.Schema({
   resetPasswordToken: String,
   resetPasswordExpire: Date,
 
-  // ✅ Doğru şekilde buraya eklendi:
   isActive: {
     type: Boolean,
     default: true
+  },
+  lastLogin: {
+    type: Date,
+    default: null
   }
-});
+}, { timestamps: true }); // ✅ timestamps burada
+
 
 module.exports = mongoose.model("User", userSchema);
