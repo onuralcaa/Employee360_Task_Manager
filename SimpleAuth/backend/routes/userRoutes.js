@@ -38,6 +38,6 @@ router.post("/reset-password/:token", resetPassword);
 router.delete("/:id", verifyToken, deleteUser);
 
 // ✅ Aktif / Deaktif durumu değiştirme (admin yetkisi)
-router.patch("/status/:id", verifyToken, toggleUserActiveStatus);s
+router.patch("/status/:id", verifyToken, toggleUserActiveStatus);
 
 module.exports = router;

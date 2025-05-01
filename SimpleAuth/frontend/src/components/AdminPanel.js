@@ -243,6 +243,19 @@ function AdminPanel() {
     }
   };
 
+  // Add this function before your return statement
+  const handleSelectMember = async (memberId) => {
+    try {
+      const response = await axios.get(`http://localhost:5000/api/users/${memberId}`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      });
+      setSelectedMember(response.data);
+    } catch (error) {
+      console.error("Kullanıcı bilgileri alınamadı:", error);
+      alert("Kullanıcı bilgileri alınamadı.");
+    }
+  };
+
   // Render appropriate content based on the active tab
   const renderContent = () => {
     if (loading) {
@@ -394,27 +407,38 @@ function AdminPanel() {
         <div className="panel-right">
           <div className="panel-right-header">
             <h2>📄 Personel Detay</h2>
-            <div>
-              <button
-                className="collapse-button"
-                onClick={handleCollapseRightPanel}
-              >
-                Kapat
-              </button>
+            <div className="action-buttons">
+              {/* Kapat butonunu kaldırdık */}
               <button 
-                className="delete-button" 
+                className="action-button delete-button" 
                 onClick={handleDeleteMember}
-                style={{ backgroundColor: "#ff4d4d", color: "white" }}
+                style={{ 
+                  backgroundColor: "#ff4d4d", 
+                  color: "white",
+                  padding: "8px 12px",
+                  border: "none",
+                  borderRadius: "4px",
+                  cursor: "pointer",
+                  marginLeft: "8px",
+                  fontSize: "14px",
+                  fontWeight: "500"
+                }}
               >
                 Personeli Sil
               </button>
               <button
-                className={`status-toggle-button ${selectedMember.isActive ? "active" : ""}`}
+                className="action-button status-toggle-button"
                 onClick={handleToggleStatus}
                 style={{ 
                   backgroundColor: selectedMember.isActive ? "#f0ad4e" : "#5cb85c", 
-                  color: "white", 
-                  marginLeft: "5px"
+                  color: "white",
+                  padding: "8px 12px",
+                  border: "none",
+                  borderRadius: "4px",
+                  cursor: "pointer", 
+                  marginLeft: "8px",
+                  fontSize: "14px",
+                  fontWeight: "500"
                 }}
               >
                 {selectedMember.isActive ? "Devre Dışı Bırak" : "Aktifleştir"}
