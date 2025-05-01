@@ -53,6 +53,8 @@ export const getAllPersonnel = () => api.get(`${API_URL}`);
 export const getAllTeams = () => api.get("/teams");
 export const getAllUsers = () => api.get("/users/all");
 export const getUsersByTeam = (teamId) => api.get(`/users/by-team/${teamId}`);
+// ✅ Personel aktif/deaktif durumu değiştirme (yeni ekledik!)
+export const toggleUserStatus = (id) => api.patch(`/users/status/${id}`);
 
 // 📩 Message endpoints
 export const sendMessage = (messageData) => api.post("/messages", messageData);

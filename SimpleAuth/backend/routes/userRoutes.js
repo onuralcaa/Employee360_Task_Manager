@@ -10,30 +10,34 @@ const {
   resetPassword,
   getAllUsers,
   getUsersByTeamId,
-  deleteUser, // ✅ eklendi
+  deleteUser,
+  toggleUserActiveStatus
 } = require("../controllers/userController");
 
-const verifyToken = require("../middleware/authMiddleware"); // ✅ burası eklendi!
+const verifyToken = require("../middleware/authMiddleware");
 
 // Kullanıcı işlemleri
 router.post("/register", register);
 router.post("/login", login);
 router.put("/:id", updateUser);
 
-// 🟢 ÖNCE spesifik "/all" gelsin!
+// 🟢 Önce spesifik "/all"
 router.get("/all", verifyToken, getAllUsers);
 
 // Takıma göre kullanıcıları getir
 router.get("/by-team/:teamId", getUsersByTeamId);
 
-// 🔥 SONDA "/:id" olsun ki "all" veya "by-team" ile çakışmasın!
+// 🔥 En sonda ID bazlı getir
 router.get("/:id", getUserById);
 
 // Şifre sıfırlama işlemleri
 router.post("/forgot-password", forgotPassword);
 router.post("/reset-password/:token", resetPassword);
 
-// ✅ Kullanıcı silme (admin yetkisi gerektirir!)
+// ✅ Kullanıcı silme (admin yetkisi)
 router.delete("/:id", verifyToken, deleteUser);
+
+// ✅ Aktif / Deaktif durumu değiştirme (admin yetkisi)
+router.patch("/status/:id", verifyToken, toggleUserActiveStatus);s
 
 module.exports = router;

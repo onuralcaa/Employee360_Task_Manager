@@ -7,6 +7,7 @@ import Messages from "./Messages";
 import TaskList from './TaskList';
 import MilestoneAdmin from './MilestoneAdmin'; // Import the MilestoneAdmin component
 import "./AdminPanel.css";
+import { toggleUserStatus } from "../api/api"; // ✅ Aktif/Deaktif için
 
 function AdminPanel() {
   const navigate = useNavigate();
@@ -225,6 +226,23 @@ function AdminPanel() {
     }
   };
 
+  const handleToggleStatus = async () => {
+    if (window.confirm(`Bu personeli ${selectedMember.isActive ? "devre dışı bırakmak" : "aktifleştirmek"} istediğinize emin misiniz?`)) {
+      try {
+        await toggleUserStatus(selectedMember._id);
+        alert(`Personel ${selectedMember.isActive ? "devre dışı bırakıldı" : "aktifleştirildi"}.`);
+        // Sağ paneli güncelle
+        axios.get(`http://localhost:5000/api/users/by-team/${selectedTeamId}`)
+          .then((res) => setTeamMembers(res.data))
+          .catch((err) => console.error("Takım personelleri alınamadı:", err));
+        setSelectedMember(null); // Sağ paneli kapat
+      } catch (error) {
+        console.error("Durum değiştirilirken hata:", error);
+        alert("Durum değiştirilirken bir hata oluştu.");
+      }
+    }
+  };
+
   // Render appropriate content based on the active tab
   const renderContent = () => {
     if (loading) {
@@ -377,15 +395,33 @@ function AdminPanel() {
           <div className="panel-right-header">
             <h2>📄 Personel Detay</h2>
             <div>
-            <button
-              className="collapse-button"
-              onClick={handleCollapseRightPanel}
-            >
-              Kapat
-            </button>
+              <button
+                className="collapse-button"
+                onClick={handleCollapseRightPanel}
+              >
+                Kapat
+              </button>
+              <button 
+                className="delete-button" 
+                onClick={handleDeleteMember}
+                style={{ backgroundColor: "#ff4d4d", color: "white" }}
+              >
+                Personeli Sil
+              </button>
+              <button
+                className="status-toggle-button"
+                onClick={handleToggleStatus}
+                style={{ 
+                  backgroundColor: selectedMember.isActive ? "#f0ad4e" : "#5cb85c", 
+                  color: "white", 
+                  marginLeft: "5px"
+                }}
+              >
+                {selectedMember.isActive ? "Devre Dışı Bırak" : "Aktif Et"}
+              </button>
             </div>
           </div>
-              
+          
           <div className="person-detail-card">
             <p><strong>Ad:</strong> {selectedMember.name || "-"}</p>
             <p><strong>Soyad:</strong> {selectedMember.surname || "-"}</p>
@@ -396,22 +432,7 @@ function AdminPanel() {
             <p><strong>Rol:</strong> {selectedMember.role === "admin" ? "Yönetici" : 
                                      selectedMember.role === "team_leader" ? "Takım Lideri" : "Personel"}</p>
             
-            {/* Add Delete Button */}
-            <button 
-              className="delete-button" 
-              onClick={handleDeleteMember}
-              style={{ 
-                backgroundColor: "#ff4d4d", 
-                color: "white", 
-                padding: "8px 12px", 
-                border: "none", 
-                borderRadius: "4px", 
-                cursor: "pointer",
-                marginTop: "15px"
-              }}
-            >
-              Personeli Sil
-            </button>
+            {/* Remove the duplicate delete button from here since it's now in the header */}
           </div>
         </div>
       )}
