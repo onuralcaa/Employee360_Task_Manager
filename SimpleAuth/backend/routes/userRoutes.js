@@ -9,7 +9,8 @@ const {
   forgotPassword,
   resetPassword,
   getAllUsers,
-  getUsersByTeamId
+  getUsersByTeamId,
+  deleteUser, // ✅ eklendi
 } = require("../controllers/userController");
 
 const verifyToken = require("../middleware/authMiddleware"); // ✅ burası eklendi!
@@ -32,5 +33,7 @@ router.get("/:id", getUserById);
 router.post("/forgot-password", forgotPassword);
 router.post("/reset-password/:token", resetPassword);
 
+// ✅ Kullanıcı silme (admin yetkisi gerektirir!)
+router.delete("/:id", verifyToken, deleteUser);
 
 module.exports = router;

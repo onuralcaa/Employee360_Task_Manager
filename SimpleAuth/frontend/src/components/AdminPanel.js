@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { getUser, getAllTeams, getUsersByTeam } from "../api/api";
+import axios from "axios"; // Add axios import
 import FileShare from "./FileShare"; 
 import Messages from "./Messages"; 
 import TaskList from './TaskList';
@@ -204,6 +205,26 @@ function AdminPanel() {
     );
   };
 
+  // Add the handleDeleteMember function
+  const handleDeleteMember = async () => {
+    if (window.confirm("Bu personeli silmek istediğinize emin misiniz?")) {
+      try {
+        await axios.delete(`http://localhost:5000/api/users/${selectedMember._id}`, {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        });
+        alert("Personel başarıyla silindi.");
+        setSelectedMember(null); // Sağ paneli kapat
+        // Takım üyelerini güncelle:
+        axios.get(`http://localhost:5000/api/users/by-team/${selectedTeamId}`)
+          .then((res) => setTeamMembers(res.data))
+          .catch((err) => console.error("Takım personelleri alınamadı:", err));
+      } catch (error) {
+        console.error("Personel silinirken hata:", error);
+        alert("Personel silinirken bir hata oluştu.");
+      }
+    }
+  };
+
   // Render appropriate content based on the active tab
   const renderContent = () => {
     if (loading) {
@@ -223,7 +244,6 @@ function AdminPanel() {
       return <div className="error-message">Kullanıcı bilgileri yüklenemedi.</div>;
     }
 
-    if (activeTab === "personel") return <p>Personel yönetimi burada olacak.</p>;
     if (activeTab === "raporlar") return <p>Raporlar burada olacak.</p>;
 
     if (activeTab === "dosyaPaylasimi") {
@@ -253,7 +273,7 @@ function AdminPanel() {
     if (activeTab === "takimlar") {
       return (
         <div>
-          <h3>📋 Takımlar</h3>
+          <h3>📋 Takımlar ve Personeller</h3>
           {teams.length === 0 ? (
             <p>Henüz takım bulunmuyor.</p>
           ) : (
@@ -332,12 +352,6 @@ function AdminPanel() {
             Dosya Paylaşımı
           </li>
           <li 
-            onClick={() => handleMenuClick("personel")}
-            className={activeTab === "personel" ? "active" : ""}
-          >
-            Personel
-          </li>
-          <li 
             onClick={() => handleMenuClick("raporlar")}
             className={activeTab === "raporlar" ? "active" : ""}
           >
@@ -362,13 +376,16 @@ function AdminPanel() {
         <div className="panel-right">
           <div className="panel-right-header">
             <h2>📄 Personel Detay</h2>
+            <div>
             <button
               className="collapse-button"
               onClick={handleCollapseRightPanel}
             >
               Kapat
             </button>
+            </div>
           </div>
+              
           <div className="person-detail-card">
             <p><strong>Ad:</strong> {selectedMember.name || "-"}</p>
             <p><strong>Soyad:</strong> {selectedMember.surname || "-"}</p>
@@ -378,6 +395,23 @@ function AdminPanel() {
             <p><strong>Doğum Tarihi:</strong> {selectedMember.birthdate?.substring(0, 10) || "-"}</p>
             <p><strong>Rol:</strong> {selectedMember.role === "admin" ? "Yönetici" : 
                                      selectedMember.role === "team_leader" ? "Takım Lideri" : "Personel"}</p>
+            
+            {/* Add Delete Button */}
+            <button 
+              className="delete-button" 
+              onClick={handleDeleteMember}
+              style={{ 
+                backgroundColor: "#ff4d4d", 
+                color: "white", 
+                padding: "8px 12px", 
+                border: "none", 
+                borderRadius: "4px", 
+                cursor: "pointer",
+                marginTop: "15px"
+              }}
+            >
+              Personeli Sil
+            </button>
           </div>
         </div>
       )}
