@@ -169,7 +169,7 @@ const handleSelectMember = async (memberId) => {
         <li onClick={() => handleMenuClick("mesajlar")}>Mesaj Gönder</li>
         <li onClick={() => handleMenuClick("dosyaPaylasimi")}>Dosya Paylaşımı</li>
         <li onClick={() => handleMenuClick("raporlar")}>Raporlar</li>
-        <li onClick={() => handleMenuClick("kartGiris")}>Kart Giriş Kontrol</li>
+        <li onClick={() => handleMenuClick("kartGiris")}>Ofis Giriş-Çıkış Kontrol</li>
 
       </ul>
       <div className="logout-container" style={{ marginTop: "auto" }}>
