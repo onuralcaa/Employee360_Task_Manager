@@ -25,7 +25,7 @@ router.put("/:id", updateUser);
 router.get("/all", verifyToken, getAllUsers);
 
 // Takıma göre kullanıcıları getir
-router.get("/by-team/:teamId", getUsersByTeamId);
+router.get("/by-team/:teamId", verifyToken, getUsersByTeamId);
 
 // 🔥 En sonda ID bazlı getir
 router.get("/:id", getUserById);

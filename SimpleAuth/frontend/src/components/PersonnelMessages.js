@@ -53,13 +53,9 @@ function PersonnelMessages({ user }) { // 🔥 user prop'u PersonelPanel'den gel
     }
   };
 
-  const filteredRecipients = allUsers.filter((user) => {
-    if (user._id === state.id) return false;
-    return (
-      user.team === state.team &&
-      (user.role === "personel" || user.role === "team_leader")
-    );
-  });
+  const filteredRecipients = allUsers;
+  
+  // No need for additional filtering - backend is already filtering properly
 
   return (
     <div className="msg-wrapper">
