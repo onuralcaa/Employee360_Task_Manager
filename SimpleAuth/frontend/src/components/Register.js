@@ -45,8 +45,8 @@ function Register() {
       return;
     }
 
-    if (user.username.length < 5) {
-      toast.error("❌ Kullanıcı adı en az 5 karakter olmalıdır!");
+    if (user.username.length < 4) {
+      toast.error("❌ Kullanıcı adı en az 4 karakter olmalıdır!");
       return;
     }
 
@@ -151,7 +151,7 @@ function Register() {
       <div className="register-info-box">
         <h4>Kayıt Kuralları</h4>
         <ul>
-          <li>Kullanıcı adı en az 5 karakter olmalıdır.</li>
+          <li>Kullanıcı adı en az 4 karakter olmalıdır.</li>
           <li>Şifre en az 6 karakter, 1 harf ve 1 rakam içermelidir.</li>
           <li>Doğum yılı mevcut yıldan büyük olamaz.</li>
           <li>Numara sadece sayılardan oluşmalıdır.</li>
