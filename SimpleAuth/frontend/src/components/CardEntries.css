@@ -1,0 +1,23 @@
+.card-entries-container {
+  padding: 20px;
+  max-width: 600px;
+}
+
+.entry-card {
+  background-color: #f4f0ff;
+  border-left: 5px solid #6a5acd;
+  border-radius: 10px;
+  padding: 15px;
+  margin-bottom: 15px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s ease;
+}
+
+.entry-card:hover {
+  transform: translateY(-2px);
+}
+
+.entry-card p {
+  margin: 5px 0;
+  font-size: 15px;
+}

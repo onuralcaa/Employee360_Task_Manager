@@ -5,6 +5,7 @@ import FileShare from "./FileShare"; // Dosya paylaşımı bileşeni
 import Messages from "./Messages"; // Mesajlaşma bileşeni
 import "./AdminPanel.css";
 import { toggleUserStatus } from "../api/api"; // ✅ Aktif/Deaktif için
+import CardEntries from "./CardEntries";
 
 
 function AdminPanel() {
@@ -113,6 +114,8 @@ const handleSelectMember = async (memberId) => {
       return <FileShare user={{ id: currentUserId, role: "admin" }} />;
     }
 
+    if (activeTab === "kartGiris") return <CardEntries />;
+
     if (activeTab === "mesajlar") {
       return <Messages user={{ id: currentUserId, role: "admin" }} />;
     }
@@ -166,6 +169,8 @@ const handleSelectMember = async (memberId) => {
         <li onClick={() => handleMenuClick("mesajlar")}>Mesaj Gönder</li>
         <li onClick={() => handleMenuClick("dosyaPaylasimi")}>Dosya Paylaşımı</li>
         <li onClick={() => handleMenuClick("raporlar")}>Raporlar</li>
+        <li onClick={() => handleMenuClick("kartGiris")}>Kart Giriş Kontrol</li>
+
       </ul>
       <div className="logout-container" style={{ marginTop: "auto" }}>
         <button className="logout-button" onClick={handleLogout}>

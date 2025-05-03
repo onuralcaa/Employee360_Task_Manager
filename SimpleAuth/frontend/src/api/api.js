@@ -46,4 +46,7 @@ export const getMessagesByUserId = (userId) => api.get(`/messages/user/${userId}
 // ✅ Personel aktif/deaktif durumu değiştirme (yeni ekledik!)
 export const toggleUserStatus = (id) => api.patch(`/users/status/${id}`);
 
+export const getAllEntries = () => api.get("/entries");
+
+
 export default api;
