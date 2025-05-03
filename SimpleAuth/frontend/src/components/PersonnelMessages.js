@@ -30,15 +30,23 @@ function PersonnelMessages({ user }) { // 🔥 user prop'u PersonelPanel'den gel
     if (!receiverId || !text.trim()) return;
 
     try {
+      // Get the user ID (ensuring we have it in the correct format)
+      const userId = state.id || state._id;
+      
+      if (!userId) {
+        console.error("Kullanıcı kimliği bulunamadı.");
+        return;
+      }
+      
       const newMessage = {
-        sender: state.id,
+        sender: userId,
         recipient: receiverId,
         content: text.trim(),
       };
       await sendMessage(newMessage);
       setText("");
       setReceiverId("");
-      const res = await getMessagesByUserId(state.id);
+      const res = await getMessagesByUserId(userId);
       setMessages(res.data);
     } catch (error) {
       console.error("Mesaj gönderme hatası:", error);

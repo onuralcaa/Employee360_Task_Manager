@@ -77,16 +77,25 @@ function Messages({ user }) {
     try {
       setLoading(true);
       
+      // Get the user ID (ensuring we have it in the correct format)
+      const userId = user.id || user._id;
+      
+      if (!userId) {
+        setError("Kullanıcı kimliği bulunamadı. Lütfen tekrar giriş yapın.");
+        setLoading(false);
+        return;
+      }
+      
       await sendMessage({
         content: message,
         recipient: recipient,
+        sender: userId  // Add the sender ID
       });
       
       setMessage("");
       setSuccess("Mesaj başarıyla gönderildi!");
       
       // Refresh messages
-      const userId = user.id || user._id;
       const response = await getMessagesByUserId(userId);
       
       setMessages(response.data);
