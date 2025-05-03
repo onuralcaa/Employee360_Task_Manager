@@ -1027,3 +1027,19 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Admin task info box */
+.admin-task-info {
+  background-color: #f8f9fa;
+  border: 1px solid #e0e0e0;
+  border-left: 4px solid #6c757d;
+  padding: 10px 15px;
+  border-radius: 4px;
+  margin: 10px 0;
+  font-size: 14px;
+}
+
+.admin-task-info p {
+  margin: 0;
+  color: #495057;
+}

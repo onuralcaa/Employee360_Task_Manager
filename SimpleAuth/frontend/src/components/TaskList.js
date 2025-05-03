@@ -157,15 +157,20 @@ function TaskList({
     <div className="task-list-container">
       <div className="task-list-header">
         <h3>{isMilestoneView ? "🎯 Kilometre Taşları" : "📋 Görevler"}</h3>
-        {(isAdmin || isTeamLeader) && isMilestoneView && (
+        {isAdmin && isMilestoneView && (
           <button className="add-milestone-btn" onClick={onAddMilestone}>
             + Yeni Kilometre Taşı Ekle
           </button>
         )}
-        {(isAdmin || isTeamLeader) && !isMilestoneView && (
+        {isTeamLeader && !isMilestoneView && (
           <button className="add-milestone-btn" onClick={onAddMilestone}>
             + Yeni Görev Ekle
           </button>
+        )}
+        {isAdmin && !isMilestoneView && (
+          <div className="admin-task-info">
+            <p>Görev oluşturma yetkisi yalnızca Takım Liderlerine aittir.</p>
+          </div>
         )}
       </div>
 
