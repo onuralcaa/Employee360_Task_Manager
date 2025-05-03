@@ -321,12 +321,20 @@ function FileShare({ user }) {
           <button 
             className={`tab-button ${activeTab === "received" ? "active" : ""}`}
             onClick={() => setActiveTab("received")}
+            style={{
+              backgroundColor: activeTab === "received" ? "#4f70ec" : "#ffffff",
+              color: activeTab === "received" ? "#ffffff" : "#555"
+            }}
           >
             Alınan Dosyalar
           </button>
           <button 
             className={`tab-button ${activeTab === "sent" ? "active" : ""}`}
             onClick={() => setActiveTab("sent")}
+            style={{
+              backgroundColor: activeTab === "sent" ? "#4f70ec" : "#ffffff",
+              color: activeTab === "sent" ? "#ffffff" : "#555"
+            }}
           >
             Gönderilen Dosyalar
           </button>

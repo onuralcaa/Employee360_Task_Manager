@@ -435,8 +435,8 @@
 }
 
 .tab-button:hover {
-  background-color: rgba(79, 112, 236, 0.8); /* Blue background on hover */
-  color: #fff; /* White text on hover for better contrast */
+  background-color: #f5f5f5; /* Light gray background on hover */
+  color: #333; /* Keep dark text on hover */
 }
 
 .tab-button.active {
