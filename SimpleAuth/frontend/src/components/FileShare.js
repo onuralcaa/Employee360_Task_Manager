@@ -144,34 +144,43 @@ function FileShare({ user }) {
     <div className="file-share-container">
       <h3>📁 Dosya Paylaşımı</h3>
       
-      {/* Yükleme Formu */}
-      <div className="file-upload-section">
-        <h4>Yeni Dosya Yükle</h4>
-        <form onSubmit={handleUpload} className="file-upload-form">
-          <div className="file-input-container">
-            <input
-              type="file"
-              id="file-input"
-              onChange={handleFileChange}
-              className="file-input"
-            />
-            <label htmlFor="file-input" className="file-input-label">
-              {selectedFile ? selectedFile.name : "Dosya Seç"}
-            </label>
-          </div>
+      {/* Yükleme Formu - Only visible to admins and team leaders */}
+      {(user.role === "admin" || user.role === "team_leader") && (
+        <div className="file-upload-section">
+          <h4>Yeni Dosya Yükle</h4>
+          <form onSubmit={handleUpload} className="file-upload-form">
+            <div className="file-input-container">
+              <input
+                type="file"
+                id="file-input"
+                onChange={handleFileChange}
+                className="file-input"
+              />
+              <label htmlFor="file-input" className="file-input-label">
+                {selectedFile ? selectedFile.name : "Dosya Seç"}
+              </label>
+            </div>
+            
+            <button 
+              type="submit" 
+              className="upload-button"
+              disabled={loading}
+            >
+              {loading ? "Yükleniyor..." : "Yükle"}
+            </button>
+          </form>
           
-          <button 
-            type="submit" 
-            className="upload-button"
-            disabled={loading}
-          >
-            {loading ? "Yükleniyor..." : "Yükle"}
-          </button>
-        </form>
-        
-        {message && <div className="success-message">{message}</div>}
-        {error && <div className="error-message">{error}</div>}
-      </div>
+          {message && <div className="success-message">{message}</div>}
+          {error && <div className="error-message">{error}</div>}
+        </div>
+      )}
+      
+      {/* Regular users see this message */}
+      {user.role === "personel" && (
+        <div className="file-info-message">
+          <p>Dosya yükleme yetkisi yalnızca Yöneticiler ve Takım Liderlerine aittir.</p>
+        </div>
+      )}
       
       {/* Dosya Listesi */}
       <div className="files-list-section">

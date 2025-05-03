@@ -223,6 +223,22 @@
   border: 1px solid #e9ecef;
 }
 
+/* File information message for users without upload permissions */
+.file-info-message {
+  background-color: #f8f9fa;
+  border: 1px solid #e0e0e0;
+  border-left: 4px solid #6c757d;
+  padding: 15px;
+  border-radius: 4px;
+  margin: 15px 0;
+}
+
+.file-info-message p {
+  margin: 0;
+  color: #495057;
+  font-size: 14px;
+}
+
 /* Files List Section */
 .files-list-section {
   margin-top: 20px;
