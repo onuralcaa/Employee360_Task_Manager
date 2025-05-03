@@ -88,7 +88,7 @@ function PersonnelMessages({ user }) { // 🔥 user prop'u PersonelPanel'den gel
               <strong>{msg.recipient?.name || "?"}</strong>
             </p>
             <p>{msg.content}</p>
-            <small>{new Date(msg.timestamp).toLocaleString()}</small>
+            <small>{msg.timestamp ? new Date(msg.timestamp).toLocaleString() : "Tarih bilgisi yok"}</small>
           </div>
         ))}
       </div>

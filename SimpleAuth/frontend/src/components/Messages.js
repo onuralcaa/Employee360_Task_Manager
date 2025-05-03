@@ -106,6 +106,7 @@ function Messages({ user }) {
 
   // Tarihi formatla
   const formatDate = (dateString) => {
+    if (!dateString) return "Tarih bilgisi yok";
     const date = new Date(dateString);
     return date.toLocaleString("tr-TR");
   };
@@ -182,7 +183,7 @@ function Messages({ user }) {
                     : ""}
                 </p>
                 <p>{msg.content}</p>
-                <small>{formatDate(msg.createdAt)}</small>
+                <small>{formatDate(msg.timestamp || msg.createdAt)}</small>
               </div>
             ))}
           </div>
