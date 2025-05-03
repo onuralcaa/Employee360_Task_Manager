@@ -94,6 +94,9 @@ const renderContent = () => {
     }
   };
 
+  // Check if a user is a team leader or admin (has access to milestones)
+  const hasMilestoneAccess = userData.role === "team_leader" || userData.role === "admin";
+
   return (
     <div className="user-panel-wrapper">
       {/* Sol Menü */}
@@ -112,12 +115,15 @@ const renderContent = () => {
           >
             Görevler
           </li>
-          <li 
-            className={activeTab === "milestonlar" ? "active" : ""}
-            onClick={() => setActiveTab("milestonlar")}
-          >
-            Kilometre Taşları
-          </li>
+          {/* Only show Milestones tab to team leaders and admins */}
+          {hasMilestoneAccess && (
+            <li 
+              className={activeTab === "milestonlar" ? "active" : ""}
+              onClick={() => setActiveTab("milestonlar")}
+            >
+              Kilometre Taşları
+            </li>
+          )}
         </ul>
       </div>
 
