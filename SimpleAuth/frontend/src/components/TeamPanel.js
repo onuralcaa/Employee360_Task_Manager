@@ -20,6 +20,7 @@ function TeamPanel() {
   const [milestones, setMilestones] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [showTaskForm, setShowTaskForm] = useState(false);
 
   // User bilgilerini localStorage'dan kontrol et
   useEffect(() => {
@@ -154,7 +155,14 @@ function TeamPanel() {
     if (activeTab === "gorevler") {
       return (
         <div>
-          <TaskForm user={userData} onTaskCreated={() => setActiveTab("gorevler")} />
+          <TaskForm 
+            user={userData} 
+            onTaskCreated={() => {
+              setActiveTab("gorevler");
+              setShowTaskForm(false);
+            }} 
+            isVisible={showTaskForm}
+          />
           <TaskList 
             user={userData}
             onSelectMilestone={handleSelectMilestone}
@@ -163,7 +171,9 @@ function TeamPanel() {
             loading={loading}
             error={error}
             isTeamLeader={true}
-            isMilestoneView={false} // Explicitly set to false to ensure only tasks show up
+            isMilestoneView={false}
+            onAddMilestone={() => setShowTaskForm(!showTaskForm)}
+            showTaskForm={showTaskForm}
           />
         </div>
       );

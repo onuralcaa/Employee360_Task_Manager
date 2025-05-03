@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './TaskForm.css';
 
-function TaskForm({ user, onTaskCreated }) {
+function TaskForm({ user, onTaskCreated, isVisible = true }) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [assignedTo, setAssignedTo] = useState('');
@@ -71,7 +71,7 @@ function TaskForm({ user, onTaskCreated }) {
   };
 
   // Sadece takım liderleri görev oluşturabilir, admin değil
-  if (user?.role !== 'team_leader') {
+  if (user?.role !== 'team_leader' || !isVisible) {
     return null;
   }
 

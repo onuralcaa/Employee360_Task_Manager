@@ -5,7 +5,8 @@ import "./TaskList.css";
 function TaskList({ 
   user, 
   onSelectMilestone, 
-  onAddMilestone, 
+  onAddMilestone,
+  showTaskForm,
   isAdmin = false, 
   isTeamLeader = false, 
   isMilestoneView = false 
@@ -164,7 +165,7 @@ function TaskList({
         )}
         {isTeamLeader && !isMilestoneView && (
           <button className="add-milestone-btn" onClick={onAddMilestone}>
-            + Yeni Görev Ekle
+            {showTaskForm ? "Formu Gizle" : "+ Yeni Görev Ekle"}
           </button>
         )}
         {isAdmin && !isMilestoneView && (
