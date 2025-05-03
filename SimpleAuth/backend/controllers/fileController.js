@@ -3,7 +3,7 @@ const User = require("../models/userModel");
 const path = require("path");
 const fs = require("fs");
 
-// 📤 Dosya Yükleme Fonksiyonu (Aynı kaldı)
+// 📤 Dosya Yükleme Fonksiyonu
 const uploadFile = async (req, res) => {
   try {
     const { recipient } = req.body;
@@ -13,26 +13,30 @@ const uploadFile = async (req, res) => {
     }
 
     if (!req.file) {
-      return res.status(400).json({ message: "Dosya yüklenemedi (req.file boş)." });
+      return res.status(400).json({ message: "Dosya yüklenemedi. Lütfen tekrar deneyin." });
     }
 
     if (req.user.role !== "admin" && req.user.role !== "team_leader") {
       return res.status(403).json({ message: "Bu işlemi yapmaya yetkiniz yok." });
     }
 
-    const newFile = new File({
+    // Store original file info
+    const fileInfo = {
       filename: req.file.filename,
       originalName: req.file.originalname,
+      size: req.file.size,
+      mimetype: req.file.mimetype,
+      path: req.file.path,
       sender: req.user.id,
-      recipient: recipient,
-    });
+      recipient: recipient
+    };
 
+    const newFile = new File(fileInfo);
     await newFile.save();
 
     res.status(200).json({
       message: "Dosya başarıyla yüklendi ve gönderildi.",
-      filePath: req.file.path,
-      originalName: req.file.originalname,
+      file: fileInfo
     });
   } catch (error) {
     console.error("Upload sırasında hata:", error);
@@ -44,8 +48,8 @@ const uploadFile = async (req, res) => {
 const getFilesForRecipient = async (req, res) => {
   try {
     const files = await File.find({ recipient: req.user.id })
-      .populate("sender", "name surname role") // 🟢 Gönderenin ad, soyad ve rolü
-      .sort({ uploadDate: -1 });               // En son gelenler üstte
+      .populate("sender", "name surname role")
+      .sort({ createdAt: -1 });
     res.status(200).json(files);
   } catch (error) {
     res.status(500).json({ message: "Dosyalar alınamadı. Hata: " + error.message });
@@ -56,8 +60,8 @@ const getFilesForRecipient = async (req, res) => {
 const getFilesSentBySender = async (req, res) => {
   try {
     const files = await File.find({ sender: req.user.id })
-      .populate("recipient", "name surname role") // 🟢 Alıcının ad, soyad ve rolü
-      .sort({ uploadDate: -1 });                 // En son gönderilenler üstte
+      .populate("recipient", "name surname role")
+      .sort({ createdAt: -1 });
     res.status(200).json(files);
   } catch (error) {
     res.status(500).json({ message: "Gönderdiğiniz dosyalar alınamadı. Hata: " + error.message });
@@ -108,16 +112,19 @@ const downloadFile = async (req, res) => {
   }
 };
 
-// 📌 Alıcıları getirme fonksiyonu (Aynı kaldı)
+// 📌 Alıcıları getirme fonksiyonu
 const getRecipientsList = async (req, res) => {
   try {
     let recipients;
     if (req.user.role === "admin") {
-      recipients = await User.find({ role: "team_leader" });
+      recipients = await User.find({ role: { $in: ["team_leader", "personel"] } });
     } else if (req.user.role === "team_leader") {
       recipients = await User.find({
-        $or: [{ role: "team_leader" }, { role: "admin" }],
-        _id: { $ne: req.user.id },
+        $or: [
+          { role: "admin" },
+          { role: "team_leader", _id: { $ne: req.user.id } },
+          { role: "personel", team: req.user.team }
+        ]
       });
     } else {
       return res.status(403).json({ message: "Bu işlemi yapmaya yetkiniz yok." });
@@ -133,5 +140,5 @@ module.exports = {
   getFilesForRecipient, 
   getFilesSentBySender, 
   getRecipientsList,
-  downloadFile  // Yeni fonksiyonu ekleyin
+  downloadFile
 };

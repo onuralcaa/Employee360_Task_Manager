@@ -1,6 +1,13 @@
 // fileController.js
 const multer = require("multer");
 const path = require("path");
+const fs = require('fs');
+
+// Make sure uploads directory exists
+const uploadDir = path.join(__dirname, "uploads");
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
 
 // Depolama ve dosya ayarları
 const storage = multer.diskStorage({
@@ -8,19 +15,59 @@ const storage = multer.diskStorage({
     cb(null, "uploads/"); // uploads klasörüne kaydedecek
   },
   filename: (req, file, cb) => {
+    // Normalize Turkish characters in filenames
+    const originalName = file.originalname.replace(/[ğĞüÜşŞıİöÖçÇ]/g, char => {
+      const tr = { 'ğ': 'g', 'Ğ': 'G', 'ü': 'u', 'Ü': 'U', 'ş': 's', 'Ş': 'S', 'ı': 'i', 'İ': 'I', 'ö': 'o', 'Ö': 'O', 'ç': 'c', 'Ç': 'C' };
+      return tr[char] || char;
+    });
+    
     const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    cb(null, uniqueSuffix + path.extname(file.originalname)); // benzersiz isim
+    cb(null, uniqueSuffix + path.extname(originalName)); // benzersiz isim
   },
 });
 
+// Debug and updated file filter function
 const fileFilter = (req, file, cb) => {
-  const allowedTypes = /pdf|doc|docx|jpg|jpeg|png/;
-  const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
-  if (extname) {
-    cb(null, true);
-  } else {
-    cb(new Error("Sadece PDF, DOC, DOCX, JPG, JPEG, PNG dosyaları yüklenebilir."));
+  console.log('Processing file:', file.originalname);
+  console.log('MIME type:', file.mimetype);
+  
+  // Define allowed MIME types
+  const allowedMimeTypes = [
+    'image/jpeg',
+    'image/png',
+    'application/pdf',
+    'application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'application/vnd.ms-excel',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    'text/plain'
+  ];
+  
+  // Special case for txt files
+  if (file.originalname.toLowerCase().endsWith('.txt')) {
+    console.log('TXT file detected, accepting');
+    return cb(null, true);
   }
+  
+  // Check MIME type first
+  if (allowedMimeTypes.includes(file.mimetype)) {
+    console.log('File accepted by MIME type:', file.mimetype);
+    return cb(null, true);
+  }
+  
+  // Fallback to extension check
+  const extension = path.extname(file.originalname).toLowerCase();
+  console.log('Checking extension:', extension);
+  
+  const allowedExtensions = ['.pdf', '.doc', '.docx', '.jpg', '.jpeg', '.png', '.xls', '.xlsx', '.txt'];
+  
+  if (allowedExtensions.includes(extension)) {
+    console.log('File accepted by extension:', extension);
+    return cb(null, true);
+  }
+  
+  console.log('File rejected. Invalid type:', file.mimetype, 'with extension:', extension);
+  return cb(new Error("Sadece PDF, DOC, DOCX, JPG, JPEG, PNG, XLS, XLSX, TXT dosyaları yüklenebilir."));
 };
 
 // Dosya yükleme middleware'ı
