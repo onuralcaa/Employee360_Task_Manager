@@ -328,16 +328,20 @@ function FileShare({ user }) {
           >
             Alınan Dosyalar
           </button>
-          <button 
-            className={`tab-button ${activeTab === "sent" ? "active" : ""}`}
-            onClick={() => setActiveTab("sent")}
-            style={{
-              backgroundColor: activeTab === "sent" ? "#4f70ec" : "#ffffff",
-              color: activeTab === "sent" ? "#ffffff" : "#555"
-            }}
-          >
-            Gönderilen Dosyalar
-          </button>
+          
+          {/* Only show Sent Files tab for admins and team leaders */}
+          {(user.role === "admin" || user.role === "team_leader") && (
+            <button 
+              className={`tab-button ${activeTab === "sent" ? "active" : ""}`}
+              onClick={() => setActiveTab("sent")}
+              style={{
+                backgroundColor: activeTab === "sent" ? "#4f70ec" : "#ffffff",
+                color: activeTab === "sent" ? "#ffffff" : "#555"
+              }}
+            >
+              Gönderilen Dosyalar
+            </button>
+          )}
         </div>
         
         <h4>{activeTab === "received" ? "Alınan Dosyalar" : "Gönderilen Dosyalar"}</h4>

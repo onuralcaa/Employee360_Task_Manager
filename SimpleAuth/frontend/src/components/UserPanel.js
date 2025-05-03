@@ -4,6 +4,7 @@ import "./UserPanel.css";
 import { updateUser } from "../api/api";
 import PersonnelMessages from "./Messages";
 import TaskList from "./TaskList";
+import FileShare from "./FileShare";
 
 function UserPanel() {
   const location = useLocation();
@@ -61,6 +62,8 @@ const renderContent = () => {
       );
     case "mesajlar":
       return <PersonnelMessages user={userData} />;
+    case "dosyalar":
+      return <FileShare user={userData} />;
     default:
       return <p>İçerik seçiniz.</p>;
   }
@@ -114,6 +117,12 @@ const renderContent = () => {
             onClick={() => setActiveTab("gorevler")}
           >
             Görevler
+          </li>
+          <li 
+            className={activeTab === "dosyalar" ? "active" : ""}
+            onClick={() => setActiveTab("dosyalar")}
+          >
+            Dosyalar
           </li>
           {/* Only show Milestones tab to team leaders and admins */}
           {hasMilestoneAccess && (
