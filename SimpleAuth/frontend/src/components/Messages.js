@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { getAllUsers, sendMessage, getMessagesByUserId } from "../api/api";
 import "./Messages.css";
+import { showSuccessToast, showErrorToast } from "../utils/toastUtils";
 
 function Messages({ user }) {
   const [message, setMessage] = useState("");
@@ -66,11 +67,13 @@ function Messages({ user }) {
     
     if (!message.trim()) {
       setError("Lütfen bir mesaj yazın.");
+      showErrorToast("Lütfen bir mesaj yazın.");
       return;
     }
     
     if (!recipient) {
       setError("Lütfen bir alıcı seçin.");
+      showErrorToast("Lütfen bir alıcı seçin.");
       return;
     }
     
@@ -82,6 +85,7 @@ function Messages({ user }) {
       
       if (!userId) {
         setError("Kullanıcı kimliği bulunamadı. Lütfen tekrar giriş yapın.");
+        showErrorToast("Kullanıcı kimliği bulunamadı. Lütfen tekrar giriş yapın.");
         setLoading(false);
         return;
       }
@@ -94,6 +98,7 @@ function Messages({ user }) {
       
       setMessage("");
       setSuccess("Mesaj başarıyla gönderildi!");
+      showSuccessToast("Mesaj başarıyla gönderildi!");
       
       // Refresh messages
       const response = await getMessagesByUserId(userId);
@@ -108,6 +113,7 @@ function Messages({ user }) {
     } catch (err) {
       console.error("Mesaj gönderilirken hata:", err);
       setError("Mesaj gönderilemedi. Lütfen daha sonra tekrar deneyin.");
+      showErrorToast("Mesaj gönderilemedi. Lütfen daha sonra tekrar deneyin.");
     } finally {
       setLoading(false);
     }

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { uploadFile, getReceivedFiles, getSentFiles, getFileRecipients, deleteFile, downloadFile } from "../api/api";
 import axios from "axios";
 import "./FileShare.css";
+import { showSuccessToast, showErrorToast } from "../utils/toastUtils";
 
 // File type icon mapping for common file types
 const getFileIcon = (fileName) => {
@@ -114,17 +115,20 @@ function FileShare({ user }) {
     
     if (!selectedFile) {
       setError("Lütfen bir dosya seçin!");
+      showErrorToast("Lütfen bir dosya seçin!");
       return;
     }
     
     if (!recipient) {
       setError("Lütfen bir alıcı seçin!");
+      showErrorToast("Lütfen bir alıcı seçin!");
       return;
     }
     
     // Dosya boyutu kontrolü (5MB)
     if (selectedFile.size > 5 * 1024 * 1024) {
       setError("Dosya boyutu çok büyük! Maksimum 5MB yükleyebilirsiniz.");
+      showErrorToast("Dosya boyutu çok büyük! Maksimum 5MB yükleyebilirsiniz.");
       return;
     }
     
@@ -142,6 +146,7 @@ function FileShare({ user }) {
     
     if (!allowedTypes.includes(selectedFile.type)) {
       setError("Dosya türü desteklenmiyor! Sadece PDF, DOC, DOCX, JPG, JPEG, PNG, XLS, XLSX, TXT dosyaları yükleyebilirsiniz.");
+      showErrorToast("Dosya türü desteklenmiyor!");
       return;
     }
     

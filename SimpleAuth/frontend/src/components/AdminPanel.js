@@ -9,6 +9,7 @@ import MilestoneAdmin from './MilestoneAdmin'; // Import the MilestoneAdmin comp
 import AdminReports from "./AdminReports"; // Import the AdminReports component
 import "./AdminPanel.css";
 import { toggleUserStatus } from "../api/api"; // ✅ Aktif/Deaktif için
+import { showSuccessToast, showErrorToast } from "../utils/toastUtils";
 
 function AdminPanel() {
   const navigate = useNavigate();
@@ -214,15 +215,18 @@ function AdminPanel() {
         await axios.delete(`http://localhost:5000/api/users/${selectedMember._id}`, {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         });
-        alert("Personel başarıyla silindi.");
+        showSuccessToast("Personel başarıyla silindi");
         setSelectedMember(null); // Sağ paneli kapat
         // Takım üyelerini güncelle:
         axios.get(`http://localhost:5000/api/users/by-team/${selectedTeamId}`)
           .then((res) => setTeamMembers(res.data))
-          .catch((err) => console.error("Takım personelleri alınamadı:", err));
+          .catch((err) => {
+            console.error("Takım personelleri alınamadı:", err);
+            showErrorToast("Takım personelleri alınamadı");
+          });
       } catch (error) {
         console.error("Personel silinirken hata:", error);
-        alert("Personel silinirken bir hata oluştu.");
+        showErrorToast("Personel silinirken bir hata oluştu");
       }
     }
   };
@@ -231,15 +235,18 @@ function AdminPanel() {
     if (window.confirm(`Bu personeli ${selectedMember.isActive ? "devre dışı bırakmak" : "aktifleştirmek"} istediğinize emin misiniz?`)) {
       try {
         await toggleUserStatus(selectedMember._id);
-        alert(`Personel ${selectedMember.isActive ? "devre dışı bırakıldı" : "aktifleştirildi"}.`);
+        showSuccessToast(`Personel ${selectedMember.isActive ? "devre dışı bırakıldı" : "aktifleştirildi"}`);
         // Sağ paneli güncelle
         axios.get(`http://localhost:5000/api/users/by-team/${selectedTeamId}`)
           .then((res) => setTeamMembers(res.data))
-          .catch((err) => console.error("Takım personelleri alınamadı:", err));
+          .catch((err) => {
+            console.error("Takım personelleri alınamadı:", err);
+            showErrorToast("Takım personelleri alınamadı");
+          });
         setSelectedMember(null); // Sağ paneli kapat
       } catch (error) {
         console.error("Durum değiştirilirken hata:", error);
-        alert("Durum değiştirilirken bir hata oluştu.");
+        showErrorToast("Durum değiştirilirken bir hata oluştu");
       }
     }
   };
@@ -253,7 +260,7 @@ function AdminPanel() {
       setSelectedMember(response.data);
     } catch (error) {
       console.error("Kullanıcı bilgileri alınamadı:", error);
-      alert("Kullanıcı bilgileri alınamadı.");
+      showErrorToast("Kullanıcı bilgileri alınamadı");
     }
   };
 

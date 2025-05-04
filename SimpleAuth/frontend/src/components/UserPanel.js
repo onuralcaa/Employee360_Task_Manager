@@ -5,6 +5,7 @@ import { updateUser } from "../api/api";
 import PersonnelMessages from "./Messages";
 import TaskList from "./TaskList";
 import FileShare from "./FileShare";
+import { showSuccessToast, showErrorToast } from "../utils/toastUtils";
 
 function UserPanel() {
   const location = useLocation();
@@ -89,11 +90,15 @@ const renderContent = () => {
 
     try {
       await updateUser(userData.id, formData);
-      alert("Bilgiler başarıyla güncellendi!");
+      showSuccessToast("Bilgiler başarıyla güncellendi!");
       setShowEdit(false);
-      window.location.reload();
+      
+      // Instead of reloading the page (which loses state), update the userData
+      const updatedUserData = { ...userData, ...formData };
+      navigate("/user-panel", { replace: true, state: updatedUserData });
     } catch (error) {
-      alert("Güncelleme sırasında hata oluştu.");
+      showErrorToast("Güncelleme sırasında hata oluştu");
+      console.error("Güncellenirken hata:", error);
     }
   };
 
