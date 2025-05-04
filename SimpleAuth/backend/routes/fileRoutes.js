@@ -6,7 +6,8 @@ const {
   getRecipientsList,
   getFilesForRecipient,
   getFilesSentBySender,
-  downloadFile
+  downloadFile,
+  deleteFile
 } = require("../controllers/fileController");
 const verifyToken = require("../middleware/authMiddleware");
 
@@ -39,5 +40,8 @@ router.get("/sent", verifyToken, getFilesSentBySender);
 
 // 📥 Dosya indirme route'u
 router.get("/download/:fileId", verifyToken, downloadFile);
+
+// 🗑️ Dosya silme route'u (sadece admin)
+router.delete("/:fileId", verifyToken, deleteFile);
 
 module.exports = router;

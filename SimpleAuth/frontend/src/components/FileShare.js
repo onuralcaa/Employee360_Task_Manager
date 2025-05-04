@@ -394,7 +394,8 @@ function FileShare({ user }) {
                       İndir
                     </button>
                     
-                    {(user.role === "admin" || user.id === file.sender?._id || user._id === file.sender?._id) && (
+                    {/* Only show delete button for admin users */}
+                    {user.role === "admin" && (
                       <button 
                         onClick={() => handleDelete(file._id)} 
                         className="delete-button"

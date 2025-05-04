@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './MilestoneForm.css';
 
-function MilestoneForm({ user, onMilestoneCreated }) {
+function MilestoneForm({ user, onMilestoneCreated, isVisible = true }) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [assignedTo, setAssignedTo] = useState('');
@@ -71,7 +71,7 @@ function MilestoneForm({ user, onMilestoneCreated }) {
   };
 
   // Sadece takım liderleri kilometre taşı oluşturabilir, admin değil
-  if (user?.role !== 'team_leader') {
+  if (user?.role !== 'team_leader' || !isVisible) {
     return null;
   }
 

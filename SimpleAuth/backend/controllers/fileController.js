@@ -145,10 +145,50 @@ const getRecipientsList = async (req, res) => {
   }
 };
 
+// Dosya silme - Sadece yöneticilere özel
+const deleteFile = async (req, res) => {
+  try {
+    const fileId = req.params.fileId;
+    
+    if (!fileId) {
+      return res.status(400).json({ message: "Dosya ID'si gereklidir." });
+    }
+    
+    // Check if user is admin
+    if (req.user.role !== "admin") {
+      return res.status(403).json({ message: "Yalnızca yöneticiler dosyaları silebilir." });
+    }
+    
+    // Find file in database
+    const file = await File.findById(fileId);
+    
+    if (!file) {
+      return res.status(404).json({ message: "Dosya bulunamadı." });
+    }
+    
+    // Get the file path
+    const filePath = path.join(__dirname, '../uploads', file.filename);
+    
+    // Delete from filesystem if exists
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
+    }
+    
+    // Delete from database
+    await File.findByIdAndDelete(fileId);
+    
+    res.status(200).json({ message: "Dosya başarıyla silindi." });
+  } catch (error) {
+    console.error("Dosya silme hatası:", error);
+    res.status(500).json({ message: "Dosya silinemedi. Hata: " + error.message });
+  }
+};
+
 module.exports = { 
   uploadFile, 
   getFilesForRecipient, 
   getFilesSentBySender, 
   getRecipientsList,
-  downloadFile
+  downloadFile,
+  deleteFile
 };

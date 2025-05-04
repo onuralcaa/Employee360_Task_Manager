@@ -252,6 +252,11 @@ function TaskList({
             {showTaskForm ? "Formu Gizle" : "+ Yeni Görev Ekle"}
           </button>
         )}
+        {isTeamLeader && isMilestoneView && (
+          <button className="add-milestone-btn" onClick={onAddMilestone}>
+            {showTaskForm ? "Formu Gizle" : "+ Yeni Kilometre Taşı Ekle"}
+          </button>
+        )}
         {isAdmin && !isMilestoneView && (
           <div className="admin-task-info">
             <p>Görev oluşturma yetkisi yalnızca Takım Liderlerine aittir.</p>
