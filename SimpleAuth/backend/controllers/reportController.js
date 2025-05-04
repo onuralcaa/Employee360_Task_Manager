@@ -71,7 +71,8 @@ const getAllReports = async (req, res) => {
       return res.status(403).json({ message: 'Bu işlemi yapmaya yetkiniz yok' });
     }
     
-    const reports = await Report.find()
+    // Modified query to only retrieve submitted reports - fixed security issue
+    const reports = await Report.find({ status: 'submitted' })
       .populate('team', 'name')
       .populate('teamLeader', 'name surname username')
       .sort({ createdAt: -1 });
@@ -120,7 +121,11 @@ const getReportById = async (req, res) => {
     }
     
     // Verify user has permission to view this report
-    if (req.user.role !== 'admin' && report.teamLeader.toString() !== req.user.id) {
+    // Team leaders can see their own reports (draft or submitted)
+    // Admin can only see submitted reports - fixed security issue
+    if (req.user.role === 'admin' && report.status !== 'submitted') {
+      return res.status(403).json({ message: 'Bu rapor henüz gönderilmediği için görüntüleme yetkiniz yok' });
+    } else if (req.user.role !== 'admin' && report.teamLeader.toString() !== req.user.id) {
       return res.status(403).json({ message: 'Bu raporu görüntüleme yetkiniz yok' });
     }
     
@@ -507,7 +512,10 @@ const generateTextReport = async (req, res) => {
     }
     
     // Verify user has permission
-    if (req.user.role !== 'admin' && report.teamLeader._id.toString() !== req.user.id) {
+    // Admin can only download submitted reports - fixed security issue
+    if (req.user.role === 'admin' && report.status !== 'submitted') {
+      return res.status(403).json({ message: 'Bu rapor henüz gönderilmediği için indirme yetkiniz yok' });
+    } else if (req.user.role !== 'admin' && report.teamLeader._id.toString() !== req.user.id) {
       return res.status(403).json({ message: 'Bu raporu indirme yetkiniz yok' });
     }
     
