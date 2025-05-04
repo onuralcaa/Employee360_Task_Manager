@@ -15,14 +15,12 @@ const storage = multer.diskStorage({
     cb(null, "uploads/"); // uploads klasörüne kaydedecek
   },
   filename: (req, file, cb) => {
-    // Normalize Turkish characters in filenames
-    const originalName = file.originalname.replace(/[ğĞüÜşŞıİöÖçÇ]/g, char => {
-      const tr = { 'ğ': 'g', 'Ğ': 'G', 'ü': 'u', 'Ü': 'U', 'ş': 's', 'Ş': 'S', 'ı': 'i', 'İ': 'I', 'ö': 'o', 'Ö': 'O', 'ç': 'c', 'Ç': 'C' };
-      return tr[char] || char;
-    });
+    // Store the original filename with Turkish characters in req.originalFileName
+    req.originalFileName = Buffer.from(file.originalname, 'latin1').toString('utf8');
     
+    // Only change the storage filename, not the displayed name
     const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    cb(null, uniqueSuffix + path.extname(originalName)); // benzersiz isim
+    cb(null, uniqueSuffix + path.extname(file.originalname)); // benzersiz isim
   },
 });
 

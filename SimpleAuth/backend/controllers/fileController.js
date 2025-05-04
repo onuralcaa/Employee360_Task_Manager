@@ -20,10 +20,13 @@ const uploadFile = async (req, res) => {
       return res.status(403).json({ message: "Bu işlemi yapmaya yetkiniz yok." });
     }
 
+    // Use the properly encoded originalFileName from multerConfig if available
+    const originalFileName = req.originalFileName || req.file.originalname;
+
     // Store original file info
     const fileInfo = {
       filename: req.file.filename,
-      originalName: req.file.originalname,
+      originalName: originalFileName, // Use the properly encoded filename
       size: req.file.size,
       mimetype: req.file.mimetype,
       path: req.file.path,
@@ -102,9 +105,16 @@ const downloadFile = async (req, res) => {
       return res.status(404).json({ message: "Dosya sunucuda bulunamadı." });
     }
     
-    // Dosyayı gönder (originalName field checking for both camelCase and snake_case possibilities)
-    const fileName = file.originalName || file.originalname || "downloaded-file";
-    res.download(filePath, fileName);
+    // Get the original filename with proper encoding
+    const originalFileName = file.originalName || file.originalname || "downloaded-file";
+    
+    // Set appropriate headers for special characters in filenames
+    res.setHeader('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent(originalFileName)}`);
+    res.setHeader('Content-Type', file.mimetype);
+    
+    // Send the file as a stream
+    const fileStream = fs.createReadStream(filePath);
+    fileStream.pipe(res);
     
   } catch (error) {
     console.error("Dosya indirme hatası:", error);
