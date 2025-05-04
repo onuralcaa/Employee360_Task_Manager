@@ -1,5 +1,6 @@
 const Task = require("../models/taskModel");
 const User = require("../models/userModel");
+const sendEmail = require("../utils/sendEmail");
 
 // Get all tasks with proper filtering based on user role
 const getAllTasks = async (req, res) => {
@@ -99,6 +100,39 @@ const createTask = async (req, res) => {
     });
 
     await task.save();
+
+    // Send email notification to the assigned user
+    try {
+      const assignedUser = await User.findById(assignedTo);
+      const teamLeader = await User.findById(createdBy);
+      
+      if (assignedUser && assignedUser.email) {
+        const emailContent = `
+          <h3>Yeni Görev Atandı</h3>
+          <p>Merhaba ${assignedUser.name} ${assignedUser.surname},</p>
+          <p>Size yeni bir görev atandı:</p>
+          <div style="background-color:#f5f5f5; padding:15px; border-radius:5px; margin:10px 0;">
+            <h4 style="margin-top:0; color:#333;">${title}</h4>
+            <p>${description || 'Açıklama yok'}</p>
+            <p><strong>Atayan:</strong> ${teamLeader ? teamLeader.name + ' ' + teamLeader.surname : 'Takım Lideri'}</p>
+            <p><strong>Durum:</strong> Bekliyor</p>
+          </div>
+          <p>Görevlerinizi kontrol etmek için lütfen sisteme giriş yapın.</p>
+        `;
+
+        await sendEmail({
+          to: assignedUser.email,
+          subject: "Yeni Görev Atandı: " + title,
+          html: emailContent
+        });
+        
+        console.log(`✅ Görev atama e-postası gönderildi: ${assignedUser.email}`);
+      }
+    } catch (emailError) {
+      console.error("❌ Görev atama e-postası gönderilirken hata:", emailError);
+      // Continue execution even if email fails
+    }
+    
     res.status(201).json({ message: "Görev başarıyla oluşturuldu", task });
   } catch (error) {
     console.error("Görev oluşturulurken hata:", error);
@@ -152,9 +186,65 @@ const updateTaskStatus = async (req, res) => {
       return res.status(403).json({ message: "Bu durum değişikliği için yetkiniz yok" });
     }
 
+    const previousStatus = task.status;
     task.status = status;
     task._modifiedBy = req.user.id;
     await task.save();
+
+    // Send email notification for significant status changes
+    try {
+      const assignedUser = await User.findById(task.assignedTo);
+      const updatedBy = await User.findById(req.user.id);
+      
+      if (assignedUser && assignedUser.email) {
+        let shouldSendEmail = false;
+        let emailSubject = "";
+        let statusMessage = "";
+        
+        // Determine email subject and message based on status change
+        if (status === "on-hold") {
+          shouldSendEmail = true;
+          emailSubject = "Görev Beklemede: " + task.title;
+          statusMessage = "<p style='color:#ff9800; font-weight:bold;'>Göreviniz şu anda beklemededir.</p>";
+        } else if (status === "verified") {
+          shouldSendEmail = true;
+          emailSubject = "Görev Onaylandı: " + task.title;
+          statusMessage = "<p style='color:#4caf50; font-weight:bold;'>Göreviniz başarıyla onaylandı.</p>";
+        } else if (status === "rejected") {
+          shouldSendEmail = true;
+          emailSubject = "Görev Reddedildi: " + task.title;
+          statusMessage = "<p style='color:#f44336; font-weight:bold;'>Göreviniz reddedildi. Lütfen tekrar gözden geçiriniz.</p>";
+        }
+        
+        if (shouldSendEmail) {
+          const emailContent = `
+            <h3>Görev Durumu Güncellendi</h3>
+            <p>Merhaba ${assignedUser.name} ${assignedUser.surname},</p>
+            <p>Bir görevinizin durumu değiştirildi:</p>
+            <div style="background-color:#f5f5f5; padding:15px; border-radius:5px; margin:10px 0;">
+              <h4 style="margin-top:0; color:#333;">${task.title}</h4>
+              <p>${task.description || 'Açıklama yok'}</p>
+              <p><strong>Önceki Durum:</strong> ${previousStatus}</p>
+              <p><strong>Yeni Durum:</strong> ${status}</p>
+              <p><strong>Güncelleyen:</strong> ${updatedBy ? updatedBy.name + ' ' + updatedBy.surname : 'Sistem Kullanıcısı'}</p>
+            </div>
+            ${statusMessage}
+            <p>Görevlerinizi kontrol etmek için lütfen sisteme giriş yapın.</p>
+          `;
+
+          await sendEmail({
+            to: assignedUser.email,
+            subject: emailSubject,
+            html: emailContent
+          });
+          
+          console.log(`✅ Görev durum güncelleme e-postası gönderildi: ${assignedUser.email}`);
+        }
+      }
+    } catch (emailError) {
+      console.error("❌ Görev durum güncelleme e-postası gönderilirken hata:", emailError);
+      // Continue execution even if email fails
+    }
 
     res.status(200).json({ message: "Görev durumu güncellendi", task });
   } catch (error) {
