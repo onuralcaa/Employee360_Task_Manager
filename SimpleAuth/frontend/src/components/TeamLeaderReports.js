@@ -10,8 +10,6 @@ import {
 import './Reports.css';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import ReportCharts from './ReportCharts';
-import './ReportSummary.css'; // Import the new CSS file for report summary styles
 
 function TeamLeaderReports({ user }) {
   const [reports, setReports] = useState([]);
@@ -377,9 +375,6 @@ function TeamLeaderReports({ user }) {
             <strong>Oluşturulma Tarihi:</strong> {formatDate(selectedReport.createdAt)}
           </p>
         </div>
-        
-        {/* Add charts visualization */}
-        <ReportCharts content={selectedReport.content} />
         
         <h3>Takım Lideri Yorumu</h3>
         <p>{selectedReport.introduction}</p>

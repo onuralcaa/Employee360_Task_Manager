@@ -171,33 +171,6 @@
   flex: 1;
 }
 
-/* Chart Styling */
-.report-charts {
-  margin-top: 30px;
-  padding: 15px;
-  background-color: #f9f9f9;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-.charts-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
-  justify-content: space-around;
-  margin-top: 20px;
-}
-
-.chart-wrapper {
-  background-color: white;
-  padding: 15px;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  width: 45%;
-  min-width: 300px;
-  margin-bottom: 15px;
-}
-
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .report-action-buttons {
@@ -206,13 +179,5 @@
   
   .date-inputs {
     flex-direction: column;
-  }
-  
-  .charts-container {
-    flex-direction: column;
-  }
-  
-  .chart-wrapper {
-    width: 100%;
   }
 }
