@@ -2,6 +2,7 @@ const File = require("../models/fileModel");
 const User = require("../models/userModel");
 const path = require("path");
 const fs = require("fs");
+const os = require('os'); // Add OS module to detect platform
 
 // 📤 Dosya Yükleme Fonksiyonu - Now stores files in MongoDB
 const uploadFile = async (req, res) => {
@@ -207,24 +208,36 @@ const downloadFile = async (req, res) => {
     else {
       console.log("Attempting to serve legacy file from filesystem");
       
+      // Normalize all path separators for cross-platform compatibility
       // Try the local filesystem as a fallback for legacy files
-      // Legacy files might have different paths, try both the filename directly and with uploads prefix
+      // Legacy files might have different paths, try multiple possible locations
       const possiblePaths = [
-        // Standard path in uploads folder
-        path.join(__dirname, '../uploads', file.filename),
+        // Standard path in uploads folder with normalized separator
+        path.normalize(path.join(__dirname, '..', 'uploads', file.filename)),
         // Just in case it was stored with a different path structure
-        file.path || path.join(__dirname, '../uploads', file.filename),
+        file.path ? path.normalize(file.path) : path.normalize(path.join(__dirname, '..', 'uploads', file.filename)),
         // Try with an alternate uploads location
-        path.join(__dirname, '../../uploads', file.filename)
+        path.normalize(path.join(__dirname, '..', '..', 'uploads', file.filename)),
+        // Try temp directory as a fallback
+        path.normalize(path.join(os.tmpdir(), 'employee360_uploads', file.filename))
       ];
       
       // Try each possible path
       let filePath = null;
       for (const tryPath of possiblePaths) {
-        if (fs.existsSync(tryPath)) {
-          filePath = tryPath;
-          console.log(`Found legacy file at: ${filePath}`);
-          break;
+        try {
+          if (fs.existsSync(tryPath)) {
+            // Additional verification: make sure it's a file, not a directory
+            const stats = fs.statSync(tryPath);
+            if (stats.isFile()) {
+              filePath = tryPath;
+              console.log(`Found legacy file at: ${filePath}`);
+              break;
+            }
+          }
+        } catch (fsErr) {
+          console.error(`Error checking path ${tryPath}:`, fsErr.message);
+          // Continue to next path
         }
       }
       
@@ -247,8 +260,16 @@ const downloadFile = async (req, res) => {
         });
       }
       
-      // Get file stats for Content-Length
-      const stats = fs.statSync(filePath);
+      // Get file stats for Content-Length with better error handling
+      let stats;
+      try {
+        stats = fs.statSync(filePath);
+      } catch (statsErr) {
+        console.error(`Error getting file stats: ${statsErr.message}`);
+        return res.status(500).json({ 
+          message: "Dosya bilgileri alınamadı. Lütfen sistem yöneticisiyle iletişime geçin." 
+        });
+      }
       
       // Set appropriate headers
       res.setHeader('Content-Type', contentType);
@@ -256,35 +277,49 @@ const downloadFile = async (req, res) => {
       res.setHeader('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent(originalFileName)}`);
       res.setHeader('Cache-Control', 'no-cache');
       
-      // Stream the file from the filesystem
-      const fileStream = fs.createReadStream(filePath);
-      fileStream.on('error', (err) => {
-        console.error(`Error streaming legacy file: ${err.message}`);
-        if (!res.headersSent) {
-          res.status(500).json({ message: "Dosya okunurken hata oluştu." });
-        }
-      });
-      
-      // Pipe the file to the response
-      fileStream.pipe(res);
-      
-      // After sending the file, attempt to migrate it to MongoDB for future downloads
-      fileStream.on('end', async () => {
-        try {
-          // Don't block the response - do this asynchronously
-          setTimeout(async () => {
-            await migrateFileToMongoDB(file, filePath);
-          }, 0);
-        } catch (migrationErr) {
-          console.error(`Migration error for file ${file._id}:`, migrationErr);
-          // Don't affect the user's download if migration fails
-        }
-      });
+      // Stream the file from the filesystem with improved error handling
+      try {
+        const fileStream = fs.createReadStream(filePath);
+        
+        fileStream.on('error', (err) => {
+          console.error(`Error streaming legacy file: ${err.message}`);
+          if (!res.headersSent) {
+            res.status(500).json({ 
+              message: "Dosya okunurken hata oluştu.",
+              details: err.message 
+            });
+          }
+        });
+        
+        // Pipe the file to the response
+        fileStream.pipe(res);
+        
+        // After sending the file, attempt to migrate it to MongoDB for future downloads
+        fileStream.on('end', async () => {
+          try {
+            // Don't block the response - do this asynchronously
+            setTimeout(async () => {
+              await migrateFileToMongoDB(file, filePath);
+            }, 0);
+          } catch (migrationErr) {
+            console.error(`Migration error for file ${file._id}:`, migrationErr);
+            // Don't affect the user's download if migration fails
+          }
+        });
+      } catch (streamErr) {
+        console.error(`Error creating read stream: ${streamErr.message}`);
+        return res.status(500).json({ 
+          message: "Dosya okunurken hata oluştu. Dosya sistemi erişim sorunu olabilir." 
+        });
+      }
     }
     
   } catch (error) {
     console.error("Dosya indirme hatası:", error);
-    res.status(500).json({ message: "Dosya indirilemedi. Hata: " + error.message });
+    res.status(500).json({ 
+      message: "Dosya indirilemedi. Hata: " + error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined 
+    });
   }
 };
 
@@ -299,9 +334,17 @@ async function migrateFileToMongoDB(fileDoc, filePath) {
       return;
     }
     
-    // Read file data
-    const fileData = fs.readFileSync(filePath);
-    const stats = fs.statSync(filePath);
+    // Read file data with better error handling
+    let fileData;
+    let stats;
+    
+    try {
+      fileData = fs.readFileSync(filePath);
+      stats = fs.statSync(filePath);
+    } catch (fsErr) {
+      console.error(`Error reading file from disk during migration: ${fsErr.message}`);
+      throw new Error(`File system error: ${fsErr.message}`);
+    }
     
     // Update the document with the file data
     fileDoc.data = fileData;
@@ -315,6 +358,16 @@ async function migrateFileToMongoDB(fileDoc, filePath) {
     // Save updated document
     await fileDoc.save();
     console.log(`✅ Successfully migrated file ${fileDoc._id} to MongoDB`);
+    
+    // Optional: Remove the file from disk after successful migration
+    // Keeping this commented out for now as it's safer to keep the files during transition
+    // try {
+    //   fs.unlinkSync(filePath);
+    //   console.log(`Removed file from disk after migration: ${filePath}`);
+    // } catch (unlinkErr) {
+    //   console.error(`Error removing file from disk: ${unlinkErr.message}`);
+    //   // Don't throw here, as the migration was still successful
+    // }
   } catch (err) {
     console.error(`❌ Error migrating file ${fileDoc._id} to MongoDB:`, err);
     throw err; // Re-throw to be handled by the caller

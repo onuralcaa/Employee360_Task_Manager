@@ -5,6 +5,7 @@ const Team = require('../models/teamModel');
 const fs = require('fs');
 const path = require('path');
 const sendEmail = require('../utils/sendEmail');
+const os = require('os'); // Add OS module to detect platform
 
 // Create a new report
 const createReport = async (req, res) => {
@@ -673,20 +674,50 @@ const generateTextReport = async (req, res) => {
     textContent += `Employee360 Task Manager © ${new Date().getFullYear()}\n`;
     textContent += `============================================\n`;
     
-    // Save to file
-    const uploadsDir = path.join(__dirname, '../uploads');
-    if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
+    // Save to file with improved cross-platform compatibility
+    // Normalize path regardless of platform (Windows or Linux)
+    const uploadsDir = path.normalize(path.join(__dirname, '..', 'uploads'));
     
-    // Use a consistent filename with timestamp - remove references to draft/submitted status
-    // Replace any non-ASCII characters in the team name with underscores to avoid header encoding issues
-    const safeTeamName = report.team.name.replace(/[^\x00-\x7F]/g, '_').replace(/\s+/g, '_');
-    const fileName = `rapor_${safeTeamName}_${Date.now()}.txt`;
-    const filePath = path.join(uploadsDir, fileName);
+    // Create directory with better error handling for cross-platform support
+    try {
+      if (!fs.existsSync(uploadsDir)) {
+        fs.mkdirSync(uploadsDir, { recursive: true, mode: 0o755 });
+        console.log(`Created uploads directory at: ${uploadsDir}`);
+      }
+    } catch (dirError) {
+      console.error(`Error creating uploads directory: ${dirError.message}`);
+      // Try alternate location as fallback if default location fails (Windows temp folder or /tmp)
+      const tempDir = os.tmpdir();
+      const altUploadsDir = path.join(tempDir, 'employee360_uploads');
+      
+      if (!fs.existsSync(altUploadsDir)) {
+        fs.mkdirSync(altUploadsDir, { recursive: true });
+        console.log(`Created alternate uploads directory at: ${altUploadsDir}`);
+      }
+      
+      // Use the alternate directory instead
+      uploadsDir = altUploadsDir;
+    }
     
-    // Write file with UTF-8 encoding explicitly set
+    // Use a consistent filename with timestamp and platform-safe characters
+    // Replace any problematic characters in the team name with underscores
+    const safeTeamName = report.team.name
+      .replace(/[^\x00-\x7F]/g, '_') // Replace non-ASCII chars
+      .replace(/[\\/:*?"<>|]/g, '_') // Replace Windows-forbidden chars
+      .replace(/\s+/g, '_');
+    
+    const fileName = `report_${safeTeamName}_${Date.now()}.txt`;
+    const filePath = path.normalize(path.join(uploadsDir, fileName));
+    
+    // Write file with UTF-8 encoding explicitly set and improved error handling
     fs.writeFile(filePath, textContent, { encoding: 'utf8' }, async (err) => {
       if (err) {
-        return res.status(500).json({ message: 'Rapor dosyası yazılırken bir hata oluştu', error: err.message });
+        console.error(`Error writing report file: ${err.message}`);
+        return res.status(500).json({ 
+          message: 'Rapor dosyası yazılırken bir hata oluştu', 
+          error: err.message,
+          details: 'This may be due to a cross-platform compatibility issue.' 
+        });
       }
       
       try {
@@ -700,18 +731,38 @@ const generateTextReport = async (req, res) => {
         // Return file as attachment for direct download instead of opening in new tab
         res.setHeader('Content-Type', 'text/plain; charset=utf-8');
         res.setHeader('Content-Disposition', `attachment; filename*=UTF-8''${encodedFilename}`);
-        res.sendFile(filePath);
+        
+        // Use fs.createReadStream instead of res.sendFile for better cross-platform support
+        const fileStream = fs.createReadStream(filePath);
+        fileStream.on('error', (streamErr) => {
+          console.error(`Error streaming file: ${streamErr.message}`);
+          res.status(500).send('Error streaming the report file');
+        });
+        
+        fileStream.pipe(res);
       } catch (saveErr) {
+        console.error(`Error saving report reference: ${saveErr.message}`);
         // Still send file even if saving report reference fails
         const encodedFilename = encodeURIComponent(fileName).replace(/['()]/g, escape);
         res.setHeader('Content-Type', 'text/plain; charset=utf-8');
         res.setHeader('Content-Disposition', `attachment; filename*=UTF-8''${encodedFilename}`);
-        res.sendFile(filePath);
+        
+        const fileStream = fs.createReadStream(filePath);
+        fileStream.on('error', (streamErr) => {
+          console.error(`Error streaming file: ${streamErr.message}`);
+          res.status(500).send('Error streaming the report file');
+        });
+        
+        fileStream.pipe(res);
       }
     });
   } catch (error) {
     console.error('Metin raporu oluşturma hatası:', error);
-    res.status(500).json({ message: 'Metin raporu oluşturulurken bir hata oluştu', error: error.message });
+    res.status(500).json({ 
+      message: 'Metin raporu oluşturulurken bir hata oluştu', 
+      error: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
   }
 };
 
