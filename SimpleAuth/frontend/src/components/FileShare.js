@@ -289,7 +289,7 @@ function FileShare({ user }) {
               className="upload-button"
               disabled={loading || !selectedFile || !recipient}
             >
-              {loading ? "Yükleniyor..." : "Yükle"}
+              {loading ? "Yükleniyor..." : "Gönder"}
             </button>
           </form>
           
