@@ -169,7 +169,7 @@ function FileShare({ user }) {
       setUploadProgress(100);
       
       setTimeout(() => {
-        setMessage("Dosya başarıyla yüklendi!");
+        setMessage("Dosya başarıyla gönderildi!");
         setSelectedFile(null);
         setRecipient("");
         setUploadProgress(0);
@@ -182,10 +182,10 @@ function FileShare({ user }) {
       }, 500);
       
     } catch (err) {
-      console.error("Dosya yükleme hatası:", err);
+      console.error("Dosya gönderme hatası:", err);
       if (progressInterval) clearInterval(progressInterval);
       setUploadProgress(0);
-      setError("Dosya yüklenemedi. " + (err.response?.data?.message || "Lütfen daha sonra tekrar deneyin."));
+      setError("Dosya gönderilemedi. " + (err.response?.data?.message || "Lütfen daha sonra tekrar deneyin."));
     } finally {
       setLoading(false);
     }
@@ -254,7 +254,7 @@ function FileShare({ user }) {
       {/* Yükleme Formu - Only visible to admins and team leaders */}
       {(user.role === "admin" || user.role === "team_leader") && (
         <div className="file-upload-section">
-          <h4>Yeni Dosya Yükle</h4>
+          <h4>Yeni Dosya Gönder</h4>
           <form onSubmit={handleUpload} className="file-upload-form">
             <div className="file-input-container">
               <input
@@ -289,7 +289,7 @@ function FileShare({ user }) {
               className="upload-button"
               disabled={loading || !selectedFile || !recipient}
             >
-              {loading ? "Yükleniyor..." : "Gönder"}
+              {loading ? "Gönderiliyor..." : "Gönder"}
             </button>
           </form>
           
@@ -311,7 +311,7 @@ function FileShare({ user }) {
       {/* Regular users see this message */}
       {user.role === "personel" && (
         <div className="file-info-message">
-          <p>Dosya yükleme yetkisi yalnızca Yöneticiler ve Takım Liderlerine aittir.</p>
+          <p>Dosya gönderme yetkisi yalnızca Yöneticiler ve Takım Liderlerine aittir.</p>
         </div>
       )}
       
@@ -346,7 +346,7 @@ function FileShare({ user }) {
         
         <h4>{activeTab === "received" ? "Alınan Dosyalar" : "Gönderilen Dosyalar"}</h4>
         
-        {loading && <p className="loading-message">Dosyalar yükleniyor...</p>}
+        {loading && <p className="loading-message">Dosyalar getiriliyor...</p>}
         
         {!loading && files.length === 0 && (
           <p className="no-files">
