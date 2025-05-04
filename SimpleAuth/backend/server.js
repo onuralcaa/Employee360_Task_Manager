@@ -27,7 +27,6 @@ app.use("/api/teams", teamRoutes);
 app.use("/api/messages", messageRoutes);
 app.use("/api/files", fileRoutes);
 app.use("/api/reports", reportRoutes); // Register the report routes
-app.use("/uploads", express.static("uploads")); // Dosyaları dışarıdan erişilebilir yapar
 
 // 🚀 Takımları Otomatik Oluştur
 const createDefaultTeams = async () => {

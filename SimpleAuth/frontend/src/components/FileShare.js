@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { uploadFile, getReceivedFiles, getSentFiles, downloadFile, deleteFile, getFileRecipients } from "../api/api";
+import { uploadFile, getReceivedFiles, getSentFiles, getFileRecipients, deleteFile, downloadFile } from "../api/api";
+import axios from "axios";
 import "./FileShare.css";
 
 // File type icon mapping for common file types
@@ -195,25 +196,89 @@ function FileShare({ user }) {
   const handleDownload = async (file) => {
     try {
       setLoading(true);
-      const response = await downloadFile(file._id);
+      setError("");
       
-      const url = window.URL.createObjectURL(new Blob([response.data]));
+      // Make a direct XMLHttpRequest for better binary data handling
+      const xhr = new XMLHttpRequest();
+      const token = localStorage.getItem("token");
+      
+      // Create a Promise to handle the XHR response
+      const downloadPromise = new Promise((resolve, reject) => {
+        xhr.open('GET', `http://localhost:5000/api/files/download/${file._id}`, true);
+        xhr.responseType = 'arraybuffer'; // Using arraybuffer for binary data
+        
+        // Set Authorization header
+        if (token) {
+          xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+        }
+        
+        xhr.onload = function() {
+          if (this.status === 200) {
+            resolve(this.response);
+          } else {
+            reject(new Error(`Server returned ${this.status}: ${this.statusText}`));
+          }
+        };
+        
+        xhr.onerror = function() {
+          reject(new Error('Network error occurred'));
+        };
+        
+        xhr.send();
+      });
+      
+      // Wait for the download to complete
+      const arrayBuffer = await downloadPromise;
+      
+      // Create a blob with the correct type
+      const mimetype = file.mimetype || getMimeTypeFromExtension(file.originalName || file.originalname);
+      const blob = new Blob([arrayBuffer], { type: mimetype });
+      
+      // Create a download link for the blob
+      const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
       
-      // Use either originalname or originalName, with a default
+      // Set the file name
       const fileName = file.originalName || file.originalname || "downloaded-file";
       link.setAttribute("download", fileName);
       
+      // Trigger download
       document.body.appendChild(link);
       link.click();
+      
+      // Clean up
       link.remove();
+      window.URL.revokeObjectURL(url); // Important: release the object URL to free memory
       setLoading(false);
     } catch (err) {
       console.error("Dosya indirme hatası:", err);
       setError("Dosya indirilemedi. Lütfen daha sonra tekrar deneyin.");
       setLoading(false);
     }
+  };
+  
+  // Helper function to get MIME type from file extension
+  const getMimeTypeFromExtension = (filename) => {
+    if (!filename) return 'application/octet-stream';
+    
+    const extension = filename.split('.').pop().toLowerCase();
+    
+    const mimeTypes = {
+      'pdf': 'application/pdf',
+      'doc': 'application/msword',
+      'docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'xls': 'application/vnd.ms-excel',
+      'xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'png': 'image/png',
+      'jpg': 'image/jpeg',
+      'jpeg': 'image/jpeg',
+      'gif': 'image/gif',
+      'txt': 'text/plain',
+      'csv': 'text/csv'
+    };
+    
+    return mimeTypes[extension] || 'application/octet-stream';
   };
 
   // Dosyayı sil (sadece admin veya yükleyen kişi)

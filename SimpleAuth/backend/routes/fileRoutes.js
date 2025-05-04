@@ -18,17 +18,7 @@ router.get("/recipients", verifyToken, getRecipientsList);
 router.post(
   "/upload",
   verifyToken,
-  (req, res, next) => {
-    upload.single("file")(req, res, (err) => {
-      if (err) {
-        // Handle Multer errors and send them as JSON response
-        return res.status(400).json({
-          message: err.message
-        });
-      }
-      next();
-    });
-  },
+  upload.single("file"),
   uploadFile
 );
 

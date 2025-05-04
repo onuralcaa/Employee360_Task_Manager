@@ -1,28 +1,9 @@
 // fileController.js
 const multer = require("multer");
 const path = require("path");
-const fs = require('fs');
 
-// Make sure uploads directory exists
-const uploadDir = path.join(__dirname, "uploads");
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-}
-
-// Depolama ve dosya ayarları
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "uploads/"); // uploads klasörüne kaydedecek
-  },
-  filename: (req, file, cb) => {
-    // Store the original filename with Turkish characters in req.originalFileName
-    req.originalFileName = Buffer.from(file.originalname, 'latin1').toString('utf8');
-    
-    // Only change the storage filename, not the displayed name
-    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    cb(null, uniqueSuffix + path.extname(file.originalname)); // benzersiz isim
-  },
-});
+// Use memory storage instead of disk storage to store files in MongoDB
+const storage = multer.memoryStorage();
 
 // Debug and updated file filter function
 const fileFilter = (req, file, cb) => {

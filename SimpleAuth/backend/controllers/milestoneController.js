@@ -318,11 +318,274 @@ async function deleteMilestone(req, res) {
   }
 }
 
+// Admin assigns milestone to team leader
+async function assignMilestone(req, res) {
+  try {
+    const { title, description, teamLeaderId } = req.body;
+    
+    // Only admin can assign milestones
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ message: "Milestone atama yetkiniz yok. Sadece yöneticiler milestone atayabilir." });
+    }
+
+    // Verify assigned user is a team leader
+    const leader = await User.findById(teamLeaderId);
+    if (!leader || leader.role !== 'team_leader') {
+      return res.status(400).json({ message: "Milestone sadece takım liderine atanabilir." });
+    }
+
+    const milestone = new Milestone({
+      title,
+      description,
+      assignedTo: teamLeaderId,
+      team: leader.team,
+      status: 'todo'
+    });
+    
+    await milestone.save();
+    
+    // Send email notification to the team leader
+    try {
+      if (leader && leader.email) {
+        const admin = await User.findById(req.user.id);
+        
+        const emailContent = `
+          <h3>Yeni Milestone Atandı</h3>
+          <p>Merhaba ${leader.name} ${leader.surname},</p>
+          <p>Size yönetici tarafından yeni bir milestone atandı:</p>
+          <div style="background-color:#f5f5f5; padding:15px; border-radius:5px; margin:10px 0;">
+            <h4 style="margin-top:0; color:#333;">${title}</h4>
+            <p>${description || 'Açıklama yok'}</p>
+            <p><strong>Atayan:</strong> ${admin ? admin.name + ' ' + admin.surname : 'Yönetici'}</p>
+            <p><strong>Durum:</strong> Bekliyor</p>
+          </div>
+          <p style="color:#0277bd; font-weight:bold;">Bu milestone sizin takım liderliğinizdeki proje süreci için önemlidir.</p>
+          <p>Milestone'larınızı kontrol etmek için lütfen sisteme giriş yapın.</p>
+        `;
+
+        await sendEmail({
+          to: leader.email,
+          subject: "Milestone Atandı: " + title,
+          html: emailContent
+        });
+        
+        console.log(`✅ Takım liderine milestone atama e-postası gönderildi: ${leader.email}`);
+      }
+    } catch (emailError) {
+      console.error("❌ Takım liderine milestone atama e-postası gönderilirken hata:", emailError);
+      // Continue execution even if email fails
+    }
+    
+    res.status(201).json({ message: "Milestone başarıyla atandı.", milestone });
+  } catch (err) {
+    console.error("Milestone atanırken hata:", err);
+    res.status(500).json({ message: "Milestone atanırken hata oluştu.", error: err.message });
+  }
+}
+
+// Team leader submits milestone
+async function submitMilestone(req, res) {
+  try {
+    const milestone = await Milestone.findById(req.params.id);
+    if (!milestone) {
+      return res.status(404).json({ message: "Milestone bulunamadı." });
+    }
+
+    // Only the assigned team leader can submit their milestone
+    if (req.user.role !== 'team_leader' || milestone.assignedTo.toString() !== req.user.id) {
+      return res.status(403).json({ message: "Bu milestone'u gönderme yetkiniz yok." });
+    }
+
+    // Check if milestone is in a submittable state
+    if (milestone.status !== 'in-progress') {
+      return res.status(400).json({ 
+        message: "Sadece 'In Progress' durumundaki milestone'lar gönderilebilir." 
+      });
+    }
+
+    milestone.status = 'submitted';
+    milestone._modifiedBy = req.user.id;
+    await milestone.save();
+
+    // Notify admins about the submission
+    try {
+      const admins = await User.find({ role: "admin" });
+      const teamLeader = await User.findById(req.user.id);
+      
+      if (admins.length > 0 && teamLeader) {
+        const emailContent = `
+          <h3>Milestone İnceleme Talebi</h3>
+          <p>Merhaba Yönetici,</p>
+          <p>${teamLeader.name} ${teamLeader.surname} bir milestone'u incelemeniz için gönderdi:</p>
+          <div style="background-color:#f5f5f5; padding:15px; border-radius:5px; margin:10px 0;">
+            <h4 style="margin-top:0; color:#333;">${milestone.title}</h4>
+            <p>${milestone.description || 'Açıklama yok'}</p>
+            <p><strong>Takım Lideri:</strong> ${teamLeader.name} ${teamLeader.surname}</p>
+            <p><strong>Yeni Durum:</strong> İncelemeye Gönderildi</p>
+          </div>
+          <p>Lütfen bu milestone'u inceleyip onaylayın veya reddedin.</p>
+        `;
+
+        // Send to all admins
+        for (const admin of admins) {
+          if (admin.email) {
+            await sendEmail({
+              to: admin.email,
+              subject: "Milestone İnceleme Talebi: " + milestone.title,
+              html: emailContent
+            });
+          }
+        }
+      }
+    } catch (emailError) {
+      console.error("❌ Milestone inceleme talebi e-postası gönderilirken hata:", emailError);
+      // Continue execution even if email fails
+    }
+
+    res.json({ message: "Milestone başarıyla gönderildi ve incelemeye alındı.", milestone });
+  } catch (err) {
+    console.error("Milestone gönderilirken hata:", err);
+    res.status(500).json({ message: "Milestone gönderilirken hata oluştu.", error: err.message });
+  }
+}
+
+// Admin verifies milestone
+async function verifyMilestone(req, res) {
+  try {
+    const milestone = await Milestone.findById(req.params.id);
+    if (!milestone) {
+      return res.status(404).json({ message: "Milestone bulunamadı." });
+    }
+
+    // Only admin can verify milestones
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ message: "Milestone onaylama yetkiniz yok. Sadece yöneticiler milestone onaylayabilir." });
+    }
+
+    // Check if milestone is in a verifiable state
+    if (milestone.status !== 'submitted') {
+      return res.status(400).json({ 
+        message: "Sadece 'Submitted' durumundaki milestone'lar onaylanabilir." 
+      });
+    }
+
+    milestone.status = 'verified';
+    milestone._modifiedBy = req.user.id;
+    await milestone.save();
+
+    // Notify team leader about the verification
+    try {
+      const teamLeader = await User.findById(milestone.assignedTo);
+      const admin = await User.findById(req.user.id);
+      
+      if (teamLeader && teamLeader.email) {
+        const emailContent = `
+          <h3>Milestone Onaylandı</h3>
+          <p>Merhaba ${teamLeader.name} ${teamLeader.surname},</p>
+          <p>Gönderdiğiniz milestone yönetici tarafından onaylandı:</p>
+          <div style="background-color:#f5f5f5; padding:15px; border-radius:5px; margin:10px 0;">
+            <h4 style="margin-top:0; color:#333;">${milestone.title}</h4>
+            <p>${milestone.description || 'Açıklama yok'}</p>
+            <p><strong>Onaylayan:</strong> ${admin ? admin.name + ' ' + admin.surname : 'Yönetici'}</p>
+          </div>
+          <p style="color:#4caf50; font-weight:bold;">Tebrikler! Milestone'unuz başarıyla tamamlandı.</p>
+        `;
+
+        await sendEmail({
+          to: teamLeader.email,
+          subject: "Milestone Onaylandı: " + milestone.title,
+          html: emailContent
+        });
+      }
+    } catch (emailError) {
+      console.error("❌ Milestone onay e-postası gönderilirken hata:", emailError);
+      // Continue execution even if email fails
+    }
+
+    res.json({ message: "Milestone başarıyla onaylandı.", milestone });
+  } catch (err) {
+    console.error("Milestone onaylanırken hata:", err);
+    res.status(500).json({ message: "Milestone onaylanırken hata oluştu.", error: err.message });
+  }
+}
+
+// Admin rejects milestone
+async function rejectMilestone(req, res) {
+  try {
+    const milestone = await Milestone.findById(req.params.id);
+    if (!milestone) {
+      return res.status(404).json({ message: "Milestone bulunamadı." });
+    }
+
+    // Only admin can reject milestones
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ message: "Milestone reddetme yetkiniz yok. Sadece yöneticiler milestone reddedebilir." });
+    }
+
+    // Check if milestone is in a rejectable state
+    if (milestone.status !== 'submitted') {
+      return res.status(400).json({ 
+        message: "Sadece 'Submitted' durumundaki milestone'lar reddedilebilir." 
+      });
+    }
+
+    milestone.status = 'rejected';
+    milestone._modifiedBy = req.user.id;
+    
+    // Add rejection reason if provided
+    if (req.body.reason) {
+      milestone.rejectionReason = req.body.reason;
+    }
+    
+    await milestone.save();
+
+    // Notify team leader about the rejection
+    try {
+      const teamLeader = await User.findById(milestone.assignedTo);
+      const admin = await User.findById(req.user.id);
+      
+      if (teamLeader && teamLeader.email) {
+        const emailContent = `
+          <h3>Milestone Reddedildi</h3>
+          <p>Merhaba ${teamLeader.name} ${teamLeader.surname},</p>
+          <p>Gönderdiğiniz milestone yönetici tarafından reddedildi:</p>
+          <div style="background-color:#f5f5f5; padding:15px; border-radius:5px; margin:10px 0;">
+            <h4 style="margin-top:0; color:#333;">${milestone.title}</h4>
+            <p>${milestone.description || 'Açıklama yok'}</p>
+            <p><strong>Reddeden:</strong> ${admin ? admin.name + ' ' + admin.surname : 'Yönetici'}</p>
+            ${milestone.rejectionReason ? `<p><strong>Red Nedeni:</strong> ${milestone.rejectionReason}</p>` : ''}
+          </div>
+          <p style="color:#f44336; font-weight:bold;">Lütfen gerekli düzeltmeleri yapıp milestone'u tekrar gönderin.</p>
+          <p>Milestone'u düzenlemek için, durumunu önce "In Progress" olarak değiştirmeniz gerekecektir.</p>
+        `;
+
+        await sendEmail({
+          to: teamLeader.email,
+          subject: "Milestone Reddedildi: " + milestone.title,
+          html: emailContent
+        });
+      }
+    } catch (emailError) {
+      console.error("❌ Milestone red e-postası gönderilirken hata:", emailError);
+      // Continue execution even if email fails
+    }
+
+    res.json({ message: "Milestone reddedildi.", milestone });
+  } catch (err) {
+    console.error("Milestone reddedilirken hata:", err);
+    res.status(500).json({ message: "Milestone reddedilirken hata oluştu.", error: err.message });
+  }
+}
+
 module.exports = {
   getAllMilestones,
   getMilestonesByUserId,
   getMilestonesByTeamId,
   createMilestone,
   updateMilestoneStatus,
-  deleteMilestone
+  deleteMilestone,
+  assignMilestone,
+  submitMilestone,
+  verifyMilestone,
+  rejectMilestone
 };
