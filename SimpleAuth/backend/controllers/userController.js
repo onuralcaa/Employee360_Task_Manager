@@ -215,12 +215,16 @@ const getAllUsers = async (req, res) => {
     }
     
     let users = [];
+    
+    // Always get admin users in a separate query to ensure they're included for everyone
+    const adminUsers = await User.find({ role: "admin" }, "name surname username email role team");
+    console.log(`Found ${adminUsers.length} admin users that will be included for all users`);
 
     // Apply role-based filtering
     if (requestingUser.role === "admin") {
       // Admins can see all users
       console.log("⭐ Admin user - returning all users");
-      users = await User.find({}, "name surname username email role team");
+      users = await User.find({ _id: { $ne: requestingUser.id } }, "name surname username email role team");
     } else if (requestingUser.role === "team_leader") {
       // Team leaders can see their team members and other team leaders
       const teamId = requestingUser.team;
@@ -230,17 +234,24 @@ const getAllUsers = async (req, res) => {
           { team: teamId }, // Same team members
           { role: "team_leader" } // Other team leaders
         ],
-        _id: { $ne: requestingUser.id } // Exclude the requesting user
+        _id: { $ne: requestingUser.id }, // Exclude the requesting user
+        role: { $ne: "admin" } // Exclude admin users (we'll add them separately)
       }, "name surname username email role team");
+      
+      // Add admin users to the results
+      users = [...users, ...adminUsers];
     } else {
-      // Regular personnel can only see their team members (excluding admins)
+      // Regular personnel can only see their team members plus admin users
       const teamId = requestingUser.team;
-      console.log("⭐ Regular user - strict filtering for team", teamId);
+      console.log("⭐ Regular user - filtering for team", teamId);
       users = await User.find({
         team: teamId, // Same team members only
-        role: { $ne: "admin" }, // Exclude admin users
-        _id: { $ne: requestingUser.id } // Exclude the requesting user
+        _id: { $ne: requestingUser.id }, // Exclude the requesting user
+        role: { $ne: "admin" } // Exclude admin users (we'll add them separately)
       }, "name surname username email role team");
+      
+      // Add admin users to the results
+      users = [...users, ...adminUsers];
     }
 
     console.log(`✅ Returning ${users.length} filtered users`);

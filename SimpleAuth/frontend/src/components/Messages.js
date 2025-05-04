@@ -1,209 +1,200 @@
-import React, { useEffect, useState } from "react";
-import { getAllUsers, sendMessage, getMessagesByUserId } from "../api/api";
+import { useEffect, useState } from "react";
+import {
+  getMessagesByUserId,
+  sendMessage,
+  getAllUsers,
+} from "../api/api";
 import "./Messages.css";
-import { showSuccessToast, showErrorToast } from "../utils/toastUtils";
 
 function Messages({ user }) {
-  const [message, setMessage] = useState("");
-  const [recipient, setRecipient] = useState("");
-  const [recipients, setRecipients] = useState([]);
+  const state = user;
+
   const [messages, setMessages] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
+  const [allUsers, setAllUsers] = useState([]);
+  const [receiverId, setReceiverId] = useState("");
+  const [text, setText] = useState("");
+  
+  // State to track currently selected conversation
+  const [currentConversation, setCurrentConversation] = useState([]);
 
-  // Fetch users
   useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const response = await getAllUsers();
-        
-        // Filter out the current user from the list
-        const filteredUsers = response.data.filter(u => 
-          (user.id && u._id !== user.id) || (user._id && u._id !== user._id)
-        );
-        
-        setRecipients(filteredUsers);
-        
-        // Select the first user by default if one exists and no recipient is selected
-        if (filteredUsers.length > 0 && !recipient) {
-          setRecipient(filteredUsers[0]._id);
+    console.log("👤 Aktif kullanıcı:", state);
+    console.log("📋 Tüm kullanıcılar:", allUsers);
+
+    if (!state?.id) return;
+
+    getMessagesByUserId(state.id)
+      .then((res) => {
+        setMessages(res.data);
+        // If a recipient is selected, filter conversations immediately
+        if (receiverId) {
+          filterConversation(receiverId, res.data);
         }
-      } catch (err) {
-        console.error("Kullanıcılar yüklenirken hata:", err);
-        setError("Kullanıcılar yüklenemedi. Lütfen daha sonra tekrar deneyin.");
-      }
-    };
+      })
+      .catch((err) => console.error("Mesajlar alınamadı", err));
 
-    fetchUsers();
-  }, [user, recipient]);
+    getAllUsers()
+      .then((res) => {
+        console.log("✅ Backend'den gelen kullanıcı listesi:", res.data);
+        setAllUsers(res.data);
+      })
+      .catch((err) => console.error("Kullanıcılar alınamadı", err));
+  }, [state?.id]);
 
-  // Fetch messages
+  // Filter messages whenever receiverId changes
   useEffect(() => {
-    const fetchMessages = async () => {
-      try {
-        setLoading(true);
-        const userId = user.id || user._id;
-        if (!userId) return;
+    if (receiverId && messages.length > 0) {
+      filterConversation(receiverId, messages);
+    } else {
+      setCurrentConversation([]);
+    }
+  }, [receiverId]);
 
-        const response = await getMessagesByUserId(userId);
+  // Filter conversation between current user and selected recipient
+  const filterConversation = (recipientId, allMessages) => {
+    const filtered = allMessages.filter(
+      (msg) => {
+        // Add null checks for sender and recipient
+        if (!msg.sender || !msg.recipient) return false;
         
-        setMessages(response.data);
-        setError("");
-      } catch (err) {
-        console.error("Mesajlar yüklenirken hata:", err);
-        setError("Mesajlar yüklenemedi. Lütfen daha sonra tekrar deneyin.");
-      } finally {
-        setLoading(false);
+        return (
+          (msg.sender._id === state.id && msg.recipient._id === recipientId) || 
+          (msg.sender._id === recipientId && msg.recipient._id === state.id)
+        );
       }
-    };
+    );
+    setCurrentConversation(filtered);
+  };
 
-    fetchMessages();
-  }, [user]);
+  const handleSend = async () => {
+    if (!receiverId || !text.trim()) return;
 
-  // Send message
-  const handleSendMessage = async (e) => {
-    e.preventDefault();
-    
-    if (!message.trim()) {
-      setError("Lütfen bir mesaj yazın.");
-      showErrorToast("Lütfen bir mesaj yazın.");
-      return;
-    }
-    
-    if (!recipient) {
-      setError("Lütfen bir alıcı seçin.");
-      showErrorToast("Lütfen bir alıcı seçin.");
-      return;
-    }
-    
     try {
-      setLoading(true);
+      const newMessage = {
+        sender: state.id,
+        recipient: receiverId,
+        content: text.trim(),
+      };
+      await sendMessage(newMessage);
+      setText("");
       
-      // Get the user ID (ensuring we have it in the correct format)
-      const userId = user.id || user._id;
-      
-      if (!userId) {
-        setError("Kullanıcı kimliği bulunamadı. Lütfen tekrar giriş yapın.");
-        showErrorToast("Kullanıcı kimliği bulunamadı. Lütfen tekrar giriş yapın.");
-        setLoading(false);
-        return;
-      }
-      
-      await sendMessage({
-        content: message,
-        recipient: recipient,
-        sender: userId  // Add the sender ID
-      });
-      
-      setMessage("");
-      setSuccess("Mesaj başarıyla gönderildi!");
-      showSuccessToast("Mesaj başarıyla gönderildi!");
-      
-      // Refresh messages
-      const response = await getMessagesByUserId(userId);
-      
-      setMessages(response.data);
-      setError("");
-      
-      // Clear success message after 3 seconds
-      setTimeout(() => {
-        setSuccess("");
-      }, 3000);
-    } catch (err) {
-      console.error("Mesaj gönderilirken hata:", err);
-      setError("Mesaj gönderilemedi. Lütfen daha sonra tekrar deneyin.");
-      showErrorToast("Mesaj gönderilemedi. Lütfen daha sonra tekrar deneyin.");
-    } finally {
-      setLoading(false);
+      // Refresh messages and update current conversation
+      const res = await getMessagesByUserId(state.id);
+      setMessages(res.data);
+      filterConversation(receiverId, res.data);
+    } catch (error) {
+      console.error("Mesaj gönderme hatası:", error);
     }
   };
 
-  // Tarihi formatla
-  const formatDate = (dateString) => {
-    if (!dateString) return "Tarih bilgisi yok";
-    const date = new Date(dateString);
-    return date.toLocaleString("tr-TR");
+  // Filter the list of users that this user can message
+  const filteredRecipients = allUsers.filter((user) => {
+    // Don't show the current user in the list
+    if (user._id === state.id) return false;
+
+    // Admin can message anyone
+    if (state.role === "admin") return true;
+
+    // Team leaders can message admin, other team leaders, and their team members
+    if (state.role === "team_leader") {
+      return (
+        user.role === "admin" ||
+        user.role === "team_leader" ||
+        user.team === state.team
+      );
+    }
+
+    // Regular personnel can message team members and team leaders from their team
+    if (state.role === "personel") {
+      return (
+        user.team === state.team &&
+        (user.role === "personel" || user.role === "team_leader")
+      );
+    }
+
+    return false;
+  });
+
+  // Get the name of currently selected recipient
+  const getRecipientName = () => {
+    if (!receiverId) return "";
+    const recipient = allUsers.find(user => user._id === receiverId);
+    return recipient ? `${recipient.name} ${recipient.surname}` : "";
   };
 
-  // Kullanıcı adını getir
-  const getUserName = (userId) => {
-    const user = recipients.find((u) => u._id === userId);
-    if (!user) return "Bilinmeyen Kullanıcı";
-    return `${user.name || ""} ${user.surname || ""}`.trim() || user.username || "Bilinmeyen Kullanıcı";
-  };
-
-  // Mesajı gönderen sen misin?
-  const isSentByMe = (senderId) => {
-    return (user.id && senderId === user.id) || (user._id && senderId === user._id);
+  // Handle Enter key to send message
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
   };
 
   return (
     <div className="msg-wrapper">
-      <h3>📨 Mesajlar</h3>
-      
-      <div className="msg-send-box">
-        <select 
-          value={recipient} 
-          onChange={(e) => setRecipient(e.target.value)}
+      <h3>📨 Mesajlaşma Paneli</h3>
+
+      <div className="msg-contacts">
+        <h4>Kişiler</h4>
+        <select
+          value={receiverId}
+          onChange={(e) => setReceiverId(e.target.value)}
+          className="contact-select"
         >
-          <option value="">Alıcı Seçin</option>
-          {recipients.map((user) => (
+          <option value="">Konuşmak istediğiniz kişiyi seçin</option>
+          {filteredRecipients.map((user) => (
             <option key={user._id} value={user._id}>
-              {user.name} {user.surname} - {user.role === "admin" ? "Yönetici" : user.role === "team_leader" ? "Takım Lideri" : "Personel"}
+              {user.name} {user.surname} ({user.role})
             </option>
           ))}
         </select>
-        
-        <textarea
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          placeholder="Mesajınızı yazın..."
-        />
-        
-        <button onClick={handleSendMessage} disabled={loading}>
-          {loading ? "Gönderiliyor..." : "Gönder"}
-        </button>
-        
-        {error && <div className="error-message">{error}</div>}
-        {success && <div className="success-message">{success}</div>}
       </div>
-      
-      <div className="msg-list">
-        <h4>Son Mesajlar</h4>
-        
-        {loading && <p className="loading-message">Mesajlar yükleniyor...</p>}
-        
-        {!loading && messages.length === 0 && (
-          <p className="no-messages">Henüz mesaj yok.</p>
-        )}
-        
-        {!loading && messages.length > 0 && (
-          <div>
-            {messages.map((msg) => (
-              <div 
-                key={msg._id} 
-                className={`msg-item ${isSentByMe(msg.sender?._id) ? "sent" : "received"}`}
-              >
-                <p>
-                  <strong>
-                    {isSentByMe(msg.sender?._id) 
-                      ? "Siz" 
-                      : msg.sender?.name 
-                        ? `${msg.sender.name} ${msg.sender.surname}` 
-                        : "Bilinmeyen Gönderici"}
-                  </strong>
-                  {isSentByMe(msg.sender?._id) 
-                    ? ` → ${msg.recipient?.name ? `${msg.recipient.name} ${msg.recipient.surname}` : "Bilinmeyen Alıcı"}`
-                    : ""}
-                </p>
-                <p>{msg.content}</p>
-                <small>{formatDate(msg.timestamp || msg.createdAt)}</small>
-              </div>
-            ))}
+
+      {receiverId ? (
+        <div className="msg-conversation">
+          <div className="conversation-header">
+            <h4>Sohbet: {getRecipientName()}</h4>
           </div>
-        )}
-      </div>
+          
+          <div className="conversation-messages">
+            {currentConversation.length === 0 ? (
+              <p className="no-messages">Henüz mesaj yok. Konuşmaya başlayın!</p>
+            ) : (
+              currentConversation.map((msg) => (
+                <div 
+                  key={msg._id} 
+                  className={`msg-item ${msg.sender._id === state.id ? 'sent' : 'received'}`}
+                >
+                  <div className="msg-content">
+                    <p>{msg.content}</p>
+                  </div>
+                  <div className="msg-timestamp">
+                    <small>{new Date(msg.timestamp).toLocaleString()}</small>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+          
+          <div className="msg-input-area">
+            <textarea
+              placeholder="Mesajınızı yazın..."
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              onKeyPress={handleKeyPress}
+              className="message-textarea"
+              rows="3"
+            />
+            <button onClick={handleSend} className="send-button">
+              <span>Gönder</span>
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className="select-contact-prompt">
+          <p>Mesajlaşmak için yukarıdan bir kişi seçin.</p>
+        </div>
+      )}
     </div>
   );
 }
