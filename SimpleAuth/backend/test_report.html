@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Report Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        button { padding: 10px 15px; margin: 10px; cursor: pointer; }
+        #token-input { width: 100%; padding: 8px; margin-bottom: 10px; }
+        #report-id { width: 100%; padding: 8px; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Report Generation Test</h1>
+        
+        <div>
+            <h3>Authorization Token:</h3>
+            <input type="text" id="token-input" placeholder="Paste your JWT token here">
+        </div>
+        
+        <div>
+            <h3>Report ID:</h3>
+            <input type="text" id="report-id" placeholder="Enter report ID">
+        </div>
+        
+        <div>
+            <button onclick="generatePdfReport()">Generate PDF Report</button>
+            <button onclick="generateTextReport()">Generate Text Report</button>
+        </div>
+        
+        <div id="result"></div>
+    </div>
+    
+    <script>
+        // Function to generate PDF report
+        function generatePdfReport() {
+            const reportId = document.getElementById('report-id').value;
+            const token = document.getElementById('token-input').value;
+            
+            if (!reportId || !token) {
+                alert("Please enter both report ID and token");
+                return;
+            }
+            
+            fetch(`http://localhost:5000/api/reports/generate-file/${reportId}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+                if (data.downloadUrl) {
+                    window.open(`http://localhost:5000${data.downloadUrl}`, '_blank');
+                }
+                document.getElementById('result').innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('result').innerHTML = `<p style="color: red">Error: ${error.message}</p>`;
+            });
+        }
+        
+        // Function to generate text report
+        function generateTextReport() {
+            const reportId = document.getElementById('report-id').value;
+            const token = document.getElementById('token-input').value;
+            
+            if (!reportId || !token) {
+                alert("Please enter both report ID and token");
+                return;
+            }
+            
+            fetch(`http://localhost:5000/api/reports/generate-text/${reportId}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+                if (data.downloadUrl) {
+                    window.open(`http://localhost:5000${data.downloadUrl}`, '_blank');
+                }
+                document.getElementById('result').innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('result').innerHTML = `<p style="color: red">Error: ${error.message}</p>`;
+            });
+        }
+    </script>
+</body>
+</html>

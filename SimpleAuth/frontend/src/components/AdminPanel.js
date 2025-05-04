@@ -6,6 +6,7 @@ import FileShare from "./FileShare";
 import Messages from "./Messages"; 
 import TaskList from './TaskList';
 import MilestoneAdmin from './MilestoneAdmin'; // Import the MilestoneAdmin component
+import AdminReports from "./AdminReports"; // Import the AdminReports component
 import "./AdminPanel.css";
 import { toggleUserStatus } from "../api/api"; // ✅ Aktif/Deaktif için
 
@@ -275,7 +276,7 @@ function AdminPanel() {
       return <div className="error-message">Kullanıcı bilgileri yüklenemedi.</div>;
     }
 
-    if (activeTab === "raporlar") return <p>Raporlar burada olacak.</p>;
+    if (activeTab === "raporlar") return <AdminReports />;
 
     if (activeTab === "dosyaPaylasimi") {
       return <FileShare user={currentUser} />;

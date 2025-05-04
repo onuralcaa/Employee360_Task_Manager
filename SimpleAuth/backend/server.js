@@ -9,6 +9,7 @@ const Team = require("./models/teamModel");
 const bcrypt = require("bcryptjs");
 const messageRoutes = require("./routes/messageRoutes");
 const fileRoutes = require("./routes/fileRoutes");
+const reportRoutes = require("./routes/reportRoutes"); // Add the report routes
 
 require("dotenv").config();
 
@@ -25,8 +26,8 @@ app.use("/api/users", userRoutes);
 app.use("/api/teams", teamRoutes);
 app.use("/api/messages", messageRoutes);
 app.use("/api/files", fileRoutes);
+app.use("/api/reports", reportRoutes); // Register the report routes
 app.use("/uploads", express.static("uploads")); // Dosyaları dışarıdan erişilebilir yapar
-
 
 // 🚀 Takımları Otomatik Oluştur
 const createDefaultTeams = async () => {

@@ -68,6 +68,15 @@ export const createTask = (taskData) => api.post("/tasks", taskData);
 export const updateTask = (taskId, taskData) => api.patch(`/tasks/${taskId}`, taskData);
 export const deleteTask = (taskId) => api.delete(`/tasks/${taskId}`);
 
+// 📊 Report endpoints
+export const createReport = (reportData) => api.post("/reports", reportData);
+export const getAllReports = () => api.get("/reports/all");
+export const getTeamLeaderReports = () => api.get("/reports/team-leader");
+export const getReportById = (reportId) => api.get(`/reports/${reportId}`);
+export const submitReport = (reportId) => api.patch(`/reports/submit/${reportId}`);
+export const deleteReport = (reportId) => api.delete(`/reports/${reportId}`);
+export const generateTextReport = (reportId) => api.get(`/reports/generate-text/${reportId}`, { responseType: 'blob' });
+
 // 🎯 Milestone endpoints
 export const getMilestones = () => api.get("/milestones");
 export const getMilestonesByUserId = (userId) => api.get(`/milestones/user/${userId}`);

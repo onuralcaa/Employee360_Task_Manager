@@ -7,6 +7,7 @@ import FileShareTeamLead from "./FileShare";
 import TaskList from "./TaskList";
 import TaskForm from "./TaskForm";
 import MilestoneForm from "./MilestoneForm";
+import TeamLeaderReports from "./TeamLeaderReports"; // Import the TeamLeaderReports component
 
 function TeamPanel() {
   const location = useLocation();
@@ -152,6 +153,10 @@ function TeamPanel() {
     if (activeTab === "dosyaPaylasimi") {
       return <FileShareTeamLead user={userData} />; 
     }
+    
+    if (activeTab === "raporlar") {
+      return <TeamLeaderReports user={userData} />;
+    }
 
     if (activeTab === "gorevler") {
       return (
@@ -245,6 +250,12 @@ function TeamPanel() {
             className={activeTab === "dosyaPaylasimi" ? "active" : ""}
           >
             Dosya Paylaşımı
+          </li>
+          <li 
+            onClick={() => setActiveTab("raporlar")} 
+            className={activeTab === "raporlar" ? "active" : ""}
+          >
+            Raporlar
           </li>
         </ul>
       </div>
