@@ -123,15 +123,33 @@ const updateTaskStatus = async (req, res) => {
       return res.status(404).json({ message: "Görev bulunamadı" });
     }
 
-    // Validate permissions based on status transition and user role
-    if (req.user.role === "admin" && (status === "verified" || status === "rejected")) {
-      // Admin can verify or reject 'done' status
+    // Regular users can only update tasks assigned to them and only to certain statuses
+    if (req.user.role === "personel") {
+      // Make sure user is assigned to this task
+      if (task.assignedTo.toString() !== req.user.id) {
+        return res.status(403).json({ message: "Sadece görevin atandığı kişi durumu değiştirebilir" });
+      }
+      
+      // Regular users can only change todo→in-progress, in-progress→done, on-hold→in-progress
+      if (
+        (task.status === "todo" && status === "in-progress") ||
+        (task.status === "in-progress" && status === "done") ||
+        (task.status === "on-hold" && status === "in-progress")
+      ) {
+        // These transitions are allowed
+      } else {
+        return res.status(403).json({ message: "Bu durum değişikliği için yetkiniz yok" });
+      }
+    } 
+    // Admin can verify or reject completed tasks
+    else if (req.user.role === "admin" && (status === "verified" || status === "rejected")) {
       if (task.status !== "done") {
         return res.status(400).json({ message: "Sadece tamamlanmış görevler onaylanabilir veya reddedilebilir" });
       }
-    } else if (task.assignedTo.toString() !== req.user.id && req.user.role !== "team_leader") {
-      // Only assigned user or team leader can change status (except admin for verify/reject)
-      return res.status(403).json({ message: "Sadece görevin atandığı kişi veya takım lideri durumu değiştirebilir" });
+    }
+    // Team leaders can make any status change
+    else if (req.user.role !== "team_leader") {
+      return res.status(403).json({ message: "Bu durum değişikliği için yetkiniz yok" });
     }
 
     task.status = status;

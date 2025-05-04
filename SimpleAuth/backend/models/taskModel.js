@@ -37,14 +37,20 @@ taskSchema.pre('save', async function(next) {
     const oldStatus = this._previousStatus || this.status;
     const newStatus = this.status;
 
+    // Allow keeping the same status (no change)
+    if (oldStatus === newStatus) {
+      return next();
+    }
+
+    // Check if transition is allowed
     if (!allowedTransitions[oldStatus]?.includes(newStatus)) {
       throw new Error(`${oldStatus} durumundan ${newStatus} durumuna geçiş geçersiz`);
     }
 
-    // Sadece admin doğrulayabilir veya reddedebilir
+    // Team leaders and admins can verify or reject
     if ((newStatus === 'verified' || newStatus === 'rejected') && 
-        (!this._modifiedBy || this._userRole !== 'admin')) {
-      throw new Error(`Görevleri sadece yöneticiler ${newStatus} durumuna getirebilir`);
+        (!this._modifiedBy || (this._userRole !== 'admin' && this._userRole !== 'team_leader'))) {
+      throw new Error(`Görevleri sadece yöneticiler veya takım liderleri ${newStatus} durumuna getirebilir`);
     }
   }
   next();

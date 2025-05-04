@@ -16,6 +16,10 @@ function TaskList({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [filter, setFilter] = useState("all");
+  const [showRejectModal, setShowRejectModal] = useState(false);
+  const [selectedTaskId, setSelectedTaskId] = useState(null);
+  const [teamMembers, setTeamMembers] = useState([]);
+  const [newAssignee, setNewAssignee] = useState("");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -72,6 +76,32 @@ function TaskList({
     }
   }, [user, isAdmin, isMilestoneView, isTeamLeader]);
 
+  useEffect(() => {
+    // Load team members for task reassignment
+    if (isTeamLeader && user?.team) {
+      const fetchTeamMembers = async () => {
+        try {
+          const response = await fetch(`http://localhost:5000/api/users/by-team/${user.team}`, {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          });
+          
+          if (!response.ok) {
+            throw new Error("Failed to fetch team members");
+          }
+          
+          const data = await response.json();
+          setTeamMembers(data);
+        } catch (err) {
+          console.error("Error fetching team members:", err);
+        }
+      };
+      
+      fetchTeamMembers();
+    }
+  }, [isTeamLeader, user]);
+
   const handleStatusChange = async (itemId, newStatus) => {
     try {
       let response;
@@ -108,7 +138,61 @@ function TaskList({
       setError(`Failed to update ${isMilestoneView ? 'milestone' : 'task'} status. Please try again.`);
     }
   };
-  
+
+  const handleReject = (taskId) => {
+    setSelectedTaskId(taskId);
+    setShowRejectModal(true);
+  };
+
+  const handleRejectConfirm = async (action) => {
+    try {
+      if (action === "abort") {
+        // Just mark as rejected
+        await handleStatusChange(selectedTaskId, "rejected");
+      } else if (action === "reassign" && newAssignee) {
+        // First mark as rejected
+        await updateTask(selectedTaskId, { status: "rejected" });
+        
+        // Then create a new task with the same details but new assignee
+        const taskToReassign = tasks.find(task => task._id === selectedTaskId);
+        if (taskToReassign) {
+          const newTask = {
+            title: taskToReassign.title,
+            description: taskToReassign.description,
+            assignedTo: newAssignee,
+            team: taskToReassign.team._id || taskToReassign.team,
+            status: "todo"
+          };
+          
+          const response = await fetch("http://localhost:5000/api/tasks", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+            body: JSON.stringify(newTask),
+          });
+          
+          if (!response.ok) {
+            throw new Error("Failed to reassign task");
+          }
+          
+          // Refresh task list
+          const userId = user.id || user._id;
+          const tasksResponse = await getTasksByUserId(userId);
+          setTasks(tasksResponse.data);
+        }
+      }
+    } catch (err) {
+      console.error("Error handling rejection:", err);
+      setError("Failed to process rejection. Please try again.");
+    } finally {
+      setShowRejectModal(false);
+      setSelectedTaskId(null);
+      setNewAssignee("");
+    }
+  };
+
   const getFilteredItems = () => {
     const items = isMilestoneView ? milestones : tasks;
     if (filter === "all") return items;
@@ -130,7 +214,7 @@ function TaskList({
 
   const getStatusText = (status) => {
     switch (status) {
-      case "todo": return "Beklemede";
+      case "todo": return "Yapılacaklar";
       case "in-progress": return "Devam Ediyor";
       case "on-hold": return "Bekletiliyor";
       case "done": return "Tamamlandı";
@@ -186,7 +270,7 @@ function TaskList({
           className={`filter-btn ${filter === "todo" ? "active" : ""}`}
           onClick={() => setFilter("todo")}
         >
-          Beklemede
+          Yapılacaklar
         </button>
         <button 
           className={`filter-btn ${filter === "in-progress" ? "active" : ""}`}
@@ -263,7 +347,7 @@ function TaskList({
               </div>
               
               {/* Task actions for regular users */}
-              {!isMilestoneView && !isAdmin && (
+              {!isMilestoneView && !isAdmin && !isTeamLeader && (
                 <div className="task-actions">
                   {item.status === "todo" && (
                     <button 
@@ -289,17 +373,7 @@ function TaskList({
                     </button>
                   )}
                   
-                  {(item.status === "in-progress" || item.status === "todo") && (
-                    <button 
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleStatusChange(item._id, "on-hold");
-                      }}
-                      className="action-btn hold-btn"
-                    >
-                      Beklet
-                    </button>
-                  )}
+                  {/* Removed the "Beklet" (on-hold) button from regular personnel view */}
                   
                   {item.status === "on-hold" && (
                     <button 
@@ -364,6 +438,30 @@ function TaskList({
                     >
                       Devam Et
                     </button>
+                  )}
+                  
+                  {/* New buttons for team leaders to verify or reject completed tasks */}
+                  {item.status === "done" && (
+                    <>
+                      <button 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleStatusChange(item._id, "verified");
+                        }}
+                        className="action-btn verify-btn"
+                      >
+                        Onayla
+                      </button>
+                      <button 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleReject(item._id);
+                        }}
+                        className="action-btn reject-btn"
+                      >
+                        Reddet
+                      </button>
+                    </>
                   )}
                 </div>
               )}
@@ -446,6 +544,60 @@ function TaskList({
               )}
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Rejection modal for team leaders */}
+      {showRejectModal && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <h3>Görev Reddetme</h3>
+            <p>Bu görevi reddetmek istediğinize emin misiniz?</p>
+            
+            <div className="modal-options">
+              <div className="modal-option">
+                <h4>Görevi Yeniden Atayın</h4>
+                <p>Görevi başka bir takım üyesine yeniden atamak için:</p>
+                <select 
+                  value={newAssignee} 
+                  onChange={(e) => setNewAssignee(e.target.value)}
+                  className="reassign-select"
+                >
+                  <option value="">Kişi Seçin</option>
+                  {teamMembers.map(member => (
+                    <option key={member._id} value={member._id}>
+                      {member.name} {member.surname}
+                    </option>
+                  ))}
+                </select>
+                <button 
+                  onClick={() => handleRejectConfirm("reassign")}
+                  className="action-btn"
+                  disabled={!newAssignee}
+                >
+                  Yeniden Ata
+                </button>
+              </div>
+              
+              <div className="modal-option">
+                <h4>Görevi İptal Et</h4>
+                <p>Görevi tamamen iptal edip reddedilmiş olarak işaretlemek için:</p>
+                <button 
+                  onClick={() => handleRejectConfirm("abort")}
+                  className="action-btn reject-btn"
+                >
+                  İptal Et
+                </button>
+              </div>
+            </div>
+            
+            <button 
+              onClick={() => setShowRejectModal(false)}
+              className="cancel-btn"
+            >
+              Vazgeç
+            </button>
+          </div>
         </div>
       )}
     </div>
