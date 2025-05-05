@@ -206,10 +206,55 @@ const getAllPersonnel = async (req, res) => {
 
 const getAllUsers = async (req, res) => {
   try {
-    //console.log("🚀 getAllUsers çalıştı!"); // ✅ Bu log gelmeli
-    //console.log("🟠 Gelen kullanıcı bilgisi (req.user):", req.user); // ✅ Token decode oldu mu?
+    // Get the requesting user information from the authentication middleware
+    const requestingUser = req.user;
+    console.log("👤 User making request:", requestingUser?.username, "Role:", requestingUser?.role, "Team:", requestingUser?.team);
+    
+    if (!requestingUser) {
+      return res.status(401).json({ message: "Authentication required" });
+    }
+    
+    let users = [];
+    
+    // Always get admin users in a separate query to ensure they're included for everyone
+    const adminUsers = await User.find({ role: "admin" }, "name surname username email role team");
+    console.log(`Found ${adminUsers.length} admin users that will be included for all users`);
 
-    const users = await User.find({}, "name surname username email role team");
+    // Apply role-based filtering
+    if (requestingUser.role === "admin") {
+      // Admins can see all users
+      console.log("⭐ Admin user - returning all users");
+      users = await User.find({ _id: { $ne: requestingUser.id } }, "name surname username email role team");
+    } else if (requestingUser.role === "team_leader") {
+      // Team leaders can see their team members and other team leaders
+      const teamId = requestingUser.team;
+      console.log("⭐ Team Leader - filtering for team", teamId);
+      users = await User.find({
+        $or: [
+          { team: teamId }, // Same team members
+          { role: "team_leader" } // Other team leaders
+        ],
+        _id: { $ne: requestingUser.id }, // Exclude the requesting user
+        role: { $ne: "admin" } // Exclude admin users (we'll add them separately)
+      }, "name surname username email role team");
+      
+      // Add admin users to the results
+      users = [...users, ...adminUsers];
+    } else {
+      // Regular personnel can only see their team members plus admin users
+      const teamId = requestingUser.team;
+      console.log("⭐ Regular user - filtering for team", teamId);
+      users = await User.find({
+        team: teamId, // Same team members only
+        _id: { $ne: requestingUser.id }, // Exclude the requesting user
+        role: { $ne: "admin" } // Exclude admin users (we'll add them separately)
+      }, "name surname username email role team");
+      
+      // Add admin users to the results
+      users = [...users, ...adminUsers];
+    }
+
+    console.log(`✅ Returning ${users.length} filtered users`);
     res.status(200).json(users);
   } catch (err) {
     console.error("❌ Kullanıcılar alınamadı:", err);
@@ -220,9 +265,45 @@ const getAllUsers = async (req, res) => {
 // ✅ Takım ID'sine göre kullanıcıları getir
 const getUsersByTeamId = async (req, res) => {
   try {
-    const teamUsers = await User.find({ team: req.params.teamId }); // ← projection kaldırıldı
-    res.status(200).json(teamUsers);
+    // Get requesting user from auth middleware
+    const requestingUser = req.user;
+    console.log("👤 getUsersByTeamId called by:", requestingUser?.username, "Role:", requestingUser?.role);
+    
+    if (!requestingUser) {
+      return res.status(401).json({ message: "Authentication required" });
+    }
+
+    // Only return team members if requesting user has permission
+    const targetTeamId = req.params.teamId;
+    
+    // Admins can see any team's members
+    if (requestingUser.role === "admin") {
+      console.log("⭐ Admin user - returning all team members for team:", targetTeamId);
+      const teamUsers = await User.find({ team: targetTeamId });
+      return res.status(200).json(teamUsers);
+    }
+    
+    // Team leaders can see their own team members
+    if (requestingUser.role === "team_leader" && requestingUser.team.toString() === targetTeamId) {
+      console.log("⭐ Team Leader - returning members for own team:", targetTeamId);
+      const teamUsers = await User.find({ team: targetTeamId });
+      return res.status(200).json(teamUsers);
+    }
+    
+    // Regular personnel can only see their own team if the IDs match
+    if (requestingUser.team.toString() === targetTeamId) {
+      console.log("⭐ Regular user - returning filtered team members for own team");
+      const teamUsers = await User.find({ 
+        team: targetTeamId,
+        role: { $ne: "admin" } // Exclude admins for regular users
+      });
+      return res.status(200).json(teamUsers);
+    }
+    
+    // If none of the above conditions are met, deny access
+    return res.status(403).json({ message: "You don't have permission to view this team's members" });
   } catch (error) {
+    console.error("❌ Takım kullanıcıları alınamadı:", error);
     res.status(500).json({ message: "Takım kullanıcıları alınamadı", error });
   }
 };
