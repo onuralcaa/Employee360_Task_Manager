@@ -6,26 +6,39 @@ function CardEntries() {
   const [entries, setEntries] = useState([]);
 
   useEffect(() => {
-    const fetchData = () => {
+    const interval = setInterval(() => {
       getAllEntries()
         .then((res) => setEntries(res.data))
         .catch((err) => console.error("Giriş kayıtları alınamadı:", err));
-    };
+    }, 3000); // 3 saniyede bir güncelle
 
-    fetchData(); // İlk yükleme
-    const interval = setInterval(fetchData, 5000); // 5 saniyede bir güncelle
-
-    return () => clearInterval(interval); // Sayfa kapatıldığında temizle
+    return () => clearInterval(interval);
   }, []);
 
   return (
-    <div className="card-entries-container">
+    <div className="entry-container">
       <h3>📋 Kart Giriş Kayıtları</h3>
       {entries.map((entry) => (
-        <div className="entry-card" key={entry._id}>
-          <p><strong>👤 Personel:</strong> {entry.name}</p>
-          <p><strong>💳 UID:</strong> {entry.uid}</p>
-          <p><strong>⏰ Tarih:</strong> {new Date(entry.time).toLocaleString()}</p>
+        <div
+          key={entry._id}
+          className={`entry-card ${entry.type === "giris" ? "giris" : "cikis"}`}
+        >
+          <p>
+            <span className="icon">👤</span>
+            <strong>Personel:</strong> {entry.name}
+          </p>
+          <p>
+            <span className="icon">💳</span>
+            <strong>UID:</strong> {entry.uid}
+          </p>
+          <p>
+            <span className="icon">⏰</span>
+            <strong>Tarih:</strong>{" "}
+            {new Date(entry.createdAt).toLocaleString()}
+          </p>
+          <p className={`type-label ${entry.type}`}>
+            {entry.type === "giris" ? "🟢 GİRİŞ" : "🔴 ÇIKIŞ"}
+          </p>
         </div>
       ))}
     </div>

@@ -4,11 +4,14 @@ const bodyParser = require("body-parser");
 const connectDB = require("./config/db");
 const userRoutes = require("./routes/userRoutes");
 const teamRoutes = require("./routes/teamRoutes");
+const taskRoutes = require("./routes/taskRoutes");
+const messageRoutes = require("./routes/messageRoutes");
+const fileRoutes = require("./routes/fileRoutes");
+const reportRoutes = require("./routes/reportRoutes"); 
+const milestoneRoutes = require("./routes/milestoneRoutes"); // Move this up with other route imports
 const User = require("./models/userModel");
 const Team = require("./models/teamModel");
 const bcrypt = require("bcryptjs");
-const messageRoutes = require("./routes/messageRoutes");
-const fileRoutes = require("./routes/fileRoutes");
 const entryRoutes = require("./routes/entryRoutes");
 
 
@@ -19,13 +22,16 @@ connectDB();
 
 app.use(cors());
 app.use(bodyParser.json());
+
+// Register all routes in a consistent location
 app.use("/api/users", userRoutes);
 app.use("/api/teams", teamRoutes);
+app.use("/api/tasks", taskRoutes);
 app.use("/api/messages", messageRoutes);
 app.use("/api/files", fileRoutes);
-app.use("/uploads", express.static("uploads")); // Dosyaları dışarıdan erişilebilir yapar
+app.use("/api/reports", reportRoutes);
+app.use("/api/milestones", milestoneRoutes); // Register milestone routes here with others
 app.use("/api/entries", entryRoutes);
-
 
 // 🚀 Takımları Otomatik Oluştur
 const createDefaultTeams = async () => {
@@ -155,7 +161,6 @@ const createTeamLeaders = async () => {
   await createAdminUser();
   await createTeamLeaders();
 })();
-
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`🚀 Server ${PORT} portunda çalışıyor!`));

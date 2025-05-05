@@ -35,8 +35,8 @@ function ResetPassword() {
   };
 
   return (
-    <div className="login-container">
-      <form className="login-box" onSubmit={handleReset}>
+    <div className="reset-password-container">
+      <form className="reset-password-box" onSubmit={handleReset}>
         <h2>Yeni Şifre Oluştur</h2>
 
         <div className="password-container">

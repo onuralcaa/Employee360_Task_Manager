@@ -11,7 +11,7 @@ const {
   getAllUsers,
   getUsersByTeamId,
   deleteUser,
-  toggleUserActiveStatus // ✅ Burada doğru isimle çağırıyoruz
+  toggleUserActiveStatus
 } = require("../controllers/userController");
 
 const verifyToken = require("../middleware/authMiddleware");
@@ -25,7 +25,7 @@ router.put("/:id", updateUser);
 router.get("/all", verifyToken, getAllUsers);
 
 // Takıma göre kullanıcıları getir
-router.get("/by-team/:teamId", getUsersByTeamId);
+router.get("/by-team/:teamId", verifyToken, getUsersByTeamId);
 
 // 🔥 En sonda ID bazlı getir
 router.get("/:id", getUserById);

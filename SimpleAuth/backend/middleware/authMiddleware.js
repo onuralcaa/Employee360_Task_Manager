@@ -2,7 +2,7 @@ const jwt = require("jsonwebtoken");
 
 const verifyToken = (req, res, next) => {
   const authHeader = req.headers.authorization;
-  console.log("🟠 Gelen Token Header:", authHeader); // 👉 Burada token var mı?
+  console.log("🟠 Gelen Token Header:", authHeader); // Token var mı kontrol et
 
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
     console.log("❌ Token eksik veya Bearer değil!");
@@ -13,7 +13,7 @@ const verifyToken = (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    console.log("✅ Token decode edildi:", decoded); // 👉 Burada kullanıcı bilgisi gelmeli!
+    console.log("✅ Token başarıyla çözüldü:", decoded); // Kullanıcı bilgisi gelmeli
     req.user = decoded;
     next();
   } catch (error) {

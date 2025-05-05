@@ -10,7 +10,13 @@ const teamSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
     required: false  // ❗ Bunu false yapıyoruz
-  }
+  },
+  members: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    }
+  ]
 });
 
 module.exports = mongoose.model("Team", teamSchema);
