@@ -5,7 +5,8 @@ export const isValidPassword = (password) => {
   return hasLetter && hasNumber;
 };
 
-export const isValidUsername = (username, fullName) => {
-  if (username.length < 4 || username.length === 1) return false;
-  return fullName.includes(username); // adsoyad içinde kullanıcı adı olmalı
+export const isValidUsername = (username) => {
+  if (username.length < 4) return false;
+  // Check that username contains only alphanumeric characters
+  return /^[a-zA-Z0-9]+$/.test(username);
 };

@@ -2,7 +2,10 @@ const express = require("express");
 const router = express.Router();
 const { createEntry, getAllEntries } = require("../controllers/entryController");
 
-router.post("/", createEntry);        // ESP32 buraya veri gönderiyor
-router.get("/", getAllEntries);       // Admin paneli burada verileri görüyor
+// Kart verilerini kaydet (ESP32 burada POST isteği yapar)
+router.post("/", createEntry);
+
+// Tüm girişleri al (frontend buradan çeker)
+router.get("/", getAllEntries);
 
 module.exports = router;

@@ -1,9 +1,13 @@
 const express = require("express");
 const router = express.Router();
-const { getAllTeams, getTeamById } = require("../controllers/teamController");
+const { getAllTeams, getTeamById, getAllTeamsWithMembersAndTasks } = require("../controllers/teamController");
+const verifyToken = require("../middleware/authMiddleware");
 
 // Route: /api/teams
 router.get("/", getAllTeams);            // tüm takımlar
 router.get("/:id", getTeamById);         // 👈 belirli takım
+
+// Admin: Get all teams with members and tasks
+router.get("/full", verifyToken, getAllTeamsWithMembersAndTasks);
 
 module.exports = router;

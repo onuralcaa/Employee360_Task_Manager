@@ -2,27 +2,30 @@ const Entry = require("../models/entryModel");
 
 const createEntry = async (req, res) => {
   try {
-    const { uid, name } = req.body;
-    // Mevcut giriş kaydı
+    const { uid, name, type } = req.body;
+
     const newEntry = new Entry({
       uid,
       name,
-      createdAt: new Date()  // 🛠 burada tarih oluşturuluyor
+      type, // gelen type (giris/cikis)
     });
 
     await newEntry.save();
-    res.status(201).json({ message: "Giriş kaydedildi" });
+    res.status(201).json(newEntry);
   } catch (error) {
-    res.status(500).json({ message: "Hata oluştu", error });
+    res.status(500).json({
+      message: "Kart girişi kaydedilemedi",
+      error: error.message,
+    });
   }
 };
 
 const getAllEntries = async (req, res) => {
   try {
-    const entries = await Entry.find().sort({ time: -1 });
+    const entries = await Entry.find().sort({ createdAt: -1 }); // createdAt kullan
     res.status(200).json(entries);
   } catch (error) {
-    res.status(500).json({ message: "Veriler alınamadı", error });
+    res.status(500).json({ message: "Girişler alınamadı", error: error.message });
   }
 };
 

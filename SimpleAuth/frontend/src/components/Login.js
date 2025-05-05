@@ -9,64 +9,84 @@ import "./Login.css";
 function Login() {
   const [user, setUser] = useState({ username: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (e) => setUser({ ...user, [e.target.name]: e.target.value });
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  try {
-    const response = await login(user);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    if (!user.username || !user.password) {
+      toast.error("Kullanıcı adı ve şifre gereklidir");
+      return;
+    }
+    
+    try {
+      setLoading(true);
+      const response = await login(user);
 
-    // ✅ Token kaydediliyor!
-    localStorage.setItem("token", response.data.token);
-    localStorage.setItem("userId", response.data.id);
-
-    const role = response.data.role;
-    const roleText =
-      role === "admin"
-        ? "Yönetici"
-        : role === "team_leader"
-        ? "Takım lideri"
-        : "Personel";
-
-    toast.success(`✅ ${roleText} girişi başarılı.`, { autoClose: 2000 });
-
-    const userState = {
-      id: response.data.id,
-      role: response.data.role,
-      name: response.data.name,
-      surname: response.data.surname,
-      username: response.data.username,
-      phone: response.data.phone,
-      email: response.data.email,
-      birthdate: response.data.birthdate,
-      team: response.data.team,
-    };
-
-    setTimeout(() => {
-      if (response.data.role === "admin") {
-        navigate("/dashboard", { replace: true, state: userState });
-      } else if (response.data.role === "team_leader") {
-        navigate("/team-panel", { replace: true, state: userState });
-      } else {
-        navigate("/user-panel", { replace: true, state: userState });
+      if (!response || !response.data || !response.data.token) {
+        throw new Error("Sunucudan geçersiz yanıt alındı");
       }
-    }, 2000);
-  } catch (error) {
-    const errMsg = error.response?.data?.message || error.message || "❌ Giriş başarısız! Lütfen bilgilerinizi kontrol edin.";
-    toast.error(errMsg);
-  }
-};
 
+      // Store token and user ID
+      localStorage.setItem("token", response.data.token);
+      localStorage.setItem("userId", response.data.id || response.data._id);
 
+      const role = response.data.role;
+      const roleText =
+        role === "admin"
+          ? "Yönetici"
+          : role === "team_leader"
+          ? "Takım lideri"
+          : "Personel";
+
+      toast.success(`✅ ${roleText} girişi başarılı.`, { autoClose: 2000 });
+
+      // Create user state to pass to the panel components
+      const userState = {
+        ...response.data,
+        id: response.data.id || response.data._id,
+        _id: response.data._id || response.data.id, // Including both formats to avoid inconsistencies
+      };
+
+      // Directly navigate to the correct panel based on role
+      setTimeout(() => {
+        if (role.toLowerCase() === "admin") {
+          navigate("/admin-panel", { replace: true, state: userState });
+        } else if (role.toLowerCase() === "team_leader") {
+          navigate("/team-panel", { replace: true, state: userState });
+        } else {
+          navigate("/user-panel", { replace: true, state: userState });
+        }
+      }, 2000);
+    } catch (error) {
+      console.error("Login error:", error);
+      const errMsg = error.response?.data?.message || error.message || "❌ Giriş başarısız! Lütfen bilgilerinizi kontrol edin.";
+      toast.error(errMsg);
+      
+      // Clear any existing tokens on login failure
+      localStorage.removeItem("token");
+      localStorage.removeItem("userId");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="login-container">
       <form onSubmit={handleSubmit} className="login-box">
         <h1>Personel360</h1>
 
-        <input name="username" placeholder="Kullanıcı Adı" onChange={handleChange} required />
+        <input 
+          name="username" 
+          placeholder="Kullanıcı Adı" 
+          onChange={handleChange} 
+          value={user.username}
+          disabled={loading}
+          required 
+        />
 
         <div className="password-container">
           <input
@@ -74,6 +94,8 @@ const handleSubmit = async (e) => {
             type={showPassword ? "text" : "password"}
             placeholder="Şifre"
             onChange={handleChange}
+            value={user.password}
+            disabled={loading}
             required
           />
           <span className="toggle-password" onClick={() => setShowPassword(!showPassword)}>
@@ -81,7 +103,9 @@ const handleSubmit = async (e) => {
           </span>
         </div>
 
-        <button type="submit">Giriş Yap</button>
+        <button type="submit" disabled={loading}>
+          {loading ? "Giriş Yapılıyor..." : "Giriş Yap"}
+        </button>
 
         <p className="register-link">
           Hesabınız yok mu?{" "}

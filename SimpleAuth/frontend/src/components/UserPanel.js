@@ -2,8 +2,10 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
 import "./UserPanel.css";
 import { updateUser } from "../api/api";
-import PersonnelMessages from "./PersonnelMessages";
-
+import PersonnelMessages from "./Messages";
+import TaskList from "./TaskList";
+import FileShare from "./FileShare";
+import { showSuccessToast, showErrorToast } from "../utils/toastUtils";
 
 function UserPanel() {
   const location = useLocation();
@@ -12,11 +14,17 @@ function UserPanel() {
   const userData = useMemo(() => location.state || {}, [location.state]);
 
   useEffect(() => {
-    console.log("Gelen kullanıcı bilgisi:", userData);
-  }, [userData]);
+    if (!userData.id) {
+      navigate("/login");
+    }
+  }, [userData, navigate]);
 
-  const [activeTab, setActiveTab] = useState("gorevler");
+  const [activeTab, setActiveTab] = useState("mesajlar");
   const [showEdit, setShowEdit] = useState(false);
+  const [tasks, setTasks] = useState([]);
+  const [milestones, setMilestones] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const [formData, setFormData] = useState({
     name: userData.name || "",
@@ -30,9 +38,33 @@ function UserPanel() {
 const renderContent = () => {
   switch (activeTab) {
     case "gorevler":
-      return <p>Burada görev listesi olacak.</p>;
+      return (
+        <TaskList 
+          user={userData}
+          activeTab="tasks"
+          tasks={tasks}
+          loading={loading}
+          error={error}
+          isTeamLeader={false}
+          isMilestoneView={false}
+        />
+      );
+    case "milestonlar":
+      return (
+        <TaskList 
+          user={userData}
+          activeTab="milestones"
+          milestones={milestones}
+          loading={loading}
+          error={error}
+          isTeamLeader={false}
+          isMilestoneView={true}
+        />
+      );
     case "mesajlar":
-      return <PersonnelMessages user={userData} />;  // ✅ BURAYI DEĞİŞTİRİYORUZ!
+      return <PersonnelMessages user={userData} />;
+    case "dosyalar":
+      return <FileShare user={userData} />;
     default:
       return <p>İçerik seçiniz.</p>;
   }
@@ -41,7 +73,11 @@ const renderContent = () => {
 
   const handleLogout = () => {
     const confirmed = window.confirm("Oturumu kapatmak istediğinize emin misiniz?");
-    if (confirmed) navigate("/login");
+    if (confirmed) {
+      localStorage.removeItem("token");
+      localStorage.removeItem("userId");
+      navigate("/login");
+    }
   };
 
   const handleChange = (e) => {
@@ -54,13 +90,20 @@ const renderContent = () => {
 
     try {
       await updateUser(userData.id, formData);
-      alert("Bilgiler başarıyla güncellendi!");
+      showSuccessToast("Bilgiler başarıyla güncellendi!");
       setShowEdit(false);
-      window.location.reload();
+      
+      // Instead of reloading the page (which loses state), update the userData
+      const updatedUserData = { ...userData, ...formData };
+      navigate("/user-panel", { replace: true, state: updatedUserData });
     } catch (error) {
-      alert("Güncelleme sırasında hata oluştu.");
+      showErrorToast("Güncelleme sırasında hata oluştu");
+      console.error("Güncellenirken hata:", error);
     }
   };
+
+  // Check if a user is a team leader or admin (has access to milestones)
+  const hasMilestoneAccess = userData.role === "team_leader" || userData.role === "admin";
 
   return (
     <div className="user-panel-wrapper">
@@ -68,8 +111,33 @@ const renderContent = () => {
       <div className="user-panel-left">
         <h2>📁 MENÜ</h2>
         <ul>
-          <li onClick={() => setActiveTab("mesajlar")}>Mesajlar</li>
-          <li onClick={() => setActiveTab("gorevler")}>Görevler</li>
+          <li 
+            className={activeTab === "mesajlar" ? "active" : ""}
+            onClick={() => setActiveTab("mesajlar")}
+          >
+            Mesajlar
+          </li>
+          <li 
+            className={activeTab === "gorevler" ? "active" : ""}
+            onClick={() => setActiveTab("gorevler")}
+          >
+            Görevler
+          </li>
+          <li 
+            className={activeTab === "dosyalar" ? "active" : ""}
+            onClick={() => setActiveTab("dosyalar")}
+          >
+            Dosyalar
+          </li>
+          {/* Only show Milestones tab to team leaders and admins */}
+          {hasMilestoneAccess && (
+            <li 
+              className={activeTab === "milestonlar" ? "active" : ""}
+              onClick={() => setActiveTab("milestonlar")}
+            >
+              Kilometre Taşları
+            </li>
+          )}
         </ul>
       </div>
 

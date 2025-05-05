@@ -23,6 +23,7 @@ function Register() {
 
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -44,8 +45,8 @@ function Register() {
       return;
     }
 
-    if (user.username.length < 5) {
-      toast.error("❌ Kullanıcı adı en az 5 karakter olmalıdır!");
+    if (user.username.length < 4) {
+      toast.error("❌ Kullanıcı adı en az 4 karakter olmalıdır!");
       return;
     }
 
@@ -126,14 +127,14 @@ function Register() {
         <div className="password-container">
           <input
             name="confirmPassword"
-            type={showPassword ? "text" : "password"}
+            type={showConfirmPassword ? "text" : "password"}
             placeholder="Şifre Tekrar"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             required
           />
-          <span className="toggle-password" onClick={() => setShowPassword(!showPassword)}>
-            {showPassword ? <FaEyeSlash /> : <FaEye />}
+          <span className="toggle-password" onClick={() => setShowConfirmPassword(!showConfirmPassword)}>
+            {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
           </span>
         </div>
 
@@ -150,7 +151,7 @@ function Register() {
       <div className="register-info-box">
         <h4>Kayıt Kuralları</h4>
         <ul>
-          <li>Kullanıcı adı en az 5 karakter olmalıdır.</li>
+          <li>Kullanıcı adı en az 4 karakter olmalıdır.</li>
           <li>Şifre en az 6 karakter, 1 harf ve 1 rakam içermelidir.</li>
           <li>Doğum yılı mevcut yıldan büyük olamaz.</li>
           <li>Numara sadece sayılardan oluşmalıdır.</li>

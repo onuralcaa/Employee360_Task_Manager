@@ -1,183 +1,254 @@
 .panel-wrapper {
   display: flex;
   height: 100vh;
+  background-color: #f4f4f4;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-.panel-left,
-.panel-center,
-.panel-right {
-  padding: 20px;
-  overflow-y: auto;
-}
-
+/* Sol Menü */
 .panel-left {
   width: 20%;
-  background-color: #f4f4f4;
+  background-color: #fff;
+  color: #333;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.05);
   border-right: 1px solid #ddd;
 }
 
 .panel-left h2 {
   font-size: 18px;
-  margin-bottom: 15px;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #eee;
   color: #333;
 }
 
 .panel-left ul {
-  list-style-type: none;
+  list-style: none;
   padding: 0;
+  margin: 0;
 }
 
 .panel-left li {
+  margin-bottom: 10px;
   padding: 10px 15px;
-  margin-bottom: 8px;
-  background-color: #ffffff;
   border-radius: 6px;
-  border: 1px solid #ccc;
+  background-color: #f4f4f4;
   cursor: pointer;
-  transition: background-color 0.2s ease;
+  transition: all 0.3s;
+  font-size: 15px;
+  color: #333;
 }
 
 .panel-left li:hover {
   background-color: #e2e6ea;
+  transform: translateX(5px);
 }
 
-.panel-center {
-  width: 50%;
-  background-color: #ffffff;
-  border-left: 1px solid #ddd;
-  border-right: 1px solid #ddd;
+.panel-left li.active {
+  background-color: #4f70ec;
+  color: white;
+  box-shadow: 0 2px 5px rgba(79, 112, 236, 0.3);
 }
 
-.panel-center h2 {
-  font-size: 22px;
-  margin-bottom: 20px;
-}
-
-/* ✅ Sağ Panel Düzenlemeleri */
-.panel-right {
-  width: 30%;
-  background-color: #fafafa;
-  display: flex;
-  flex-direction: column;
-  padding: 20px;
-  border-left: 1px solid #ddd;
-}
-
-.panel-right h2 {
-  font-size: 20px;
-  margin-bottom: 20px;
-  color: #4a3f7a;
-  border-bottom: 2px solid #ccc;
-  padding-bottom: 5px;
-}
-
-.user-detail {
-  background-color: #f4f0fa;
-  border: 1px solid #ddd;
-  border-radius: 10px;
-  padding: 15px 20px;
-  margin-bottom: 15px;
-  font-size: 15px;
-}
-
-.user-detail p {
-  margin: 10px 0;
-  color: #333;
-}
-
-.user-detail strong {
-  color: #5b3f7a;
-}
-
-/* ✅ Personel Kart Tasarımı */
-.person-card {
-  background-color: #f4f0fa;
-  border: 1px solid #d1c4e9;
-  padding: 5px 15px;
-  border-radius: 8px;
-  margin-bottom: 10px;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  box-shadow: 0 4px 5px rgba(128, 90, 213, 0.05);
-  cursor: pointer;
-}
-
-.person-card:hover {
-  transform: scale(1.0);
-  box-shadow: 0 4px 10px rgba(128, 90, 213, 0.15);
-  background-color: #ace3ff;
-}
-
-.person-card p {
-  margin: 6px 0;
-  font-size: 14px;
-  color: #333;
-}
-
-.person-card strong {
-  color: #5b3f7a;
-}
-
-/* Oturumu Kapat Butonu */
 .logout-container {
-  margin-top: 20px;
-  padding-top: 10px;
-  border-top: 1px solid #ccc;
+  margin-top: auto;
+  padding-top: 20px;
 }
 
 .logout-button {
+  width: 100%;
+  padding: 12px;
   background-color: #f44336;
   color: white;
   border: none;
-  padding: 10px 16px;
   border-radius: 6px;
   cursor: pointer;
-  width: 100%;
-  font-weight: bold;
-  transition: background-color 0.2s ease;
+  font-size: 15px;
+  font-weight: 500;
+  transition: background-color 0.3s;
 }
 
 .logout-button:hover {
   background-color: #d32f2f;
 }
 
-/* Sağ panel butonları */
+/* Orta Panel */
+.panel-center {
+  flex: 1;
+  padding: 2rem;
+  overflow-y: auto;
+  background-color: #fff;
+}
+
+.panel-center h2 {
+  font-size: 24px;
+  color: #333;
+  margin-bottom: 25px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #eee;
+}
+
+.panel-center h3 {
+  font-size: 20px;
+  color: #444;
+  margin-bottom: 20px;
+}
+
+.panel-center h4 {
+  font-size: 18px;
+  color: #5b3f7a;
+  margin-bottom: 15px;
+}
+
+/* Sağ Panel */
+.panel-right {
+  width: 300px;
+  background-color: #f9f9f9;
+  padding: 1.5rem;
+  border-left: 1px solid #e0e0e0;
+  overflow-y: auto;
+  box-shadow: -2px 0 5px rgba(0, 0, 0, 0.05);
+}
+
 .panel-right-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 15px;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #e0e0e0;
 }
 
-.collapse-button,
-.delete-button {
-  padding: 8px 16px;
-  border: none;
-  border-radius: 8px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.1s ease;
+.panel-right-header h2 {
+  font-size: 18px;
+  color: #333;
+  margin: 0;
 }
 
 .collapse-button {
-  background-color: #6c757d;
-  color: white;
-  margin-right: 8px;
+  background: none;
+  border: none;
+  font-weight: bold;
+  color: #888;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 5px;
+  transition: color 0.3s;
 }
 
 .collapse-button:hover {
-  background-color: #5a6268;
+  color: #333;
   transform: scale(1.05);
 }
 
 .delete-button {
-  background-color: #dc3545;
-  color: white;
+  background: none;
+  border: none;
+  color: #888;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 5px;
+  transition: color 0.3s;
+  font-weight: bold;
 }
 
 .delete-button:hover {
-  background-color: #c82333;
+  color: #333;
   transform: scale(1.05);
+}
+
+/* Personel Kartları */
+.person-card {
+  background-color: white;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.person-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+}
+
+.person-card p {
+  margin: 8px 0;
+  font-size: 14px;
+  color: #666;
+}
+
+.person-card strong {
+  color: #333;
+}
+
+/* Personel Detay Kartı */
+.person-detail-card {
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.person-detail-card p {
+  margin: 12px 0;
+  font-size: 15px;
+  color: #555;
+}
+
+.person-detail-card strong {
+  color: #333;
+  display: inline-block;
+  width: 130px;
+}
+
+/* Kilometre Taşı Detay */
+.milestone-detail {
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.milestone-detail h3 {
+  margin-top: 0;
+  font-size: 18px;
+  color: #333;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 10px;
+  margin-bottom: 15px;
+}
+
+.milestone-detail p {
+  margin: 12px 0;
+  color: #555;
+  font-size: 15px;
+}
+
+.milestone-detail strong {
+  color: #333;
+  display: inline-block;
+  width: 100px;
+}
+
+/* Kilometre Taşı Formu */
+.milestone-form {
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.milestone-form h3 {
+  margin-top: 0;
+  font-size: 18px;
+  color: #333;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 10px;
+  margin-bottom: 20px;
 }
 
 .status-toggle-button {
@@ -218,3 +289,88 @@
   border: 2px solid #b39ddb; /* Aynı hafif mor çerçeve */
 }
 
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+  color: #555;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 14px;
+  color: #333;
+}
+
+.form-group textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.cancel-btn, .submit-btn {
+  padding: 10px 16px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s;
+  border: none;
+}
+
+.cancel-btn {
+  background-color: #e0e0e0;
+  color: #333;
+}
+
+.cancel-btn:hover {
+  background-color: #d0d0d0;
+}
+
+.submit-btn {
+  background-color: #4a90e2;
+  color: white;
+}
+
+.submit-btn:hover {
+  background-color: #3a80d2;
+}
+
+/* Mobil Responsive */
+@media (max-width: 1024px) {
+  .panel-wrapper {
+    flex-direction: column;
+    height: auto;
+  }
+  
+  .panel-left {
+    width: 100%;
+    padding: 1rem;
+  }
+  
+  .panel-center {
+    width: 100%;
+    padding: 1rem;
+  }
+  
+  .panel-right {
+    width: 100%;
+    border-left: none;
+    border-top: 1px solid #e0e0e0;
+  }
+}

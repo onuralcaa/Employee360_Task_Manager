@@ -36,6 +36,7 @@ const userSchema = new mongoose.Schema({
   },
   resetPasswordToken: String,
   resetPasswordExpire: Date,
+
   isActive: {
     type: Boolean,
     default: true
@@ -46,4 +47,5 @@ const userSchema = new mongoose.Schema({
   }
 }, { timestamps: true }); // ✅ timestamps burada
 
-module.exports = mongoose.model("User", userSchema); // ✅ Doğru export
+
+module.exports = mongoose.model("User", userSchema);

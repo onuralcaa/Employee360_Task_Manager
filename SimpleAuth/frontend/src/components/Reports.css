@@ -1,0 +1,183 @@
+/* Report components styling */
+.report-container {
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  background-color: #fff;
+}
+
+.report-list {
+  margin-top: 20px;
+}
+
+.report-card {
+  background-color: #f9f9f9;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.report-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+}
+
+.report-card h3 {
+  margin-top: 0;
+  color: #5b3f7a;
+}
+
+.report-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.report-form input,
+.report-form textarea,
+.report-form select {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 16px;
+  width: 100%;
+}
+
+.report-form textarea {
+  min-height: 150px;
+  resize: vertical;
+}
+
+.report-form label {
+  font-weight: bold;
+  margin-bottom: 5px;
+  display: block;
+}
+
+.report-action-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.report-action-buttons button {
+  padding: 5px 10px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+}
+
+.report-create-button {
+  padding: 10px 15px;
+  background-color: #5b3f7a;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  margin-top: 10px;
+  transition: background-color 0.3s ease;
+}
+
+.report-create-button:hover {
+  background-color: #4a3464;
+}
+
+.submit-button {
+  background-color: #3498db;
+  color: white;
+}
+
+.submit-button:hover {
+  background-color: #2980b9;
+}
+
+.view-button {
+  background-color: #2ecc71;
+  color: white;
+}
+
+.view-button:hover {
+  background-color: #27ae60;
+}
+
+.delete-button {
+  background-color: #e74c3c;
+  color: white;
+}
+
+.delete-button:hover {
+  background-color: #c0392b;
+}
+
+.report-detail {
+  margin-top: 20px;
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.report-detail h2 {
+  color: #5b3f7a;
+  margin-top: 0;
+}
+
+.report-detail-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.report-content {
+  margin-top: 20px;
+  padding: 15px;
+  background-color: white;
+  border-radius: 4px;
+  border: 1px solid #eee;
+}
+
+.report-status {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.report-status-draft {
+  background-color: #f39c12;
+  color: white;
+}
+
+.report-status-submitted {
+  background-color: #2ecc71;
+  color: white;
+}
+
+.date-inputs {
+  display: flex;
+  gap: 10px;
+}
+
+.date-inputs input {
+  flex: 1;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .report-action-buttons {
+    flex-direction: column;
+  }
+  
+  .date-inputs {
+    flex-direction: column;
+  }
+}
