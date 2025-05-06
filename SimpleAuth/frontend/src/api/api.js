@@ -76,6 +76,7 @@ export const getReportById = (reportId) => api.get(`/reports/${reportId}`);
 export const submitReport = (reportId) => api.patch(`/reports/submit/${reportId}`);
 export const deleteReport = (reportId) => api.delete(`/reports/${reportId}`);
 export const generateTextReport = (reportId) => api.get(`/reports/generate-text/${reportId}`, { responseType: 'blob' });
+export const generateReportFile = (reportId) => api.get(`/reports/generate-file/${reportId}`);
 
 // 🎯 Milestone endpoints
 export const getMilestones = () => api.get("/milestones");
