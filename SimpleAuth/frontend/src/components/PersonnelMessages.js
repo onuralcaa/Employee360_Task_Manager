@@ -113,9 +113,7 @@ function PersonnelMessages({ user }) {
       e.preventDefault();
       handleSend();
     }
-  };
-
-  // Separate users by role for better organization in the dropdown
+  };  // Separate users by role for better organization in the dropdown
   const adminUsers = allUsers.filter(user => 
     user._id !== state.id && user.role === "admin"
   );
@@ -128,10 +126,11 @@ function PersonnelMessages({ user }) {
 
   return (
     <div className="msg-wrapper">
-      <h3>📨 Mesajlaşma Paneli (Personel)</h3>
-
-      <div className="msg-contacts">
+      <h3>📨 Mesajlaşma Paneli (Personel)</h3>      <div className="msg-contacts">
         <h4>Kişiler</h4>
+        <div className="messaging-info">
+          <small>Not: Admin mesajlarını görebilirsiniz ancak cevap veremezsiniz</small>
+        </div>
         <select
           value={receiverId}
           onChange={(e) => setReceiverId(e.target.value)}

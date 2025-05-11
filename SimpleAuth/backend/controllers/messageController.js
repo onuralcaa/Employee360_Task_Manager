@@ -25,24 +25,23 @@ const sendMessage = async (req, res) => {
 
     if (!senderUser || !recipientUser) {
       return res.status(404).json({ message: "Gönderen veya alıcı bulunamadı." });
-    }
-
-    // Check messaging permissions based on roles
+    }    // Check messaging permissions based on roles
     if (senderUser.role === "personel") {
-      // Allow personnel to message admins
+      // Regular personnel cannot message admins
       if (recipientUser.role === "admin") {
-        console.log("✅ Personnel is allowed to message admin");
-      } else {
-        // Regular personnel can only message people on their own team
-        const senderTeamId = senderUser.team ? senderUser.team.toString() : null;
-        const recipientTeamId = recipientUser.team ? recipientUser.team.toString() : null;
-
-        if (senderTeamId !== recipientTeamId) {
-          console.log("❌ Personnel attempted to message user from another team");
-          return res.status(403).json({ message: "Yalnızca kendi takımınızdaki kişilere mesaj gönderebilirsiniz." });
-        }
+        console.log("❌ Personnel attempted to message admin");
+        return res.status(403).json({ message: "Yöneticilere (admin) mesaj gönderemezsiniz." });
       }
-    } else if (senderUser.role === "team_leader") {
+      
+      // Regular personnel can only message people on their own team
+      const senderTeamId = senderUser.team ? senderUser.team.toString() : null;
+      const recipientTeamId = recipientUser.team ? recipientUser.team.toString() : null;
+
+      if (senderTeamId !== recipientTeamId) {
+        console.log("❌ Personnel attempted to message user from another team");
+        return res.status(403).json({ message: "Yalnızca kendi takımınızdaki kişilere mesaj gönderebilirsiniz." });
+      }
+    } else if (senderUser.role === "team_leader") {else if (senderUser.role === "team_leader") {
       // Team leaders can message their team members and other team leaders
       const senderTeamId = senderUser.team ? senderUser.team.toString() : null;
       const recipientTeamId = recipientUser.team ? recipientUser.team.toString() : null;
