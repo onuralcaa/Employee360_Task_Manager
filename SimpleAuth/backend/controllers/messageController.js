@@ -41,7 +41,7 @@ const sendMessage = async (req, res) => {
         console.log("❌ Personnel attempted to message user from another team");
         return res.status(403).json({ message: "Yalnızca kendi takımınızdaki kişilere mesaj gönderebilirsiniz." });
       }
-    } else if (senderUser.role === "team_leader") {else if (senderUser.role === "team_leader") {
+    } else if (senderUser.role === "team_leader") {
       // Team leaders can message their team members and other team leaders
       const senderTeamId = senderUser.team ? senderUser.team.toString() : null;
       const recipientTeamId = recipientUser.team ? recipientUser.team.toString() : null;
