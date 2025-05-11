@@ -191,10 +191,26 @@ async function updateMilestoneStatus(req, res) {
     }
 
     const previousStatus = milestone.status;
+    
+    // Check if trying to change assignedTo field
+    if (req.body.assignedTo && String(milestone.assignedTo) !== req.body.assignedTo) {
+      // Only admin can reassign milestones
+      if (req.user.role !== 'admin') {
+        return res.status(403).json({ message: "Sadece yöneticiler milestone atamalarını değiştirebilir." });
+      }
+      
+      // Verify the new assignee is a team leader
+      const newAssignee = await User.findById(req.body.assignedTo);
+      if (!newAssignee || newAssignee.role !== 'team_leader') {
+        return res.status(400).json({ message: "Milestone sadece takım liderine atanabilir." });
+      }
+    }
+    
     // Update milestone fields
     if (req.body.title) milestone.title = req.body.title;
     if (req.body.description) milestone.description = req.body.description;
     if (req.body.status) milestone.status = req.body.status;
+    if (req.body.assignedTo && req.user.role === 'admin') milestone.assignedTo = req.body.assignedTo;
     
     milestone._modifiedBy = req.user.id;  // Track who modified it
     await milestone.save();

@@ -183,19 +183,10 @@ function TeamPanel() {
           />
         </div>
       );
-    }
-
-    if (activeTab === "milestonlar") {
+    }    if (activeTab === "milestonlar") {
       return (
         <div>
-          <MilestoneForm 
-            user={userData} 
-            onMilestoneCreated={() => {
-              setActiveTab("milestonlar");
-              setShowMilestoneForm(false);
-            }} 
-            isVisible={showMilestoneForm}
-          />
+          <MilestoneForm isVisible={showMilestoneForm} />
           <TaskList 
             user={userData}
             onSelectMilestone={handleSelectMilestone}
