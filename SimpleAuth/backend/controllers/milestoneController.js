@@ -321,7 +321,19 @@ async function deleteMilestone(req, res) {
 // Admin assigns milestone to team leader
 async function assignMilestone(req, res) {
   try {
-    const { title, description, teamLeaderId } = req.body;
+    // Log the full request body for debugging
+    console.log("⭐ assignMilestone: Request received", JSON.stringify(req.body, null, 2));
+    
+    const { title, description, assignedTo } = req.body;
+    
+    // Validate required fields
+    if (!title || !title.trim()) {
+      return res.status(400).json({ message: "Başlık gereklidir." });
+    }
+    
+    if (!assignedTo) {
+      return res.status(400).json({ message: "Takım lideri seçilmelidir." });
+    }
     
     // Only admin can assign milestones
     if (req.user.role !== 'admin') {
@@ -329,15 +341,25 @@ async function assignMilestone(req, res) {
     }
 
     // Verify assigned user is a team leader
-    const leader = await User.findById(teamLeaderId);
-    if (!leader || leader.role !== 'team_leader') {
+    const leader = await User.findById(assignedTo);
+    
+    if (!leader) {
+      return res.status(404).json({ message: "Belirtilen takım lideri bulunamadı." });
+    }
+    
+    if (leader.role !== 'team_leader') {
       return res.status(400).json({ message: "Milestone sadece takım liderine atanabilir." });
+    }
+    
+    // Check if the team leader has a team assigned
+    if (!leader.team) {
+      return res.status(400).json({ message: "Seçilen takım liderinin bir takımı yok. Önce takım liderine bir takım atayın." });
     }
 
     const milestone = new Milestone({
       title,
       description,
-      assignedTo: teamLeaderId,
+      assignedTo,
       team: leader.team,
       status: 'todo'
     });
@@ -376,9 +398,23 @@ async function assignMilestone(req, res) {
       // Continue execution even if email fails
     }
     
+    console.log("✅ Milestone başarıyla oluşturuldu:", milestone);
     res.status(201).json({ message: "Milestone başarıyla atandı.", milestone });
   } catch (err) {
     console.error("Milestone atanırken hata:", err);
+    
+    // Provide more specific error messages based on the error type
+    if (err.name === 'ValidationError') {
+      // Handle Mongoose validation errors
+      const validationErrors = Object.values(err.errors).map(error => error.message);
+      return res.status(400).json({ 
+        message: "Milestone atanırken doğrulama hatası oluştu.", 
+        details: validationErrors.join(', ') 
+      });
+    } else if (err.name === 'CastError' && err.kind === 'ObjectId') {
+      return res.status(400).json({ message: "Geçersiz ID formatı." });
+    }
+    
     res.status(500).json({ message: "Milestone atanırken hata oluştu.", error: err.message });
   }
 }
