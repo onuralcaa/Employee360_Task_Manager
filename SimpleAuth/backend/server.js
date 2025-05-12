@@ -12,6 +12,8 @@ const milestoneRoutes = require("./routes/milestoneRoutes"); // Move this up wit
 const User = require("./models/userModel");
 const Team = require("./models/teamModel");
 const bcrypt = require("bcryptjs");
+const entryRoutes = require("./routes/entryRoutes");
+
 
 require("dotenv").config();
 
@@ -29,6 +31,7 @@ app.use("/api/messages", messageRoutes);
 app.use("/api/files", fileRoutes);
 app.use("/api/reports", reportRoutes);
 app.use("/api/milestones", milestoneRoutes); // Register milestone routes here with others
+app.use("/api/entries", entryRoutes);
 
 // 🚀 Takımları Otomatik Oluştur
 const createDefaultTeams = async () => {

@@ -10,6 +10,7 @@ import AdminReports from "./AdminReports"; // Import the AdminReports component
 import "./AdminPanel.css";
 import { toggleUserStatus } from "../api/api"; // ✅ Aktif/Deaktif için
 import { showSuccessToast, showErrorToast } from "../utils/toastUtils";
+import CardEntries from "./CardEntries";
 
 function AdminPanel() {
   const navigate = useNavigate();
@@ -289,6 +290,8 @@ function AdminPanel() {
       return <FileShare user={currentUser} />;
     }
 
+    if (activeTab === "kartGiris") return <CardEntries />;
+
     if (activeTab === "mesajlar") {
       return <Messages user={currentUser} />;
     }
@@ -396,6 +399,9 @@ function AdminPanel() {
           >
             Raporlar
           </li>
+
+          <li onClick={() => handleMenuClick("kartGiris")}>Kart Giriş Kontrol</li>
+
         </ul>
         <div className="logout-container">
           <button className="logout-button" onClick={handleLogout}>

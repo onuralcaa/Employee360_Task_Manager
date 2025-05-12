@@ -5,7 +5,8 @@ import {
   getReportById, 
   submitReport, 
   deleteReport, 
-  generateTextReport 
+  generateTextReport,
+  generateReportFile 
 } from '../api/api';
 import './Reports.css';
 import { ToastContainer, toast } from 'react-toastify';

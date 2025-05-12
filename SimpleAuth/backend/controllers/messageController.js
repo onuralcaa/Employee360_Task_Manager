@@ -25,19 +25,18 @@ const sendMessage = async (req, res) => {
 
     if (!senderUser || !recipientUser) {
       return res.status(404).json({ message: "Gönderen veya alıcı bulunamadı." });
-    }
-
-    // Check messaging permissions based on roles
+    }    // Check messaging permissions based on roles
     if (senderUser.role === "personel") {
+      // Regular personnel cannot message admins
+      if (recipientUser.role === "admin") {
+        console.log("❌ Personnel attempted to message admin");
+        return res.status(403).json({ message: "Yöneticilere (admin) mesaj gönderemezsiniz." });
+      }
+      
       // Regular personnel can only message people on their own team
       const senderTeamId = senderUser.team ? senderUser.team.toString() : null;
       const recipientTeamId = recipientUser.team ? recipientUser.team.toString() : null;
-      
-      if (recipientUser.role === "admin") {
-        console.log("❌ Personnel attempted to message admin");
-        return res.status(403).json({ message: "Yöneticilere mesaj gönderme yetkiniz bulunmamaktadır." });
-      }
-      
+
       if (senderTeamId !== recipientTeamId) {
         console.log("❌ Personnel attempted to message user from another team");
         return res.status(403).json({ message: "Yalnızca kendi takımınızdaki kişilere mesaj gönderebilirsiniz." });
@@ -46,7 +45,7 @@ const sendMessage = async (req, res) => {
       // Team leaders can message their team members and other team leaders
       const senderTeamId = senderUser.team ? senderUser.team.toString() : null;
       const recipientTeamId = recipientUser.team ? recipientUser.team.toString() : null;
-      
+
       if (recipientUser.role === "personel" && senderTeamId !== recipientTeamId) {
         console.log("❌ Team leader attempted to message personnel from another team");
         return res.status(403).json({ message: "Yalnızca kendi takımınızdaki personele mesaj gönderebilirsiniz." });

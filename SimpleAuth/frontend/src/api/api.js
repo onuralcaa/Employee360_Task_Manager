@@ -20,6 +20,17 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    // Log detailed error information for debugging
+    if (error.response) {
+      console.error("API Error Response:", {
+        status: error.response.status,
+        data: error.response.data,
+        endpoint: error.config?.url
+      });
+    } else {
+      console.error("API Error:", error.message);
+    }
+    
     if (
       error.response?.status === 401 ||
       error.response?.data?.message?.includes("jwt expired") || 
@@ -76,18 +87,26 @@ export const getReportById = (reportId) => api.get(`/reports/${reportId}`);
 export const submitReport = (reportId) => api.patch(`/reports/submit/${reportId}`);
 export const deleteReport = (reportId) => api.delete(`/reports/${reportId}`);
 export const generateTextReport = (reportId) => api.get(`/reports/generate-text/${reportId}`, { responseType: 'blob' });
+export const generateReportFile = (reportId) => api.get(`/reports/generate-file/${reportId}`);
 
 // 🎯 Milestone endpoints
 export const getMilestones = () => api.get("/milestones");
 export const getMilestonesByUserId = (userId) => api.get(`/milestones/user/${userId}`);
 export const getMilestonesByTeamId = (teamId) => api.get(`/milestones/team/${teamId}`);
 export const createMilestone = (milestoneData) => api.post("/milestones", milestoneData);
-export const assignMilestoneToTeamLeader = (milestoneData) => api.post("/milestones/assign", milestoneData);
+export const assignMilestoneToTeamLeader = (milestoneData) => {
+  console.log("Calling assignMilestoneToTeamLeader API with data:", milestoneData);
+  return api.post("/milestones/assign", milestoneData);
+};
 export const updateMilestone = (milestoneId, milestoneData) => api.patch(`/milestones/${milestoneId}`, milestoneData);
 export const deleteMilestone = (milestoneId) => api.delete(`/milestones/${milestoneId}`);
 export const submitMilestone = (milestoneId) => api.patch(`/milestones/${milestoneId}/submit`);
 export const verifyMilestone = (milestoneId) => api.patch(`/milestones/${milestoneId}/verify`);
 export const rejectMilestone = (milestoneId) => api.patch(`/milestones/${milestoneId}/reject`);
+
+// Entries endpoints
+export const getAllEntries = () => api.get("/entries");
+
 
 // 📁 File endpoints
 export const uploadFile = (formData) => {

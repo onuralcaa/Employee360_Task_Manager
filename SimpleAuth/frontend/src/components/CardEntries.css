@@ -1,0 +1,43 @@
+.entry-container {
+  margin-top: 20px;
+}
+
+.entry-card {
+  background-color: #f5f0ff;
+  border-left: 5px solid #aaa;
+  border-radius: 10px;
+  padding: 12px 18px;
+  margin-bottom: 14px;
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+}
+
+.entry-card.giris {
+  border-left-color: green;
+}
+
+.entry-card.cikis {
+  border-left-color: red;
+}
+
+.icon {
+  margin-right: 6px;
+}
+
+.type-label {
+  font-weight: bold;
+  margin-top: 8px;
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 6px;
+}
+
+.type-label.giris {
+  background-color: #e8f5e9;
+  color: green;
+}
+
+.type-label.cikis {
+  background-color: #ffebee;
+  color: red;
+}

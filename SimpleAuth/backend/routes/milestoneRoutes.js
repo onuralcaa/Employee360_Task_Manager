@@ -23,11 +23,23 @@ router.get("/user/:userId", verifyToken, getMilestonesByUserId);
 // Get milestones by team ID
 router.get("/team/:teamId", verifyToken, getMilestonesByTeamId);
 
-// Create new milestone
-router.post("/", verifyToken, createMilestone);
+// Create new milestone (admin only)
+router.post("/", verifyToken, (req, res, next) => {
+  // Extra middleware to ensure only admins can access this route
+  if (req.user.role !== 'admin') {
+    return res.status(403).json({ message: "Bu işlem için yetkiniz yok. Sadece yöneticiler milestone oluşturabilir." });
+  }
+  next();
+}, createMilestone);
 
 // Admin assigns milestone to team leader
-router.post("/assign", verifyToken, assignMilestone);
+router.post("/assign", verifyToken, (req, res, next) => {
+  // Extra middleware to ensure only admins can access this route
+  if (req.user.role !== 'admin') {
+    return res.status(403).json({ message: "Bu işlem için yetkiniz yok. Sadece yöneticiler milestone atayabilir." });
+  }
+  next();
+}, assignMilestone);
 
 // Update milestone status
 router.patch("/:id", verifyToken, updateMilestoneStatus);

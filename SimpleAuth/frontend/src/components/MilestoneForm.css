@@ -73,3 +73,17 @@
   background-color: #aaa;
   cursor: not-allowed;
 }
+
+.milestone-form-info {
+  background-color: #f7f7f7;
+  border-radius: 6px;
+  padding: 15px;
+  margin-top: 10px;
+}
+
+.milestone-form-info p {
+  color: #555;
+  margin: 8px 0;
+  font-size: 14px;
+  line-height: 1.5;
+}
