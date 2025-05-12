@@ -389,30 +389,7 @@ function TaskList({
               {/* Task actions for team leaders */}
               {!isMilestoneView && isTeamLeader && !isAdmin && (
                 <div className="task-actions">
-                  {item.status === "todo" && (
-                    <button 
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleStatusChange(item._id, "in-progress");
-                      }}
-                      className="action-btn start-btn"
-                    >
-                      Başlat
-                    </button>
-                  )}
-                  
-                  {item.status === "in-progress" && (
-                    <button 
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleStatusChange(item._id, "done");
-                      }}
-                      className="action-btn complete-btn"
-                    >
-                      Tamamla
-                    </button>
-                  )}
-                  
+                                                     
                   {(item.status === "in-progress" || item.status === "todo") && (
                     <button 
                       onClick={(e) => {
