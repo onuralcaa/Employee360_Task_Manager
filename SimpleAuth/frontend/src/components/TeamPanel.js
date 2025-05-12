@@ -8,6 +8,8 @@ import TaskList from "./TaskList";
 import TaskForm from "./TaskForm";
 import MilestoneForm from "./MilestoneForm";
 import TeamLeaderReports from "./TeamLeaderReports"; // Import the TeamLeaderReports component
+import { toast, ToastContainer } from "react-toastify"; // Import toastify
+import "react-toastify/dist/ReactToastify.css"; // Import toastify styles
 
 function TeamPanel() {
   const location = useLocation();
@@ -130,6 +132,11 @@ function TeamPanel() {
     );
   };
 
+  const handleTaskCreated = () => {
+    setShowTaskForm(false);
+    toast.success("Görev başarıyla oluşturuldu!"); // Show success toast
+  };
+
   const renderContent = () => {
     if (activeTab === "uyeler") {
       return (
@@ -163,10 +170,7 @@ function TeamPanel() {
         <div>
           <TaskForm 
             user={userData} 
-            onTaskCreated={() => {
-              setActiveTab("gorevler");
-              setShowTaskForm(false);
-            }} 
+            onTaskCreated={handleTaskCreated} // Pass the success handler
             isVisible={showTaskForm}
           />
           <TaskList 
@@ -272,6 +276,7 @@ function TeamPanel() {
         </div>
         {rightPanelContent}
       </div>
+      <ToastContainer position="top-center" autoClose={3000} /> {/* Add ToastContainer */}
     </div>
   );
 }

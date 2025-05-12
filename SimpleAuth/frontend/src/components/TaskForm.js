@@ -60,7 +60,7 @@ function TaskForm({ user, onTaskCreated, isVisible = true }) {
       setAssignedTo('');
       
       // Görev listesini yenile
-      if (onTaskCreated) onTaskCreated();
+      if (onTaskCreated) onTaskCreated(); // Call the success callback
       
       setLoading(false);
     } catch (err) {
