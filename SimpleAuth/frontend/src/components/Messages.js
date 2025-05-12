@@ -65,9 +65,11 @@ function Messages({ user }) {
     );
     setCurrentConversation(filtered);
   };
-
   const handleSend = async () => {
     if (!receiverId || !text.trim()) return;
+    
+    // Don't allow regular users to send messages to admins
+    if (isAdminSelected()) return;
 
     try {
       const newMessage = {
@@ -85,9 +87,7 @@ function Messages({ user }) {
     } catch (error) {
       console.error("Mesaj gönderme hatası:", error);
     }
-  };
-
-  // Filter the list of users that this user can message
+  };  // Filter the list of users that this user can message
   const filteredRecipients = allUsers.filter((user) => {
     // Don't show the current user in the list
     if (user._id === state.id) return false;
@@ -104,10 +104,10 @@ function Messages({ user }) {
       );
     }
 
-    // Regular personnel can message team members, team leaders, and admins
+    // Regular personnel can see admins (to view messages) and can message team members and team leaders
     if (state.role === "personel") {
       return (
-        user.role === "admin" || // Include admins
+        user.role === "admin" || // Include admins for viewing
         (user.team === state.team &&
           (user.role === "personel" || user.role === "team_leader"))
       );
@@ -115,12 +115,18 @@ function Messages({ user }) {
 
     return false;
   });
-
   // Get the name of currently selected recipient
   const getRecipientName = () => {
     if (!receiverId) return "";
     const recipient = allUsers.find(user => user._id === receiverId);
     return recipient ? `${recipient.name} ${recipient.surname}` : "";
+  };
+
+  // Check if selected recipient is an admin
+  const isAdminSelected = () => {
+    if (!receiverId) return false;
+    const recipient = allUsers.find(user => user._id === receiverId);
+    return recipient && recipient.role === "admin" && state.role === "personel";
   };
 
   // Handle Enter key to send message
@@ -133,10 +139,13 @@ function Messages({ user }) {
 
   return (
     <div className="msg-wrapper">
-      <h3>📨 Mesajlaşma Paneli</h3>
-
-      <div className="msg-contacts">
+      <h3>📨 Mesajlaşma Paneli</h3>      <div className="msg-contacts">
         <h4>Kişiler</h4>
+        {state.role === "personel" && (
+          <div className="messaging-info">
+            <small>Not: Personel, admin mesajlarını görebilir ancak cevap veremez</small>
+          </div>
+        )}
         <select
           value={receiverId}
           onChange={(e) => setReceiverId(e.target.value)}
@@ -151,15 +160,22 @@ function Messages({ user }) {
         </select>
       </div>
 
-      {receiverId ? (
-        <div className="msg-conversation">
+      {receiverId ? (        <div className="msg-conversation">
           <div className="conversation-header">
             <h4>Sohbet: {getRecipientName()}</h4>
+            {isAdminSelected() && (
+              <div className="admin-message-notice">
+                Admin mesajlarını görebilirsiniz ancak cevap veremezsiniz.
+              </div>
+            )}
           </div>
-          
-          <div className="conversation-messages">
+            <div className="conversation-messages">
             {currentConversation.length === 0 ? (
-              <p className="no-messages">Henüz mesaj yok. Konuşmaya başlayın!</p>
+              <p className="no-messages">
+                {isAdminSelected() 
+                  ? "Bu admin ile mesaj geçmişi bulunmamaktadır." 
+                  : "Henüz mesaj yok. Konuşmaya başlayın!"}
+              </p>
             ) : (
               currentConversation.map((msg) => (
                 <div 
@@ -176,17 +192,21 @@ function Messages({ user }) {
               ))
             )}
           </div>
-          
-          <div className="msg-input-area">
+            <div className="msg-input-area">
             <textarea
-              placeholder="Mesajınızı yazın..."
+              placeholder={isAdminSelected() ? "Admin kullanıcısına mesaj gönderemezsiniz" : "Mesajınızı yazın..."}
               value={text}
               onChange={(e) => setText(e.target.value)}
               onKeyPress={handleKeyPress}
               className="message-textarea"
               rows="3"
+              disabled={isAdminSelected()}
             />
-            <button onClick={handleSend} className="send-button">
+            <button 
+              onClick={handleSend} 
+              className="send-button"
+              disabled={isAdminSelected()}
+            >
               <span>Gönder</span>
             </button>
           </div>

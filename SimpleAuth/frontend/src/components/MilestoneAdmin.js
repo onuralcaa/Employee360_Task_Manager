@@ -10,12 +10,12 @@ import {
   getAllTeams,
   getUsersByTeam
 } from "../api/api";
+import { showSuccessToast, showErrorToast } from "../utils/toastUtils";
 import "./MilestoneAdmin.css";
 
 function MilestoneAdmin({ user }) {
   const [milestones, setMilestones] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [teams, setTeams] = useState([]);
   const [teamLeaders, setTeamLeaders] = useState([]);
   const [selectedTeam, setSelectedTeam] = useState("");
@@ -26,7 +26,8 @@ function MilestoneAdmin({ user }) {
   const [formData, setFormData] = useState({
     title: "",
     description: "",
-    assignedTo: ""
+    assignedTo: "",
+    team: ""
   });
 
   // Fetch all milestones
@@ -56,10 +57,9 @@ function MilestoneAdmin({ user }) {
         }
 
         setMilestones(milestoneData);
-        setError(null);
       } catch (err) {
         console.error("Error fetching milestones:", err);
-        setError("Kilometre taşları yüklenemedi. Lütfen daha sonra tekrar deneyin.");
+        showErrorToast("Kilometre taşları yüklenemedi. Lütfen daha sonra tekrar deneyin.");
       } finally {
         setLoading(false);
       }
@@ -79,7 +79,7 @@ function MilestoneAdmin({ user }) {
         setTeams(response.data);
       } catch (err) {
         console.error("Error fetching teams:", err);
-        setError("Takımlar yüklenemedi.");
+        showErrorToast("Takımlar yüklenemedi.");
       }
     };
 
@@ -135,18 +135,23 @@ function MilestoneAdmin({ user }) {
     e.preventDefault();
     
     if (!formData.title.trim() || !formData.assignedTo) {
-      setError("Lütfen başlık ve takım lideri seçin.");
+      showErrorToast("Lütfen başlık ve takım lideri seçin.");
       return;
     }
     
     try {
       setLoading(true);
       
-      const response = await assignMilestoneToTeamLeader({
+      // Prepare milestone data to send
+      const milestoneData = {
         title: formData.title,
         description: formData.description,
         assignedTo: formData.assignedTo
-      });
+      };
+      
+      console.log("Sending milestone data:", milestoneData);
+      
+      const response = await assignMilestoneToTeamLeader(milestoneData);
       
       if (!response || !response.data) {
         throw new Error("Milestone atama başarısız");
@@ -167,10 +172,11 @@ function MilestoneAdmin({ user }) {
         setMilestones(milestonesResponse.data);
       }
       
-      setError(null);
+      showSuccessToast("Milestone başarıyla atandı.");
     } catch (err) {
       console.error("Error assigning milestone:", err);
-      setError("Milestone atanamadı. Lütfen daha sonra tekrar deneyin.");
+      const errorMessage = err.response?.data?.message || "Milestone atanamadı. Lütfen daha sonra tekrar deneyin.";
+      showErrorToast(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -189,9 +195,11 @@ function MilestoneAdmin({ user }) {
             : milestone
         )
       );
+      
+      showSuccessToast("Milestone başarıyla onaylandı");
     } catch (err) {
       console.error("Error verifying milestone:", err);
-      setError("Milestone doğrulanamadı. Lütfen daha sonra tekrar deneyin.");
+      showErrorToast("Milestone doğrulanamadı. Lütfen daha sonra tekrar deneyin.");
     }
   };
 
@@ -208,9 +216,11 @@ function MilestoneAdmin({ user }) {
             : milestone
         )
       );
+      
+      showSuccessToast("Milestone başarıyla reddedildi");
     } catch (err) {
       console.error("Error rejecting milestone:", err);
-      setError("Milestone reddedilemedi. Lütfen daha sonra tekrar deneyin.");
+      showErrorToast("Milestone reddedilemedi. Lütfen daha sonra tekrar deneyin.");
     }
   };
 
@@ -227,9 +237,11 @@ function MilestoneAdmin({ user }) {
       setMilestones(prevMilestones => 
         prevMilestones.filter(milestone => milestone._id !== milestoneId)
       );
+      
+      showSuccessToast("Milestone başarıyla silindi");
     } catch (err) {
       console.error("Error deleting milestone:", err);
-      setError("Milestone silinemedi. Lütfen daha sonra tekrar deneyin.");
+      showErrorToast("Milestone silinemedi. Lütfen daha sonra tekrar deneyin.");
     }
   };
 
@@ -303,8 +315,6 @@ function MilestoneAdmin({ user }) {
           {showAssignForm ? "Formu Kapat" : "Yeni Kilometre Taşı Ata"}
         </button>
       </div>
-
-      {error && <div className="milestone-admin-error">{error}</div>}
 
       {/* Milestone assignment form */}
       {showAssignForm && (

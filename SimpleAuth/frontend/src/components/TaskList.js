@@ -104,23 +104,20 @@ function TaskList({
 
   const handleStatusChange = async (itemId, newStatus) => {
     try {
-      let response;
-      
       if (isMilestoneView) {
-        response = await updateMilestone(itemId, { status: newStatus });
-        
+        const response = await updateMilestone(itemId, { status: newStatus });
+
         if (!response || !response.data) {
           throw new Error("Failed to update milestone status");
         }
-        
-        // Update the local state with the updated milestone
+
         setMilestones(milestones.map(milestone => 
           milestone._id === itemId 
             ? { ...milestone, status: newStatus } 
             : milestone
         ));
       } else {
-        response = await updateTask(itemId, { status: newStatus });
+        const response = await updateTask(itemId, { status: newStatus });
         
         if (!response || !response.data) {
           throw new Error("Failed to update task status");
@@ -250,11 +247,6 @@ function TaskList({
         {isTeamLeader && !isMilestoneView && (
           <button className="add-milestone-btn" onClick={onAddMilestone}>
             {showTaskForm ? "Formu Gizle" : "+ Yeni Görev Ekle"}
-          </button>
-        )}
-        {isTeamLeader && isMilestoneView && (
-          <button className="add-milestone-btn" onClick={onAddMilestone}>
-            {showTaskForm ? "Formu Gizle" : "+ Yeni Kilometre Taşı Ekle"}
           </button>
         )}
         {isAdmin && !isMilestoneView && (
