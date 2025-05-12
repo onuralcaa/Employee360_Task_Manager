@@ -19,8 +19,8 @@ MFRC522 rfid(SS_PIN, RST_PIN);
 #define LED_PIN 12
 
 // WiFi Bilgileri
-const char* ssid = "Onur iPhone’u";
-const char* password = "oalcaa1900";
+const char* ssid = "network";
+const char* password = "password";
 
 // Backend URL
 const char* serverURL = "http://172.20.10.2:5000/api/entries";
