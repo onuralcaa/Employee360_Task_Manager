@@ -115,14 +115,8 @@ function Messages({ user }) {
 
     return false;
   });
-  // Get the name of currently selected recipient
-  const getRecipientName = () => {
-    if (!receiverId) return "";
-    const recipient = allUsers.find(user => user._id === receiverId);
-    return recipient ? `${recipient.name} ${recipient.surname}` : "";
-  };
 
-  // Check if selected recipient is an admin
+  // Check if selected recipient is an admin// Check if selected recipient is an admin
   const isAdminSelected = () => {
     if (!receiverId) return false;
     const recipient = allUsers.find(user => user._id === receiverId);
@@ -142,14 +136,6 @@ function Messages({ user }) {
     if (!receiverId) return "";
     const recipient = allUsers.find(user => user._id === receiverId);
     return recipient ? `${recipient.name} ${recipient.surname}` : "";
-  };
-
-  // Handle Enter key to send message
-  const handleKeyPress = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
-    }
   };
 
   return (
