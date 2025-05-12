@@ -164,27 +164,54 @@ const updateTaskStatus = async (req, res) => {
         return res.status(403).json({ message: "Sadece görevin atandığı kişi durumu değiştirebilir" });
       }
       
-      // Regular users can only change todo→in-progress, in-progress→done, on-hold→in-progress
+      // Regular users can only change todo→in-progress, in-progress→done
       if (
         (task.status === "todo" && status === "in-progress") ||
-        (task.status === "in-progress" && status === "done") ||
-        (task.status === "on-hold" && status === "in-progress")
+        (task.status === "in-progress" && status === "done")
       ) {
         // These transitions are allowed
       } else {
         return res.status(403).json({ message: "Bu durum değişikliği için yetkiniz yok" });
       }
     } 
-    // Admin can verify or reject completed tasks
-    else if (req.user.role === "admin" && (status === "verified" || status === "rejected")) {
-      if (task.status !== "done") {
-        return res.status(400).json({ message: "Sadece tamamlanmış görevler onaylanabilir veya reddedilebilir" });
+    // Team leaders can only assign, hold, resume, verify and reject tasks
+    else if (req.user.role === "team_leader") {
+      // Team leaders CANNOT start or complete tasks
+      if (
+        (task.status === "todo" && status === "in-progress") ||
+        (task.status === "in-progress" && status === "done")
+      ) {
+        return res.status(403).json({ 
+          message: "Takım liderleri görevleri başlatamaz veya tamamlayamaz, bu işlemler çalışanlar tarafından yapılmalıdır" 
+        });
+      }
+      
+      // Team leaders can put tasks on hold or resume them
+      // Team leaders can verify or reject completed tasks
+      // Team leaders can reassign tasks (to todo state)
+      if (
+        (task.status === "todo" && status === "on-hold") ||
+        (task.status === "on-hold" && status === "todo") ||
+        (task.status === "done" && status === "verified") ||
+        (task.status === "done" && status === "rejected") ||
+        (status === "todo") // For reassignment
+      ) {
+        // These transitions are allowed
+      } else {
+        return res.status(403).json({ 
+          message: "Bu durum değişikliği için yetkiniz yok" 
+        });
       }
     }
-    // Team leaders can make any status change
-    else if (req.user.role !== "team_leader") {
+    // Admins can only view tasks, not edit them
+    else if (req.user.role === "admin") {
+      return res.status(403).json({ message: "Yöneticiler görev durumlarını düzenleyemez, sadece görüntüleyebilir" });
+    }
+    // Any other role (should not happen, but as a safeguard)
+    else {
       return res.status(403).json({ message: "Bu durum değişikliği için yetkiniz yok" });
     }
+    
 
     const previousStatus = task.status;
     task.status = status;
